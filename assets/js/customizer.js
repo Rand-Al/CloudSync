@@ -17,7 +17,7 @@
     "use strict";
 
     // Debug flag - set to true during development, false for production
-    const DEBUG = true;
+    const DEBUG = false;
 
     /**
      * Debug logging function for development and troubleshooting
@@ -53,6 +53,8 @@
 
         // Initialize hero section live preview
         initializeHeroSectionPreview();
+        // Initialize features section live preview
+        initializeFeaturesSectionPreview();
     });
 
     /**
@@ -154,7 +156,25 @@
             });
         });
     }
+    function initializeFeaturesSectionPreview() {
+        wp.customize("cloudsync_features_main_title", function (value) {
+            value.bind(function (newValue) {
+                updateFeaturesTitle(newValue);
+            });
+        });
 
+        // Hero Description live preview
+        wp.customize("cloudsync_features_description", (value) => {
+            value.bind((newValue) => {
+                updateFeaturesDescription(newValue);
+            });
+        });
+    }
+    /**
+     * =============================================
+     *    1) Helper functions to update Hero section
+     * =============================================
+     * */
     /**
      * Update hero title in the preview
      *
@@ -363,5 +383,24 @@
             "Successfully updated card " + cardNumber + " title to:",
             newTitle
         );
+    }
+
+    /**
+     * ==================================================
+     *    1) Helper functions to update Features section
+     * ==================================================
+     * */
+    /**
+     * Update hero title in the preview
+     *
+     * This function finds the hero title element and updates only the
+     * customizable part while preserving the site name structure.
+     *
+     * @param {string} newTitle The new title text from Customizer
+     */
+    function updateFeaturesTitle(newTitle) {
+        // Find the features title element
+        const featuresTitle = document.querySelector(".features h2");
+        featuresTitle.textContent = newTitle;
     }
 })();

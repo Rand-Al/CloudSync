@@ -56,8 +56,12 @@ get_header(); ?>
 <section class="features" id="features">
     <div class="container">
         <div class="section-header fade-in">
-            <h2><?php esc_html_e('Powerful Features for Modern Teams', 'cloudsync'); ?></h2>
-            <p><?php esc_html_e('Everything you need to scale your business and streamline your workflow', 'cloudsync'); ?></p>
+            <h2>
+                <?php echo esc_html(cloudsync_get_customizer_value('cloudsync_features_main_title', 'Powerful Features for Modern Teams')); ?>
+            </h2>
+            <p>
+                <?php echo esc_html(cloudsync_get_customizer_value('cloudsync_features_main_title', 'Everything you need to scale your business and streamline your workflow')); ?>
+            </p>
         </div>
         <div class="features-grid">
             <div class="feature-card fade-in">
