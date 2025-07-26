@@ -60,7 +60,7 @@ get_header(); ?>
                 <?php echo esc_html(cloudsync_get_customizer_value('cloudsync_features_main_title', 'Powerful Features for Modern Teams')); ?>
             </h2>
             <p>
-                <?php echo esc_html(cloudsync_get_customizer_value('cloudsync_features_main_title', 'Everything you need to scale your business and streamline your workflow')); ?>
+                <?php echo esc_html(cloudsync_get_customizer_value('cloudsync_features_description', 'Everything you need to scale your business and streamline your workflow')); ?>
             </p>
         </div>
         <div class="features-grid">

@@ -391,16 +391,33 @@
      * ==================================================
      * */
     /**
-     * Update hero title in the preview
+     * Update features title in the preview
      *
-     * This function finds the hero title element and updates only the
-     * customizable part while preserving the site name structure.
+     * This function finds the features title element and updates it
      *
      * @param {string} newTitle The new title text from Customizer
      */
     function updateFeaturesTitle(newTitle) {
         // Find the features title element
         const featuresTitle = document.querySelector(".features h2");
+        // Update the features title element
         featuresTitle.textContent = newTitle;
+    }
+
+    /**
+     * Update features description in the preview
+     *
+     * This function finds the features description paragraph and updates
+     * its content with the new text from Customizer.
+     *
+     * @param {string} newDescription The new description text from Customizer
+     */
+    function updateFeaturesDescription(newDescription) {
+        // Find the features paragraph element
+        const featuresDescription = document.querySelector(
+            ".features .section-header p"
+        );
+        // Update the features description element
+        featuresDescription.textContent = newDescription;
     }
 })();
