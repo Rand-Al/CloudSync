@@ -17,7 +17,7 @@
     "use strict";
 
     // Debug flag - set to true during development, false for production
-    const DEBUG = false;
+    const DEBUG = true;
 
     /**
      * Debug logging function for development and troubleshooting
@@ -157,16 +157,59 @@
         });
     }
     function initializeFeaturesSectionPreview() {
+        // Features title live preview
         wp.customize("cloudsync_features_main_title", function (value) {
             value.bind(function (newValue) {
                 updateFeaturesTitle(newValue);
             });
         });
 
-        // Hero Description live preview
+        // Features description live preview
         wp.customize("cloudsync_features_description", (value) => {
             value.bind((newValue) => {
                 updateFeaturesDescription(newValue);
+            });
+        });
+        /**
+         * ==============================
+         *  Features cards live preview
+         * ==============================
+         */
+
+        // Feature Card 1 - Icon live preview
+        wp.customize("cloudsync_feature1_icon", function (value) {
+            value.bind(function (newValue) {
+                updateFeatureCardIcon(0, newValue);
+            });
+        });
+        // Feature Card 2 - Icon live preview
+        wp.customize("cloudsync_feature2_icon", function (value) {
+            value.bind(function (newValue) {
+                updateFeatureCardIcon(1, newValue);
+            });
+        });
+        // Feature Card 3 - Icon live preview
+        wp.customize("cloudsync_feature3_icon", function (value) {
+            value.bind(function (newValue) {
+                updateFeatureCardIcon(2, newValue);
+            });
+        });
+        // Feature Card 4 - Icon live preview
+        wp.customize("cloudsync_feature4_icon", function (value) {
+            value.bind(function (newValue) {
+                updateFeatureCardIcon(3, newValue);
+            });
+        });
+        // Feature Card 5 - Icon live preview
+        wp.customize("cloudsync_feature5_icon", function (value) {
+            value.bind(function (newValue) {
+                updateFeatureCardIcon(4, newValue);
+            });
+        });
+        // Feature Card 6 - Icon live preview
+        wp.customize("cloudsync_feature6_icon", function (value) {
+            value.bind(function (newValue) {
+                updateFeatureCardIcon(5, newValue);
             });
         });
     }
@@ -387,7 +430,7 @@
 
     /**
      * ==================================================
-     *    1) Helper functions to update Features section
+     *    2) Helper functions to update Features section
      * ==================================================
      * */
     /**
@@ -419,5 +462,126 @@
         );
         // Update the features description element
         featuresDescription.textContent = newDescription;
+    }
+
+    /**
+     * Features Cards
+     */
+
+    function updateFeatureCardIcon(cardIndex, newValue) {
+        /**
+         * Universal function for updating feature card icons with comprehensive error handling
+         * Integrates with the theme's centralized debug logging system
+         *
+         * @param {number} cardIndex - Zero-based index (0-5) for the six feature cards
+         * @param {string} newValue - New FontAwesome CSS class for the icon
+         * @returns {boolean} - Success status of the update operation
+         */
+
+        // Inner function that performs the actual DOM update
+        function performIconUpdate() {
+            // Validate cardIndex parameter before proceeding
+            if (
+                typeof cardIndex !== "number" ||
+                cardIndex < 0 ||
+                cardIndex > 5
+            ) {
+                debugLog("Invalid card index provided. Expected: 0-5", {
+                    provided: cardIndex,
+                });
+                return false;
+            }
+
+            // Validate newValue parameter to ensure it's a valid CSS class string
+            if (
+                !newValue ||
+                typeof newValue !== "string" ||
+                newValue.trim() === ""
+            ) {
+                debugLog("Invalid icon class provided", { value: newValue });
+                return false;
+            }
+
+            // Query all feature cards from the DOM
+            const featureCards = document.querySelectorAll(".feature-card");
+
+            // Check if we found any feature cards at all
+            if (featureCards.length === 0) {
+                debugLog("No feature cards found in DOM");
+                return false;
+            }
+
+            // Check if the requested card index exists in our NodeList
+            if (cardIndex >= featureCards.length) {
+                debugLog("Card index not found", {
+                    requested: cardIndex,
+                    available: featureCards.length,
+                });
+                return false;
+            }
+
+            // Get the specific feature card we want to update
+            const targetCard = featureCards[cardIndex];
+
+            // Additional safety check for the target card
+            if (!targetCard) {
+                debugLog("Feature card is null or undefined", {
+                    index: cardIndex,
+                });
+                return false;
+            }
+
+            // Find the icon element within the target card using the established HTML structure
+            const iconElement = targetCard.querySelector(".feature-icon i");
+
+            // Verify that the icon element exists within this card
+            if (!iconElement) {
+                debugLog(
+                    "Icon element not found in feature card. Check HTML structure.",
+                    {
+                        cardIndex: cardIndex,
+                    }
+                );
+                return false;
+            }
+
+            // Clean the new value to remove any potential whitespace issues
+            const cleanIconClass = newValue.trim();
+
+            // Perform the actual icon class update
+            iconElement.className = cleanIconClass;
+
+            // Log successful update for debugging purposes
+            debugLog("Successfully updated feature card icon", {
+                cardIndex: cardIndex,
+                newClass: cleanIconClass,
+            });
+
+            return true;
+        }
+
+        // Attempt immediate update first (most common success case)
+        if (performIconUpdate()) {
+            return true; // Success on first attempt, exit early
+        }
+
+        // If immediate update failed, the DOM might not be ready yet
+        debugLog("Immediate update failed, attempting delayed update...", {
+            cardIndex: cardIndex,
+        });
+
+        // Schedule a retry after a short delay to allow DOM to fully load
+        setTimeout(() => {
+            if (!performIconUpdate()) {
+                // If even the delayed attempt fails, log an error for debugging
+                debugLog("Failed to update feature card icon after delay", {
+                    cardIndex: cardIndex,
+                    iconClass: newValue,
+                });
+            }
+        }, 500);
+
+        // Return false for immediate attempt (delayed attempt status is handled in callback)
+        return false;
     }
 })();

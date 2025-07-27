@@ -66,42 +66,42 @@ get_header(); ?>
         <div class="features-grid">
             <div class="feature-card fade-in">
                 <div class="feature-icon">
-                    <i class="fas fa-cloud"></i>
+                    <i class="<?php echo esc_html(cloudsync_get_customizer_value('cloudsync_feature1_icon', 'fas fa-cloud')); ?>"></i>
                 </div>
                 <h3><?php esc_html_e('Cloud Storage', 'cloudsync'); ?></h3>
                 <p><?php esc_html_e('Unlimited storage with 99.99% uptime guarantee. Access your files from anywhere, anytime.', 'cloudsync'); ?></p>
             </div>
             <div class="feature-card fade-in">
                 <div class="feature-icon">
-                    <i class="fas fa-users"></i>
+                    <i class="<?php echo esc_html(cloudsync_get_customizer_value('cloudsync_feature2_icon', 'fas fa-users')); ?>"></i>
                 </div>
                 <h3><?php esc_html_e('Team Collaboration', 'cloudsync'); ?></h3>
                 <p><?php esc_html_e('Real-time collaboration tools that keep your team synchronized and productive.', 'cloudsync'); ?></p>
             </div>
             <div class="feature-card fade-in">
                 <div class="feature-icon">
-                    <i class="fas fa-lock"></i>
+                    <i class="<?php echo esc_html(cloudsync_get_customizer_value('cloudsync_feature3_icon', 'fas fa-lock')); ?>"></i>
                 </div>
                 <h3><?php esc_html_e('Advanced Security', 'cloudsync'); ?></h3>
                 <p><?php esc_html_e('Enterprise-grade encryption and security protocols to keep your data safe.', 'cloudsync'); ?></p>
             </div>
             <div class="feature-card fade-in">
                 <div class="feature-icon">
-                    <i class="fas fa-cog"></i>
+                    <i class="<?php echo esc_html(cloudsync_get_customizer_value('cloudsync_feature4_icon', 'fas fa-cog')); ?>"></i>
                 </div>
                 <h3><?php esc_html_e('API Integration', 'cloudsync'); ?></h3>
                 <p><?php esc_html_e('Seamless integration with 500+ popular tools and services your team already uses.', 'cloudsync'); ?></p>
             </div>
             <div class="feature-card fade-in">
                 <div class="feature-icon">
-                    <i class="fas fa-mobile-alt"></i>
+                    <i class="<?php echo esc_html(cloudsync_get_customizer_value('cloudsync_feature5_icon', 'fas fa-mobile-alt')); ?>"></i>
                 </div>
                 <h3><?php esc_html_e('Mobile Apps', 'cloudsync'); ?></h3>
                 <p><?php esc_html_e('Native iOS and Android apps for productivity on the go with offline sync.', 'cloudsync'); ?></p>
             </div>
             <div class="feature-card fade-in">
                 <div class="feature-icon">
-                    <i class="fas fa-headset"></i>
+                    <i class="<?php echo esc_html(cloudsync_get_customizer_value('cloudsync_feature6_icon', 'fas fa-headset')); ?>"></i>
                 </div>
                 <h3><?php esc_html_e('24/7 Support', 'cloudsync'); ?></h3>
                 <p><?php esc_html_e('Round-the-clock customer support from our team of cloud experts.', 'cloudsync'); ?></p>

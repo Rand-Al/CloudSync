@@ -541,6 +541,138 @@ function cloudsync_register_features_cards_section($wp_customize) {
         'type'        => 'textarea',
         'priority'    => 90,
     ));
+
+    // --- FEATURE CARD 4: API INTEGRATION ---
+
+    $wp_customize->add_setting('cloudsync_feature4_icon', array(
+        'default'           => 'fas fa-cog',
+        'sanitize_callback' => 'sanitize_text_field',
+        'transport'         => 'postMessage',
+    ));
+
+    $wp_customize->add_control('cloudsync_feature4_icon', array(
+        'label'       => __('Feature 4 - Icon Class', 'cloudsync'),
+        'description' => __('FontAwesome icon class for the fourth feature (e.g., fas fa-cog for integrations). Technical features benefit from gear, connection, or puzzle piece icons.', 'cloudsync'),
+        'section'     => 'cloudsync_features_cards_section',
+        'type'        => 'text',
+        'priority'    => 100,
+    ));
+
+    $wp_customize->add_setting('cloudsync_feature4_title', array(
+        'default'           => __('API Integration', 'cloudsync'),
+        'sanitize_callback' => 'sanitize_text_field',
+        'transport'         => 'postMessage',
+    ));
+
+    $wp_customize->add_control('cloudsync_feature4_title', array(
+        'label'       => __('Feature 4 - Title', 'cloudsync'),
+        'description' => __('Integration-focused title that emphasizes connectivity and workflow efficiency. Technical prospects value seamless tool integration.', 'cloudsync'),
+        'section'     => 'cloudsync_features_cards_section',
+        'type'        => 'text',
+        'priority'    => 110,
+    ));
+
+    $wp_customize->add_setting('cloudsync_feature4_description', array(
+        'default'           => __('Seamless integration with 500+ popular tools and services your team already uses.', 'cloudsync'),
+        'sanitize_callback' => 'sanitize_textarea_field',
+        'transport'         => 'postMessage',
+    ));
+
+    $wp_customize->add_control('cloudsync_feature4_description', array(
+        'label'       => __('Feature 4 - Description', 'cloudsync'),
+        'description' => __('Highlight the breadth of integrations and emphasize that users can keep their existing workflow. Include specific numbers for credibility.', 'cloudsync'),
+        'section'     => 'cloudsync_features_cards_section',
+        'type'        => 'textarea',
+        'priority'    => 120,
+    ));
+
+    // --- FEATURE CARD 5: MOBILE APPS ---
+
+    $wp_customize->add_setting('cloudsync_feature5_icon', array(
+        'default'           => 'fas fa-mobile-alt',
+        'sanitize_callback' => 'sanitize_text_field',
+        'transport'         => 'postMessage',
+    ));
+
+    $wp_customize->add_control('cloudsync_feature5_icon', array(
+        'label'       => __('Feature 5 - Icon Class', 'cloudsync'),
+        'description' => __('FontAwesome icon class for the fifth feature (e.g., fas fa-mobile-alt for mobile apps). Mobile icons should clearly represent cross-device accessibility.', 'cloudsync'),
+        'section'     => 'cloudsync_features_cards_section',
+        'type'        => 'text',
+        'priority'    => 130,
+    ));
+
+    $wp_customize->add_setting('cloudsync_feature5_title', array(
+        'default'           => __('Mobile Apps', 'cloudsync'),
+        'sanitize_callback' => 'sanitize_text_field',
+        'transport'         => 'postMessage',
+    ));
+
+    $wp_customize->add_control('cloudsync_feature5_title', array(
+        'label'       => __('Feature 5 - Title', 'cloudsync'),
+        'description' => __('Mobile-focused title that communicates accessibility and flexibility. Modern teams expect full mobile functionality, not just responsive web design.', 'cloudsync'),
+        'section'     => 'cloudsync_features_cards_section',
+        'type'        => 'text',
+        'priority'    => 140,
+    ));
+
+    $wp_customize->add_setting('cloudsync_feature5_description', array(
+        'default'           => __('Native iOS and Android apps for productivity on the go with offline sync.', 'cloudsync'),
+        'sanitize_callback' => 'sanitize_textarea_field',
+        'transport'         => 'postMessage',
+    ));
+
+    $wp_customize->add_control('cloudsync_feature5_description', array(
+        'label'       => __('Feature 5 - Description', 'cloudsync'),
+        'description' => __('Emphasize native app quality and offline functionality. Mobile workers need assurance that they can be productive without constant internet connection.', 'cloudsync'),
+        'section'     => 'cloudsync_features_cards_section',
+        'type'        => 'textarea',
+        'priority'    => 150,
+    ));
+
+    // --- FEATURE CARD 6: 24/7 SUPPORT ---
+
+    $wp_customize->add_setting('cloudsync_feature6_icon', array(
+        'default'           => 'fas fa-headset',
+        'sanitize_callback' => 'sanitize_text_field',
+        'transport'         => 'postMessage',
+    ));
+
+    $wp_customize->add_control('cloudsync_feature6_icon', array(
+        'label'       => __('Feature 6 - Icon Class', 'cloudsync'),
+        'description' => __('FontAwesome icon class for the sixth feature (e.g., fas fa-headset for support). Support icons should convey human assistance and reliability.', 'cloudsync'),
+        'section'     => 'cloudsync_features_cards_section',
+        'type'        => 'text',
+        'priority'    => 160,
+    ));
+
+    $wp_customize->add_setting('cloudsync_feature6_title', array(
+        'default'           => __('24/7 Support', 'cloudsync'),
+        'sanitize_callback' => 'sanitize_text_field',
+        'transport'         => 'postMessage',
+    ));
+
+    $wp_customize->add_control('cloudsync_feature6_title', array(
+        'label'       => __('Feature 6 - Title', 'cloudsync'),
+        'description' => __('Support-focused title that builds confidence in post-purchase experience. Enterprise customers especially value guaranteed support availability.', 'cloudsync'),
+        'section'     => 'cloudsync_features_cards_section',
+        'type'        => 'text',
+        'priority'    => 170,
+    ));
+
+    $wp_customize->add_setting('cloudsync_feature6_description', array(
+        'default'           => __('Round-the-clock customer support from our team of cloud experts.', 'cloudsync'),
+        'sanitize_callback' => 'sanitize_textarea_field',
+        'transport'         => 'postMessage',
+    ));
+
+    $wp_customize->add_control('cloudsync_feature6_description', array(
+        'label'       => __('Feature 6 - Description', 'cloudsync'),
+        'description' => __('Emphasize expertise and availability. Prospects need confidence that they will receive knowledgeable help when they need it most.', 'cloudsync'),
+        'section'     => 'cloudsync_features_cards_section',
+        'type'        => 'textarea',
+        'priority'    => 180,
+    ));
 }
 
 /* =============================================================================
