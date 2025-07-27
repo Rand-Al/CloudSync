@@ -212,6 +212,42 @@
                 updateFeatureCardIcon(5, newValue);
             });
         });
+        // Feature Card 1 - Title live preview
+        wp.customize("cloudsync_feature1_title", function (value) {
+            value.bind(function (newValue) {
+                updateFeatureCardTitle(0, newValue);
+            });
+        });
+        // Feature Card 2 - Title live preview
+        wp.customize("cloudsync_feature2_title", function (value) {
+            value.bind(function (newValue) {
+                updateFeatureCardTitle(1, newValue);
+            });
+        });
+        // Feature Card 3 - Title live preview
+        wp.customize("cloudsync_feature3_title", function (value) {
+            value.bind(function (newValue) {
+                updateFeatureCardTitle(2, newValue);
+            });
+        });
+        // Feature Card 4 - Title live preview
+        wp.customize("cloudsync_feature4_title", function (value) {
+            value.bind(function (newValue) {
+                updateFeatureCardTitle(3, newValue);
+            });
+        });
+        // Feature Card 5 - Title live preview
+        wp.customize("cloudsync_feature5_title", function (value) {
+            value.bind(function (newValue) {
+                updateFeatureCardTitle(4, newValue);
+            });
+        });
+        // Feature Card 6 - Title live preview
+        wp.customize("cloudsync_feature6_title", function (value) {
+            value.bind(function (newValue) {
+                updateFeatureTitleIcon(5, newValue);
+            });
+        });
     }
     /**
      * =============================================
@@ -575,6 +611,122 @@
             if (!performIconUpdate()) {
                 // If even the delayed attempt fails, log an error for debugging
                 debugLog("Failed to update feature card icon after delay", {
+                    cardIndex: cardIndex,
+                    iconClass: newValue,
+                });
+            }
+        }, 500);
+
+        // Return false for immediate attempt (delayed attempt status is handled in callback)
+        return false;
+    }
+    function updateFeatureCardTitle(cardIndex, newValue) {
+        /**
+         * Universal function for updating feature card title with comprehensive error handling
+         * Integrates with the theme's centralized debug logging system
+         *
+         * @param {number} cardIndex - Zero-based index (0-5) for the six feature cards
+         * @param {string} newValue - New title value
+         * @returns {boolean} - Success status of the update operation
+         */
+
+        // Inner function that performs the actual DOM update
+        function performTitleUpdate() {
+            // Validate cardIndex parameter before proceeding
+            if (
+                typeof cardIndex !== "number" ||
+                cardIndex < 0 ||
+                cardIndex > 5
+            ) {
+                debugLog("Invalid card index provided. Expected: 0-5", {
+                    provided: cardIndex,
+                });
+                return false;
+            }
+
+            // Validate newValue parameter to ensure it's a valid title string
+            if (
+                !newValue ||
+                typeof newValue !== "string" ||
+                newValue.trim() === ""
+            ) {
+                debugLog("Invalid icon class provided", { value: newValue });
+                return false;
+            }
+
+            // Query all feature cards from the DOM
+            const featureCards = document.querySelectorAll(".feature-card");
+
+            // Check if we found any feature cards at all
+            if (featureCards.length === 0) {
+                debugLog("No feature cards found in DOM");
+                return false;
+            }
+
+            // Check if the requested card index exists in our NodeList
+            if (cardIndex >= featureCards.length) {
+                debugLog("Card index not found", {
+                    requested: cardIndex,
+                    available: featureCards.length,
+                });
+                return false;
+            }
+
+            // Get the specific feature card we want to update
+            const targetCard = featureCards[cardIndex];
+
+            // Additional safety check for the target card
+            if (!targetCard) {
+                debugLog("Feature card is null or undefined", {
+                    index: cardIndex,
+                });
+                return false;
+            }
+
+            // Find the icon element within the target card using the established HTML structure
+            const titleElement = targetCard.querySelector("h3");
+
+            // Verify that the title element exists within this card
+            if (!titleElement) {
+                debugLog(
+                    "Icon element not found in feature card. Check HTML structure.",
+                    {
+                        cardIndex: cardIndex,
+                    }
+                );
+                return false;
+            }
+
+            // Clean the new value to remove any potential whitespace issues
+            const cleanTitle = newValue.trim();
+
+            // Perform the actual icon class update
+            titleElement.innerText = cleanTitle;
+
+            // Log successful update for debugging purposes
+            debugLog("Successfully updated feature card title", {
+                cardIndex: cardIndex,
+                newClass: cleanTitle,
+            });
+
+            return true;
+        }
+
+        // Attempt immediate update first (most common success case)
+        if (performTitleUpdate()) {
+            return true; // Success on first attempt, exit early
+        }
+
+        // If immediate update failed, the DOM might not be ready yet
+        debugLog("Immediate update failed, attempting delayed update...", {
+            cardIndex: cardIndex,
+        });
+
+        // Schedule a retry after a short delay to allow DOM to fully load
+        setTimeout(() => {
+            if (!performTitleUpdate()) {
+                // If even the delayed attempt fails, log an error for debugging
+                debugLog("Failed to update feature card title after delay", {
                     cardIndex: cardIndex,
                     iconClass: newValue,
                 });
