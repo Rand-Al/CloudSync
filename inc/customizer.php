@@ -822,10 +822,10 @@ function cloudsync_register_how_it_works_steps_section($wp_customize) {
         'type'        => 'textarea',
         'priority'    => 25,
     ));
-    // --- PROCESS STEP 2: SIGN UP ---
+    // --- PROCESS STEP 2: SETUP ---
 
     $wp_customize->add_setting('cloudsync_how_it_works_step2_identifier', array(
-        'default'           => '1',
+        'default'           => '2',
         'sanitize_callback' => 'sanitize_text_field',
         'transport'         => 'postMessage',
     ));
@@ -853,7 +853,7 @@ function cloudsync_register_how_it_works_steps_section($wp_customize) {
     ));
 
     $wp_customize->add_setting('cloudsync_how_it_works_step2_description', array(
-        'default'           => __('Create your account in seconds with our streamlined onboarding process', 'cloudsync'),
+        'default'           => __('Integrate your existing tools and import your data with one-click setup', 'cloudsync'),
         'sanitize_callback' => 'sanitize_textarea_field',
         'transport'         => 'postMessage',
     ));
@@ -864,6 +864,49 @@ function cloudsync_register_how_it_works_steps_section($wp_customize) {
         'section'     => 'cloudsync_how_it_works_steps_section',
         'type'        => 'textarea',
         'priority'    => 40,
+    ));
+    // --- PROCESS STEP 3: LAUNCH ---
+
+    $wp_customize->add_setting('cloudsync_how_it_works_step3_identifier', array(
+        'default'           => '3',
+        'sanitize_callback' => 'sanitize_text_field',
+        'transport'         => 'postMessage',
+    ));
+
+    $wp_customize->add_control('cloudsync_how_it_works_step3_identifier', array(
+        'label'       => __('Step 3 - Identifier', 'cloudsync'),
+        'description' => __("Step number or identifier for the third and final stage of your process. Completes the logical progression from setup to active usage. Maintains visual consistency with steps 1 and 2 while signaling the culmination of the onboarding journey. Use '3' for standard numbering, 'C' for alphabetical sequence, or 'Phase 3' for more descriptive labeling that aligns with your business methodology and indicates full product activation.", 'cloudsync'),
+        'section'     => 'cloudsync_how_it_works_steps_section',
+        'type'        => 'text',
+        'priority'    => 45,
+    ));
+
+    $wp_customize->add_setting('cloudsync_how_it_works_step3_title', array(
+        'default'           => __('Start Collaborating', 'cloudsync'),
+        'sanitize_callback' => 'sanitize_text_field',
+        'transport'         => 'postMessage',
+    ));
+
+    $wp_customize->add_control('cloudsync_how_it_works_step3_title', array(
+        'label'       => __('Step 3 - Title', 'cloudsync'),
+        'description' => __("Action-oriented title that emphasizes completion and achievement after the logical progression from steps 1 and 2. Use words that show successful implementation like 'Launch', 'Deploy', 'Activate', or 'Go Live' to demonstrate the culmination of the process. Focus on conveying that the third step represents the reward - the moment when everything comes together and users begin experiencing the full value of your solution.", 'cloudsync'),
+        'section'     => 'cloudsync_how_it_works_steps_section',
+        'type'        => 'text',
+        'priority'    => 50,
+    ));
+
+    $wp_customize->add_setting('cloudsync_how_it_works_step3_description', array(
+        'default'           => __('Invite your team and start experiencing the future of cloud computing', 'cloudsync'),
+        'sanitize_callback' => 'sanitize_textarea_field',
+        'transport'         => 'postMessage',
+    ));
+
+    $wp_customize->add_control('cloudsync_how_it_works_step3_description', array(
+        'label'       => __('Step 3 - Description', 'cloudsync'),
+        'description' => __('Clear explanation that demonstrates how this step builds upon the previous two and delivers the promised outcome. Address any final concerns about complexity or time investment, specify the immediate benefits users will experience, and emphasize that the process concludes with tangible results. Use confident, achievement-focused language that shows successful completion rather than ongoing effort, creating excitement about the transformation achieved through the simple three-step process.', 'cloudsync'),
+        'section'     => 'cloudsync_how_it_works_steps_section',
+        'type'        => 'textarea',
+        'priority'    => 55,
     ));
 }
 /* =============================================================================
