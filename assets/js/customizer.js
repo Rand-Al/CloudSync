@@ -17,7 +17,7 @@
     "use strict";
 
     // Debug flag - set to true during development, false for production
-    const DEBUG = true;
+    const DEBUG = false;
 
     /**
      * Debug logging function for development and troubleshooting
@@ -311,6 +311,15 @@
             });
         });
     }
+
+    /**
+     * Initialize live preview for How it works section elements
+     *
+     * This function sets up real-time preview for all How it works section fields.
+     * Each field gets its own listener that updates the corresponding
+     * DOM element when the user changes the value in Customizer.
+     * Handles both section header content and individual steps element updates.
+     */
     function initializeHowItWorksPreview() {
         // Features title live preview
         wp.customize("cloudsync_how_it_works_main_title", function (value) {
@@ -368,40 +377,22 @@
          *  Title
          * ==============================
          */
-        // Step 1 1 - Title live preview
-        wp.customize("cloudsync_feature1_title", function (value) {
+        // Step 1 - Identifier live preview
+        wp.customize("cloudsync_how_it_works_step1_title", function (value) {
             value.bind(function (newValue) {
-                updateFeatureCardTitle(0, newValue);
+                updateHowItWorksStepsTitle(0, newValue);
             });
         });
-        // Feature Card 2 - Title live preview
-        wp.customize("cloudsync_feature2_title", function (value) {
+        // Step 2 - Identifier live preview
+        wp.customize("cloudsync_how_it_works_step2_title", function (value) {
             value.bind(function (newValue) {
-                updateFeatureCardTitle(1, newValue);
+                updateHowItWorksStepsTitle(1, newValue);
             });
         });
-        // Feature Card 3 - Title live preview
-        wp.customize("cloudsync_feature3_title", function (value) {
+        // Step 3 - Identifier live preview
+        wp.customize("cloudsync_how_it_works_step3_title", function (value) {
             value.bind(function (newValue) {
-                updateFeatureCardTitle(2, newValue);
-            });
-        });
-        // Feature Card 4 - Title live preview
-        wp.customize("cloudsync_feature4_title", function (value) {
-            value.bind(function (newValue) {
-                updateFeatureCardTitle(3, newValue);
-            });
-        });
-        // Feature Card 5 - Title live preview
-        wp.customize("cloudsync_feature5_title", function (value) {
-            value.bind(function (newValue) {
-                updateFeatureCardTitle(4, newValue);
-            });
-        });
-        // Feature Card 6 - Title live preview
-        wp.customize("cloudsync_feature6_title", function (value) {
-            value.bind(function (newValue) {
-                updateFeatureCardTitle(5, newValue);
+                updateHowItWorksStepsTitle(2, newValue);
             });
         });
         /**
@@ -409,42 +400,33 @@
          *  Description
          * ==============================
          */
-        // Feature Card 1 - Description live preview
-        wp.customize("cloudsync_feature1_description", function (value) {
-            value.bind(function (newValue) {
-                updateFeatureCardDescription(0, newValue);
-            });
-        });
-        // Feature Card 2 - Description live preview
-        wp.customize("cloudsync_feature2_description", function (value) {
-            value.bind(function (newValue) {
-                updateFeatureCardDescription(1, newValue);
-            });
-        });
-        // Feature Card 3 - Description live preview
-        wp.customize("cloudsync_feature3_description", function (value) {
-            value.bind(function (newValue) {
-                updateFeatureCardDescription(2, newValue);
-            });
-        });
-        // Feature Card 4 - Description live preview
-        wp.customize("cloudsync_feature4_description", function (value) {
-            value.bind(function (newValue) {
-                updateFeatureCardDescription(3, newValue);
-            });
-        });
-        // Feature Card 5 - Description live preview
-        wp.customize("cloudsync_feature5_description", function (value) {
-            value.bind(function (newValue) {
-                updateFeatureCardDescription(4, newValue);
-            });
-        });
-        // Feature Card 6 - Description live preview
-        wp.customize("cloudsync_feature6_description", function (value) {
-            value.bind(function (newValue) {
-                updateFeatureCardDescription(5, newValue);
-            });
-        });
+        // Step 1 - Identifier live preview
+        wp.customize(
+            "cloudsync_how_it_works_step1_description",
+            function (value) {
+                value.bind(function (newValue) {
+                    updateHowItWorksStepsDescription(0, newValue);
+                });
+            }
+        );
+        // Step 2 - Identifier live preview
+        wp.customize(
+            "cloudsync_how_it_works_step2_description",
+            function (value) {
+                value.bind(function (newValue) {
+                    updateHowItWorksStepsDescription(1, newValue);
+                });
+            }
+        );
+        // Step 3 - Identifier live preview
+        wp.customize(
+            "cloudsync_how_it_works_step3_description",
+            function (value) {
+                value.bind(function (newValue) {
+                    updateHowItWorksStepsDescription(2, newValue);
+                });
+            }
+        );
     }
     /**
      * =============================================
@@ -701,16 +683,15 @@
      * Features Cards
      */
 
+    /**
+     * Universal function for updating feature card icons with comprehensive error handling
+     * Integrates with the theme's centralized debug logging system
+     *
+     * @param {number} cardIndex - Zero-based index (0-5) for the six feature cards
+     * @param {string} newValue - New FontAwesome CSS class for the icon
+     * @returns {boolean} - Success status of the update operation
+     */
     function updateFeatureCardIcon(cardIndex, newValue) {
-        /**
-         * Universal function for updating feature card icons with comprehensive error handling
-         * Integrates with the theme's centralized debug logging system
-         *
-         * @param {number} cardIndex - Zero-based index (0-5) for the six feature cards
-         * @param {string} newValue - New FontAwesome CSS class for the icon
-         * @returns {boolean} - Success status of the update operation
-         */
-
         // Inner function that performs the actual DOM update
         function performIconUpdate() {
             // Validate cardIndex parameter before proceeding
@@ -817,16 +798,15 @@
         // Return false for immediate attempt (delayed attempt status is handled in callback)
         return false;
     }
+    /**
+     * Universal function for updating feature card title with comprehensive error handling
+     * Integrates with the theme's centralized debug logging system
+     *
+     * @param {number} cardIndex - Zero-based index (0-5) for the six feature cards
+     * @param {string} newValue - New title value
+     * @returns {boolean} - Success status of the update operation
+     */
     function updateFeatureCardTitle(cardIndex, newValue) {
-        /**
-         * Universal function for updating feature card title with comprehensive error handling
-         * Integrates with the theme's centralized debug logging system
-         *
-         * @param {number} cardIndex - Zero-based index (0-5) for the six feature cards
-         * @param {string} newValue - New title value
-         * @returns {boolean} - Success status of the update operation
-         */
-
         // Inner function that performs the actual DOM update
         function performTitleUpdate() {
             // Validate cardIndex parameter before proceeding
@@ -933,16 +913,15 @@
         // Return false for immediate attempt (delayed attempt status is handled in callback)
         return false;
     }
+    /**
+     * Universal function for updating feature card title with comprehensive error handling
+     * Integrates with the theme's centralized debug logging system
+     *
+     * @param {number} cardIndex - Zero-based index (0-5) for the six feature cards
+     * @param {string} newValue - New description value
+     * @returns {boolean} - Success status of the update operation
+     */
     function updateFeatureCardDescription(cardIndex, newValue) {
-        /**
-         * Universal function for updating feature card title with comprehensive error handling
-         * Integrates with the theme's centralized debug logging system
-         *
-         * @param {number} cardIndex - Zero-based index (0-5) for the six feature cards
-         * @param {string} newValue - New description value
-         * @returns {boolean} - Success status of the update operation
-         */
-
         // Inner function that performs the actual DOM update
         function performDescriptionUpdate() {
             // Validate cardIndex parameter before proceeding
@@ -1101,5 +1080,357 @@
                 'ERROR: Could not find how it works description element with selector ".hero-text p"'
             );
         }
+    }
+
+    /**
+     * Steps
+     */
+    /**
+     * Universal function for updating how it works identifier with comprehensive error handling
+     * Integrates with the theme's centralized debug logging system
+     *
+     * @param {number} stepIndex - Zero-based index (0-2) for the three steps elements
+     * @param {string} newValue - New value for identifier
+     * @returns {boolean} - Success status of the update operation
+     */
+    function updateHowItWorksStepsIdentifier(stepIndex, newValue) {
+        // Inner function that performs the actual DOM update
+        function performIdentifierUpdate() {
+            // Validate stepIndex parameter before proceeding
+            if (
+                typeof stepIndex !== "number" ||
+                stepIndex < 0 ||
+                stepIndex > 2
+            ) {
+                debugLog("Invalid step index provided. Expected: 0-5", {
+                    provided: stepIndex,
+                });
+                return false;
+            }
+
+            // Validate newValue parameter to ensure it's a valid string
+            if (
+                !newValue ||
+                typeof newValue !== "string" ||
+                newValue.trim() === ""
+            ) {
+                debugLog("Invalid value provided", { value: newValue });
+                return false;
+            }
+
+            // Query all steps elements from the DOM
+            const stepsElements = document.querySelectorAll(".step");
+            // Check if we found any steps elements at all
+            if (stepsElements.length === 0) {
+                debugLog("No steps elements found in DOM");
+                return false;
+            }
+
+            // Check if the requested steps element index exists in our NodeList
+            if (stepIndex >= stepsElements.length) {
+                debugLog("Steps element index not found", {
+                    requested: stepIndex,
+                    available: stepsElements.length,
+                });
+                return false;
+            }
+
+            // Get the specific step element we want to update
+            const targetStep = stepsElements[stepIndex];
+
+            // Additional safety check for the target step element
+            if (!targetStep) {
+                debugLog("Step element is null or undefined", {
+                    index: stepIndex,
+                });
+                return false;
+            }
+
+            // Find the identifier element within the target steps element using the established HTML structure
+            const identifierElement =
+                targetStep.querySelector(".step .step-number");
+
+            // Verify that the icon element exists within this card
+            if (!identifierElement) {
+                debugLog(
+                    "Identifier element not found in step element. Check HTML structure.",
+                    {
+                        stepIndex: stepIndex,
+                    }
+                );
+                return false;
+            }
+
+            // Clean the new value to remove any potential whitespace issues
+            const cleanIdentifierValue = newValue.trim();
+
+            // Perform the actual icon class update
+            identifierElement.innerText = cleanIdentifierValue;
+
+            // Log successful update for debugging purposes
+            debugLog("Successfully updated feature card icon", {
+                stepIndex: stepIndex,
+                newValue: cleanIdentifierValue,
+            });
+
+            return true;
+        }
+
+        // Attempt immediate update first (most common success case)
+        if (performIdentifierUpdate()) {
+            return true; // Success on first attempt, exit early
+        }
+
+        // If immediate update failed, the DOM might not be ready yet
+        debugLog("Immediate update failed, attempting delayed update...", {
+            stepIndex: stepIndex,
+        });
+
+        // Schedule a retry after a short delay to allow DOM to fully load
+        setTimeout(() => {
+            if (!performIdentifierUpdate()) {
+                // If even the delayed attempt fails, log an error for debugging
+                debugLog("Failed to update step index after delay", {
+                    Index: stepIndex,
+                    titleValue: newValue,
+                });
+            }
+        }, 500);
+
+        // Return false for immediate attempt (delayed attempt status is handled in callback)
+        return false;
+    }
+    /**
+     * Universal function for updating how it works step's title with comprehensive error handling
+     * Integrates with the theme's centralized debug logging system
+     *
+     * @param {number} stepIndex - Zero-based index (0-2) for the three steps
+     * @param {string} newValue - New title value
+     * @returns {boolean} - Success status of the update operation
+     */
+    function updateHowItWorksStepsTitle(stepIndex, newValue) {
+        // Inner function that performs the actual DOM update
+        function performTitleUpdate() {
+            // Validate cardIndex parameter before proceeding
+            if (
+                typeof stepIndex !== "number" ||
+                stepIndex < 0 ||
+                stepIndex > 2
+            ) {
+                debugLog("Invalid card index provided. Expected: 0-2", {
+                    provided: stepIndex,
+                });
+                return false;
+            }
+
+            // Validate newValue parameter to ensure it's a valid title string
+            if (
+                !newValue ||
+                typeof newValue !== "string" ||
+                newValue.trim() === ""
+            ) {
+                debugLog("Invalid title provided", { value: newValue });
+                return false;
+            }
+
+            // Query all steps element from the DOM
+            const howItWorksSteps = document.querySelectorAll(".step");
+
+            // Check if we found any steps element at all
+            if (howItWorksSteps.length === 0) {
+                debugLog("No steps elements found in DOM");
+                return false;
+            }
+
+            // Check if the requested step element index exists in our NodeList
+            if (stepIndex >= howItWorksSteps.length) {
+                debugLog("Card index not found", {
+                    requested: stepIndex,
+                    available: howItWorksSteps.length,
+                });
+                return false;
+            }
+
+            // Get the specific step element we want to update
+            const targetStep = howItWorksSteps[stepIndex];
+
+            // Additional safety check for the target step element
+            if (!targetStep) {
+                debugLog("Step element is null or undefined", {
+                    index: stepIndex,
+                });
+                return false;
+            }
+
+            // Find the title element within the target step element using the established HTML structure
+            const titleElement = targetStep.querySelector("h3");
+
+            // Verify that the title element exists within this step element
+            if (!titleElement) {
+                debugLog(
+                    "Title element not found in feature card. Check HTML structure.",
+                    {
+                        stepIndex: stepIndex,
+                    }
+                );
+                return false;
+            }
+
+            // Clean the new value to remove any potential whitespace issues
+            const cleanTitle = newValue.trim();
+
+            // Perform the actual title element update
+            titleElement.innerText = cleanTitle;
+
+            // Log successful update for debugging purposes
+            debugLog("Successfully updated feature card title", {
+                stepIndex: stepIndex,
+                newTitle: cleanTitle,
+            });
+
+            return true;
+        }
+
+        // Attempt immediate update first (most common success case)
+        if (performTitleUpdate()) {
+            return true; // Success on first attempt, exit early
+        }
+
+        // If immediate update failed, the DOM might not be ready yet
+        debugLog("Immediate update failed, attempting delayed update...", {
+            stepIndex: stepIndex,
+        });
+
+        // Schedule a retry after a short delay to allow DOM to fully load
+        setTimeout(() => {
+            if (!performTitleUpdate()) {
+                // If even the delayed attempt fails, log an error for debugging
+                debugLog("Failed to update feature card title after delay", {
+                    stepIndex: stepIndex,
+                    newTitle: newValue,
+                });
+            }
+        }, 500);
+
+        // Return false for immediate attempt (delayed attempt status is handled in callback)
+        return false;
+    }
+    /**
+     * Universal function for updating how it works step's title with comprehensive error handling
+     * Integrates with the theme's centralized debug logging system
+     *
+     * @param {number} stepIndex - Zero-based index (0-2) for the three steps
+     * @param {string} newValue - New title value
+     * @returns {boolean} - Success status of the update operation
+     */
+    function updateHowItWorksStepsDescription(stepIndex, newValue) {
+        // Inner function that performs the actual DOM update
+        function performDescriptionUpdate() {
+            // Validate cardIndex parameter before proceeding
+            if (
+                typeof stepIndex !== "number" ||
+                stepIndex < 0 ||
+                stepIndex > 2
+            ) {
+                debugLog("Invalid step index provided. Expected: 0-2", {
+                    provided: stepIndex,
+                });
+                return false;
+            }
+
+            // Validate newValue parameter to ensure it's a valid description string
+            if (
+                !newValue ||
+                typeof newValue !== "string" ||
+                newValue.trim() === ""
+            ) {
+                debugLog("Invalid description provided", { value: newValue });
+                return false;
+            }
+
+            // Query all steps element from the DOM
+            const howItWorksSteps = document.querySelectorAll(".step");
+
+            // Check if we found any steps element at all
+            if (howItWorksSteps.length === 0) {
+                debugLog("No steps elements found in DOM");
+                return false;
+            }
+
+            // Check if the requested step element index exists in our NodeList
+            if (stepIndex >= howItWorksSteps.length) {
+                debugLog("Card index not found", {
+                    requested: stepIndex,
+                    available: howItWorksSteps.length,
+                });
+                return false;
+            }
+
+            // Get the specific step element we want to update
+            const targetStep = howItWorksSteps[stepIndex];
+
+            // Additional safety check for the target step element
+            if (!targetStep) {
+                debugLog("Step element is null or undefined", {
+                    index: stepIndex,
+                });
+                return false;
+            }
+
+            // Find the description element within the target step element using the established HTML structure
+            const descriptionElement = targetStep.querySelector("p");
+
+            // Verify that the description element exists within this step element
+            if (!descriptionElement) {
+                debugLog(
+                    "description element not found in step element. Check HTML structure.",
+                    {
+                        stepIndex: stepIndex,
+                    }
+                );
+                return false;
+            }
+
+            // Clean the new value to remove any potential whitespace issues
+            const cleanDescription = newValue.trim();
+
+            // Perform the actual description element update
+            descriptionElement.innerText = cleanDescription;
+
+            // Log successful update for debugging purposes
+            debugLog("Successfully updated feature card title", {
+                stepIndex: stepIndex,
+                newTitle: cleanDescription,
+            });
+
+            return true;
+        }
+
+        // Attempt immediate update first (most common success case)
+        if (performDescriptionUpdate()) {
+            return true; // Success on first attempt, exit early
+        }
+
+        // If immediate update failed, the DOM might not be ready yet
+        debugLog("Immediate update failed, attempting delayed update...", {
+            stepIndex: stepIndex,
+        });
+
+        // Schedule a retry after a short delay to allow DOM to fully load
+        setTimeout(() => {
+            if (!performDescriptionUpdate()) {
+                // If even the delayed attempt fails, log an error for debugging
+                debugLog(
+                    "Failed to update step element description after delay",
+                    {
+                        stepIndex: stepIndex,
+                        newTitle: newValue,
+                    }
+                );
+            }
+        }, 500);
+
+        // Return false for immediate attempt (delayed attempt status is handled in callback)
+        return false;
     }
 })();
