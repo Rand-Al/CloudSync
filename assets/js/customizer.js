@@ -1083,8 +1083,9 @@
     }
 
     /**
-     * Steps
+     ************* Steps *************
      */
+
     /**
      * Universal function for updating how it works identifier with comprehensive error handling
      * Integrates with the theme's centralized debug logging system
