@@ -55,6 +55,8 @@
         initializeHeroSectionPreview();
         // Initialize features section live preview
         initializeFeaturesSectionPreview();
+        // Initialize how it works section live preview
+        initializeHowItWorksPreview();
     });
 
     /**
@@ -156,6 +158,15 @@
             });
         });
     }
+
+    /**
+     * Initialize live preview for features section elements
+     *
+     * This function sets up real-time preview for all features section fields.
+     * Each field gets its own listener that updates the corresponding
+     * DOM element when the user changes the value in Customizer.
+     * Handles both section header content and individual feature card updates.
+     */
     function initializeFeaturesSectionPreview() {
         // Features title live preview
         wp.customize("cloudsync_features_main_title", function (value) {
@@ -223,6 +234,141 @@
          * ==============================
          */
         // Feature Card 1 - Title live preview
+        wp.customize("cloudsync_feature1_title", function (value) {
+            value.bind(function (newValue) {
+                updateFeatureCardTitle(0, newValue);
+            });
+        });
+        // Feature Card 2 - Title live preview
+        wp.customize("cloudsync_feature2_title", function (value) {
+            value.bind(function (newValue) {
+                updateFeatureCardTitle(1, newValue);
+            });
+        });
+        // Feature Card 3 - Title live preview
+        wp.customize("cloudsync_feature3_title", function (value) {
+            value.bind(function (newValue) {
+                updateFeatureCardTitle(2, newValue);
+            });
+        });
+        // Feature Card 4 - Title live preview
+        wp.customize("cloudsync_feature4_title", function (value) {
+            value.bind(function (newValue) {
+                updateFeatureCardTitle(3, newValue);
+            });
+        });
+        // Feature Card 5 - Title live preview
+        wp.customize("cloudsync_feature5_title", function (value) {
+            value.bind(function (newValue) {
+                updateFeatureCardTitle(4, newValue);
+            });
+        });
+        // Feature Card 6 - Title live preview
+        wp.customize("cloudsync_feature6_title", function (value) {
+            value.bind(function (newValue) {
+                updateFeatureCardTitle(5, newValue);
+            });
+        });
+        /**
+         * ==============================
+         *  Description
+         * ==============================
+         */
+        // Feature Card 1 - Description live preview
+        wp.customize("cloudsync_feature1_description", function (value) {
+            value.bind(function (newValue) {
+                updateFeatureCardDescription(0, newValue);
+            });
+        });
+        // Feature Card 2 - Description live preview
+        wp.customize("cloudsync_feature2_description", function (value) {
+            value.bind(function (newValue) {
+                updateFeatureCardDescription(1, newValue);
+            });
+        });
+        // Feature Card 3 - Description live preview
+        wp.customize("cloudsync_feature3_description", function (value) {
+            value.bind(function (newValue) {
+                updateFeatureCardDescription(2, newValue);
+            });
+        });
+        // Feature Card 4 - Description live preview
+        wp.customize("cloudsync_feature4_description", function (value) {
+            value.bind(function (newValue) {
+                updateFeatureCardDescription(3, newValue);
+            });
+        });
+        // Feature Card 5 - Description live preview
+        wp.customize("cloudsync_feature5_description", function (value) {
+            value.bind(function (newValue) {
+                updateFeatureCardDescription(4, newValue);
+            });
+        });
+        // Feature Card 6 - Description live preview
+        wp.customize("cloudsync_feature6_description", function (value) {
+            value.bind(function (newValue) {
+                updateFeatureCardDescription(5, newValue);
+            });
+        });
+    }
+    function initializeHowItWorksPreview() {
+        // Features title live preview
+        wp.customize("cloudsync_how_it_works_main_title", function (value) {
+            value.bind(function (newValue) {
+                updateHowItWorksTitle(newValue);
+            });
+        });
+
+        // Features description live preview
+        wp.customize("cloudsync_how_it_works_description", (value) => {
+            value.bind((newValue) => {
+                updateHowItWorksDescription(newValue);
+            });
+        });
+        /**
+         * ==============================
+         *  HOW IT WORKS LIVE PREVIEW
+         * ==============================
+         */
+        /**
+         * ==============================
+         *  Identifier
+         * ==============================
+         */
+        // Step 1 - Identifier live preview
+        wp.customize(
+            "cloudsync_how_it_works_step1_identifier",
+            function (value) {
+                value.bind(function (newValue) {
+                    updateHowItWorksStepsIdentifier(0, newValue);
+                });
+            }
+        );
+        // Step 2 - Identifier live preview
+        wp.customize(
+            "cloudsync_how_it_works_step2_identifier",
+            function (value) {
+                value.bind(function (newValue) {
+                    updateHowItWorksStepsIdentifier(1, newValue);
+                });
+            }
+        );
+        // Step 3 - Identifier live preview
+        wp.customize(
+            "cloudsync_how_it_works_step3_identifier",
+            function (value) {
+                value.bind(function (newValue) {
+                    updateHowItWorksStepsIdentifier(2, newValue);
+                });
+            }
+        );
+
+        /**
+         * ==============================
+         *  Title
+         * ==============================
+         */
+        // Step 1 1 - Title live preview
         wp.customize("cloudsync_feature1_title", function (value) {
             value.bind(function (newValue) {
                 updateFeatureCardTitle(0, newValue);
@@ -905,5 +1051,55 @@
 
         // Return false for immediate attempt (delayed attempt status is handled in callback)
         return false;
+    }
+
+    /**
+     * ==================================================
+     *    3) Helper functions to update How it works section
+     * ==================================================
+     * */
+    /**
+     * Update how it works title in the preview
+     *
+     * This function finds the how it works title element and updates it
+     *
+     * @param {string} newTitle The new title text from Customizer
+     */
+    function updateHowItWorksTitle(newTitle) {
+        debugLog("Updating how it works title with:", newTitle);
+        // Find the features title element
+        const howItWorksTitle = document.querySelector(".how-it-works h2");
+        if (howItWorksTitle) {
+            // Update the features title element
+            howItWorksTitle.textContent = newTitle;
+            debugLog("How it works title updated successfully");
+        } else {
+            debugLog(
+                'ERROR: Could not find How it works title element with selector ".how-it-works h2"'
+            );
+        }
+    }
+
+    /**
+     * Update how it works description in the preview
+     *
+     * This function finds the how it works description paragraph and updates
+     * its content with the new text from Customizer.
+     *
+     * @param {string} newDescription The new description text from Customizer
+     */
+    function updateHowItWorksDescription(newDescription) {
+        debugLog("Updating how it works description with:", newDescription);
+
+        const howItWorksDescription = document.querySelector(".how-it-works p");
+
+        if (howItWorksDescription) {
+            howItWorksDescription.textContent = newDescription;
+            debugLog("how it works description updated successfully");
+        } else {
+            debugLog(
+                'ERROR: Could not find how it works description element with selector ".hero-text p"'
+            );
+        }
     }
 })();

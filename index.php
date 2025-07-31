@@ -148,24 +148,47 @@ get_header(); ?>
 <section class="how-it-works">
     <div class="container">
         <div class="section-header fade-in">
-            <h2><?php esc_html_e('How It Works', 'cloudsync'); ?></h2>
-            <p><?php esc_html_e('Get started in minutes with our simple 3-step process', 'cloudsync'); ?></p>
+            <h2>
+                <?php echo esc_html(cloudsync_get_customizer_value('cloudsync_how_it_works_main_title', 'How It Works')); ?>
+            </h2>
+            <p>
+                <?php echo esc_html(cloudsync_get_customizer_value('cloudsync_how_it_works_description', 'Get started in minutes with our simple 3-step process')); ?>
+            </p>
         </div>
         <div class="steps">
             <div class="step fade-in">
-                <div class="step-number">1</div>
-                <h3><?php esc_html_e('Sign Up', 'cloudsync'); ?></h3>
-                <p><?php esc_html_e('Create your account in seconds with our streamlined onboarding process', 'cloudsync'); ?></p>
+                <div class="step-number">
+                    <?php echo esc_html(cloudsync_get_customizer_value('cloudsync_how_it_works_step1_identifier', '1')); ?>
+                </div>
+                <h3>
+                    <?php echo esc_html(cloudsync_get_customizer_value('cloudsync_how_it_works_step1_title', 'Sign Up')); ?>
+                </h3>
+                <p>
+                    <?php echo esc_html(cloudsync_get_customizer_value('cloudsync_how_it_works_step1_description', 'Create your account in seconds with our streamlined onboarding process')); ?>
+                </p>
             </div>
             <div class="step fade-in">
-                <div class="step-number">2</div>
-                <h3><?php esc_html_e('Connect Tools', 'cloudsync'); ?></h3>
-                <p><?php esc_html_e('Integrate your existing tools and import your data with one-click setup', 'cloudsync'); ?></p>
+                <div class="step-number">
+                    <?php echo esc_html(cloudsync_get_customizer_value('cloudsync_how_it_works_step2_identifier', '2')); ?>
+                </div>
+                <h3>
+                    <?php echo esc_html(cloudsync_get_customizer_value('cloudsync_how_it_works_step2_title', 'Connect Tools')); ?>
+                </h3>
+                <p>
+                    <?php echo esc_html(cloudsync_get_customizer_value('cloudsync_how_it_works_step2_description', 'Integrate your existing tools and import your data with one-click setup')); ?>
+
+                </p>
             </div>
             <div class="step fade-in">
-                <div class="step-number">3</div>
-                <h3><?php esc_html_e('Start Collaborating', 'cloudsync'); ?></h3>
-                <p><?php esc_html_e('Invite your team and start experiencing the future of cloud computing', 'cloudsync'); ?></p>
+                <div class="step-number">
+                    <?php echo esc_html(cloudsync_get_customizer_value('cloudsync_how_it_works_step3_identifier', '3')); ?>
+                </div>
+                <h3>
+                    <?php echo esc_html(cloudsync_get_customizer_value('cloudsync_how_it_works_step3_title', 'Start Collaborating')); ?>
+                </h3>
+                <p>
+                    <?php echo esc_html(cloudsync_get_customizer_value('cloudsync_how_it_works_step3_description', 'IInvite your team and start experiencing the future of cloud computing')); ?>
+                </p>
             </div>
         </div>
     </div>

@@ -692,9 +692,6 @@ function cloudsync_register_features_cards_section($wp_customize) {
  * Fields included:
  * - Section main headline
  * - Section description text
- * - Step 1: number, title, and description
- * - Step 2: number, title, and description  
- * - Step 3: number, title, and description
  * 
  * @since 1.0.0
  * @param WP_Customize_Manager $wp_customize WordPress Customizer Manager instance
@@ -734,7 +731,7 @@ function cloudsync_register_how_it_works_section($wp_customize) {
     ));
 
     $wp_customize->add_control('cloudsync_how_it_works_description', array(
-        'label'       => __('Рow it Works Description', 'cloudsync'),
+        'label'       => __('How it Works Description', 'cloudsync'),
         'description' => __('Supporting text that explains why your process is simple and efficient. Keep it concise and focus on reducing implementation concerns that might prevent signups.', 'cloudsync'),
         'section'     => 'cloudsync_how_it_works_section',
         'type'        => 'textarea',
