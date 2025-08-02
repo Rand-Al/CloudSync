@@ -1238,21 +1238,7 @@ function cloudsync_register_footer_section($wp_customize) {
    6. HELPER FUNCTIONS & UTILITIES
    ============================================================================= */
 
-/**
- * Helper function to safely retrieve Customizer values
- * 
- * This utility function provides a safe way to get theme modification values
- * with fallback defaults. It prevents errors if settings don't exist and
- * ensures consistent data retrieval throughout the theme.
- * 
- * @since 1.0.0
- * @param string $setting_name The name of the setting to retrieve
- * @param mixed  $default      The default value if setting doesn't exist
- * @return mixed               The setting value or default
- */
-function cloudsync_get_customizer_value($setting_name, $default = '') {
-    return get_theme_mod($setting_name, $default);
-}
+
 // Hook our initialization function into WordPress
 add_action('customize_register', 'cloudsync_customize_register');
 

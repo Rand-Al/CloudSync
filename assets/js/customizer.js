@@ -17,7 +17,7 @@
     "use strict";
 
     // Debug flag - set to true during development, false for production
-    const DEBUG = false;
+    const DEBUG = true;
 
     /**
      * Debug logging function for development and troubleshooting
@@ -57,6 +57,8 @@
         initializeFeaturesSectionPreview();
         // Initialize how it works section live preview
         initializeHowItWorksPreview();
+        // Initialize pricing section live preview
+        initializePricingPreview();
     });
 
     /**
@@ -321,14 +323,14 @@
      * Handles both section header content and individual steps element updates.
      */
     function initializeHowItWorksPreview() {
-        // Features title live preview
+        // HowItWorks title live preview
         wp.customize("cloudsync_how_it_works_main_title", function (value) {
             value.bind(function (newValue) {
                 updateHowItWorksTitle(newValue);
             });
         });
 
-        // Features description live preview
+        // HowItWorks description live preview
         wp.customize("cloudsync_how_it_works_description", (value) => {
             value.bind((newValue) => {
                 updateHowItWorksDescription(newValue);
@@ -336,7 +338,7 @@
         });
         /**
          * ==============================
-         *  HOW IT WORKS LIVE PREVIEW
+         *  HOW IT WORKS STEPS LIVE PREVIEW
          * ==============================
          */
         /**
@@ -428,6 +430,81 @@
             }
         );
     }
+
+    /**
+     * Initialize live preview for pricing section elements
+     *
+     * This function sets up real-time preview for the header section fields of pricing section.
+     * Each field gets its own listener that updates the corresponding
+     * DOM element when the user changes the value in Customizer.
+     */
+
+    function initializePricingPreview() {
+        // Pricing title live preview
+        wp.customize("cloudsync_pricing_main_title", function (value) {
+            value.bind(function (newValue) {
+                updatePricingTitle(newValue);
+            });
+        });
+        // Pricing description live preview
+        wp.customize("cloudsync_pricing_description", (value) => {
+            value.bind((newValue) => {
+                updatePricingDescription(newValue);
+            });
+        });
+        /**
+         * ==============================
+         *  PRICING ELEMENTS LIVE PREVIEW
+         * ==============================
+         */
+        /**
+         * ==============================
+         *  Name
+         * ==============================
+         */
+        // PRICING PLAN 1 - Name live preview
+        wp.customize("cloudsync_plan1_name", function (value) {
+            value.bind(function (newValue) {
+                updatePricingPlanName(0, newValue);
+            });
+        });
+        // PRICING PLAN 2 - Name live preview
+        wp.customize("cloudsync_plan2_name", function (value) {
+            value.bind(function (newValue) {
+                updatePricingPlanName(1, newValue);
+            });
+        });
+        // PRICING PLAN 3 - Name live preview
+        wp.customize("cloudsync_plan3_name", function (value) {
+            value.bind(function (newValue) {
+                updatePricingPlanName(2, newValue);
+            });
+        });
+        /**
+         * ==============================
+         *  Price
+         * ==============================
+         */
+        // PRICING PLAN 1 - Price live preview
+        wp.customize("cloudsync_plan1_price", function (value) {
+            value.bind(function (newValue) {
+                updatePricingPlanPrice(0, newValue);
+            });
+        });
+        // PRICING PLAN 2 - Price live preview
+        wp.customize("cloudsync_plan2_price", function (value) {
+            value.bind(function (newValue) {
+                updatePricingPlanPrice(1, newValue);
+            });
+        });
+        // PRICING PLAN 3 - Price live preview
+        wp.customize("cloudsync_plan3_price", function (value) {
+            value.bind(function (newValue) {
+                updatePricingPlanPrice(2, newValue);
+            });
+        });
+    }
+
     /**
      * =============================================
      *    1) Helper functions to update Hero section
@@ -1428,6 +1505,286 @@
                         newTitle: newValue,
                     }
                 );
+            }
+        }, 500);
+
+        // Return false for immediate attempt (delayed attempt status is handled in callback)
+        return false;
+    }
+
+    /**
+     * ==================================================
+     *    4) Helper functions to update Pricing section
+     * ==================================================
+     * */
+
+    /**
+     * Update pricing title in the preview
+     *
+     * This function finds the pricing title element and updates it
+     *
+     * @param {string} newTitle The new title text from Customizer
+     */
+    function updatePricingTitle(newTitle) {
+        debugLog("Updating pricing title with:", newTitle);
+        // Find the pricing title element
+        const pricingTitle = document.querySelector(".pricing h2");
+        if (pricingTitle) {
+            // Update the pricing title element
+            pricingTitle.textContent = newTitle;
+            debugLog("Pricing title updated successfully");
+        } else {
+            debugLog(
+                'ERROR: Could not find pricing title element with selector ".pricing h2"'
+            );
+        }
+    }
+    /**
+     * Update pricing description in the preview
+     *
+     * This function finds the pricing description paragraph and updates
+     * its content with the new text from Customizer.
+     *
+     * @param {string} newDescription The new description text from Customizer
+     */
+    function updatePricingDescription(newDescription) {
+        debugLog("Updating pricing description with:", newDescription);
+
+        const pricingDescription = document.querySelector(".pricing p");
+
+        if (pricingDescription) {
+            pricingDescription.textContent = newDescription;
+            debugLog("Pricing description updated successfully");
+        } else {
+            debugLog(
+                'ERROR: Could not find Pricing description element with selector ".pricing p"'
+            );
+        }
+    }
+
+    /**
+     * Universal function for updating pricing plan  with comprehensive error handling
+     * Integrates with the theme's centralized debug logging system
+     *
+     * @param {number} planIndex - Zero-based index (0-2) for the three plans elements
+     * @param {string} newValue - New value for identifier
+     * @returns {boolean} - Success status of the update operation
+     */
+    function updatePricingPlanName(planIndex, newValue) {
+        // Inner function that performs the actual DOM update
+        function performNameUpdate() {
+            // Validate stepIndex parameter before proceeding
+            if (
+                typeof planIndex !== "number" ||
+                planIndex < 0 ||
+                planIndex > 2
+            ) {
+                debugLog("Invalid step index provided. Expected: 0-5", {
+                    provided: planIndex,
+                });
+                return false;
+            }
+
+            // Validate newValue parameter to ensure it's a valid string
+            if (
+                !newValue ||
+                typeof newValue !== "string" ||
+                newValue.trim() === ""
+            ) {
+                debugLog("Invalid value provided", { value: newValue });
+                return false;
+            }
+
+            // Query all steps elements from the DOM
+            const pricingPlans = document.querySelectorAll(".pricing-card");
+            // Check if we found any steps elements at all
+            if (pricingPlans.length === 0) {
+                debugLog("No steps elements found in DOM");
+                return false;
+            }
+
+            // Check if the requested steps element index exists in our NodeList
+            if (planIndex >= pricingPlans.length) {
+                debugLog("pricing plan index not found", {
+                    requested: planIndex,
+                    available: pricingPlans.length,
+                });
+                return false;
+            }
+
+            // Get the specific step element we want to update
+            const targetPlan = pricingPlans[planIndex];
+
+            // Additional safety check for the target step element
+            if (!targetPlan) {
+                debugLog("Plan element is null or undefined", {
+                    index: planIndex,
+                });
+                return false;
+            }
+
+            // Find the identifier element within the target steps element using the established HTML structure
+            const nameElement = targetPlan.querySelector("h3");
+
+            // Verify that the icon element exists within this card
+            if (!nameElement) {
+                debugLog(
+                    "Name element not found in plan element. Check HTML structure.",
+                    {
+                        stepIndex: planIndex,
+                    }
+                );
+                return false;
+            }
+
+            // Clean the new value to remove any potential whitespace issues
+            const cleanNameValue = newValue.trim();
+
+            // Perform the actual icon class update
+            nameElement.innerText = cleanNameValue;
+
+            // Log successful update for debugging purposes
+            debugLog("Successfully updated pricing plan name", {
+                planIndex: planIndex,
+                newValue: cleanNameValue,
+            });
+
+            return true;
+        }
+
+        // Attempt immediate update first (most common success case)
+        if (performNameUpdate()) {
+            return true; // Success on first attempt, exit early
+        }
+
+        // If immediate update failed, the DOM might not be ready yet
+        debugLog("Immediate update failed, attempting delayed update...", {
+            planIndex: planIndex,
+        });
+
+        // Schedule a retry after a short delay to allow DOM to fully load
+        setTimeout(() => {
+            if (!performNameUpdate()) {
+                // If even the delayed attempt fails, log an error for debugging
+                debugLog("Failed to update pricing plan name after delay", {
+                    Index: planIndex,
+                    nameValue: newValue,
+                });
+            }
+        }, 500);
+
+        // Return false for immediate attempt (delayed attempt status is handled in callback)
+        return false;
+    }
+
+    /**
+     * Universal function for updating pricing plan price with comprehensive error handling
+     * Integrates with the theme's centralized debug logging system
+     *
+     * @param {number} planIndex - Zero-based index (0-2) for the three steps
+     * @param {string} newValue - New title value
+     * @returns {boolean} - Success status of the update operation
+     */
+    function updatePricingPlanPrice(planIndex, newValue) {
+        // Inner function that performs the actual DOM update
+        function performPlanPriceUpdate() {
+            // Validate cardIndex parameter before proceeding
+            if (
+                typeof planIndex !== "number" ||
+                planIndex < 0 ||
+                planIndex > 2
+            ) {
+                debugLog("Invalid plan index provided. Expected: 0-2", {
+                    provided: planIndex,
+                });
+                return false;
+            }
+
+            // Validate newValue parameter to ensure it's a valid title string
+            if (
+                !newValue ||
+                typeof newValue !== "string" ||
+                newValue.trim() === ""
+            ) {
+                debugLog("Invalid price provided", { value: newValue });
+                return false;
+            }
+
+            // Query all steps elements from the DOM
+            const pricingPlans = document.querySelectorAll(".pricing-card");
+            // Check if we found any steps elements at all
+            if (pricingPlans.length === 0) {
+                debugLog("No pricing plans elements found in DOM");
+                return false;
+            }
+
+            // Check if the requested steps element index exists in our NodeList
+            if (planIndex >= pricingPlans.length) {
+                debugLog("Pricing plan index not found", {
+                    requested: planIndex,
+                    available: pricingPlans.length,
+                });
+                return false;
+            }
+
+            // Get the specific step element we want to update
+            const targetPlan = pricingPlans[planIndex];
+
+            // Additional safety check for the target step element
+            if (!targetPlan) {
+                debugLog("Plan element is null or undefined", {
+                    index: planIndex,
+                });
+                return false;
+            }
+
+            // Find the title element within the target step element using the established HTML structure
+            const priceElement = targetPlan.querySelector(".price-value");
+
+            // Verify that the title element exists within this step element
+            if (!priceElement) {
+                debugLog(
+                    "Price element not found in pricing plan. Check HTML structure.",
+                    {
+                        planIndex: planIndex,
+                    }
+                );
+                return false;
+            }
+
+            // Clean the new value to remove any potential whitespace issues
+            const cleanPrice = newValue.trim();
+
+            // Perform the actual title element update
+            priceElement.innerText = cleanPrice;
+
+            // Log successful update for debugging purposes
+            debugLog("Successfully updated feature card title", {
+                planIndex: planIndex,
+                newPrice: cleanPrice,
+            });
+
+            return true;
+        }
+
+        // Attempt immediate update first (most common success case)
+        if (performPlanPriceUpdate()) {
+            return true; // Success on first attempt, exit early
+        }
+
+        // If immediate update failed, the DOM might not be ready yet
+        debugLog("Immediate update failed, attempting delayed update...", {
+            planIndex: planIndex,
+        });
+
+        // Schedule a retry after a short delay to allow DOM to fully load
+        setTimeout(() => {
+            if (!performPlanPriceUpdate()) {
+                // If even the delayed attempt fails, log an error for debugging
+                debugLog("Failed to update feature card title after delay", {
+                    planIndex: planIndex,
+                    newTitle: newValue,
+                });
             }
         }, 500);
 

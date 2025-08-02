@@ -198,45 +198,67 @@ get_header(); ?>
 <section class="pricing" id="pricing">
     <div class="container">
         <div class="section-header fade-in">
-            <h2><?php esc_html_e('Simple, Transparent Pricing', 'cloudsync'); ?></h2>
-            <p><?php esc_html_e('Choose the plan that\'s right for your team', 'cloudsync'); ?></p>
+            <h2>
+                <?php echo esc_html(cloudsync_get_customizer_value('cloudsync_pricing_main_title', 'Simple, Transparent Pricing')); ?>
+            </h2>
+            <p>
+                <?php echo esc_html(cloudsync_get_customizer_value('cloudsync_pricing_description', 'Choose the plan that\'s right for your team')); ?>
+            </p>
         </div>
         <div class="pricing-grid">
+            <!-- Plan 1: Starter -->
             <div class="pricing-card fade-in">
-                <h3><?php esc_html_e('Starter', 'cloudsync'); ?></h3>
-                <div class="price">$9<span><?php esc_html_e('/month', 'cloudsync'); ?></span></div>
+                <h3><?php echo esc_html(cloudsync_get_customizer_value('cloudsync_plan1_name', __('Starter', 'cloudsync'))); ?></h3>
+                <div class="price">
+                    $<span class="price-value"><?php echo esc_html(cloudsync_get_customizer_value('cloudsync_plan1_price', '9')); ?></span>
+                    <span><?php esc_html_e('/month', 'cloudsync'); ?></span>
+                </div>
                 <ul class="features-list">
-                    <li><i class="fas fa-check"></i><?php esc_html_e('5 Users', 'cloudsync'); ?></li>
-                    <li><i class="fas fa-check"></i><?php esc_html_e('100GB Storage', 'cloudsync'); ?></li>
-                    <li><i class="fas fa-check"></i><?php esc_html_e('Basic Support', 'cloudsync'); ?></li>
-                    <li><i class="fas fa-check"></i><?php esc_html_e('Mobile Apps', 'cloudsync'); ?></li>
+                    <?php
+                    $plan1_features = cloudsync_get_customizer_value('cloudsync_plan1_features', "5 Users\n100GB Storage\nBasic Support\nMobile Apps");
+                    echo cloudsync_get_pricing_features($plan1_features);
+                    ?>
                 </ul>
-                <a href="#" class="cta-btn"><?php esc_html_e('Get Started', 'cloudsync'); ?></a>
+                <a href="<?php echo esc_url(cloudsync_get_customizer_value('cloudsync_plan1_button_url', '#')); ?>" class="cta-btn">
+                    <?php echo esc_html(cloudsync_get_customizer_value('cloudsync_plan1_button_text', __('Get Started', 'cloudsync'))); ?>
+                </a>
             </div>
+
+            <!-- Plan 2: Professional -->
             <div class="pricing-card popular fade-in">
                 <div class="popular-badge"><?php esc_html_e('Most Popular', 'cloudsync'); ?></div>
-                <h3><?php esc_html_e('Professional', 'cloudsync'); ?></h3>
-                <div class="price">$29<span><?php esc_html_e('/month', 'cloudsync'); ?></span></div>
+                <h3><?php echo esc_html(cloudsync_get_customizer_value('cloudsync_plan2_name', __('Professional', 'cloudsync'))); ?></h3>
+                <div class="price">
+                    $<?php echo esc_html(cloudsync_get_customizer_value('cloudsync_plan2_price', '29')); ?>
+                    <span><?php esc_html_e('/month', 'cloudsync'); ?></span>
+                </div>
                 <ul class="features-list">
-                    <li><i class="fas fa-check"></i><?php esc_html_e('25 Users', 'cloudsync'); ?></li>
-                    <li><i class="fas fa-check"></i><?php esc_html_e('1TB Storage', 'cloudsync'); ?></li>
-                    <li><i class="fas fa-check"></i><?php esc_html_e('Priority Support', 'cloudsync'); ?></li>
-                    <li><i class="fas fa-check"></i><?php esc_html_e('Advanced Security', 'cloudsync'); ?></li>
-                    <li><i class="fas fa-check"></i><?php esc_html_e('API Access', 'cloudsync'); ?></li>
+                    <?php
+                    $plan2_features = cloudsync_get_customizer_value('cloudsync_plan2_features', "25 Users\n1TB Storage\nPriority Support\nAdvanced Security\nAPI Access");
+                    echo cloudsync_get_pricing_features($plan2_features);
+                    ?>
                 </ul>
-                <a href="#" class="cta-btn"><?php esc_html_e('Get Started', 'cloudsync'); ?></a>
+                <a href="<?php echo esc_url(cloudsync_get_customizer_value('cloudsync_plan2_button_url', '#')); ?>" class="cta-btn">
+                    <?php echo esc_html(cloudsync_get_customizer_value('cloudsync_plan2_button_text', __('Get Started', 'cloudsync'))); ?>
+                </a>
             </div>
+
+            <!-- Plan 3: Enterprise -->
             <div class="pricing-card fade-in">
-                <h3><?php esc_html_e('Enterprise', 'cloudsync'); ?></h3>
-                <div class="price">$99<span><?php esc_html_e('/month', 'cloudsync'); ?></span></div>
+                <h3><?php echo esc_html(cloudsync_get_customizer_value('cloudsync_plan3_name', __('Enterprise', 'cloudsync'))); ?></h3>
+                <div class="price">
+                    $<?php echo esc_html(cloudsync_get_customizer_value('cloudsync_plan3_price', '99')); ?>
+                    <span><?php esc_html_e('/month', 'cloudsync'); ?></span>
+                </div>
                 <ul class="features-list">
-                    <li><i class="fas fa-check"></i><?php esc_html_e('Unlimited Users', 'cloudsync'); ?></li>
-                    <li><i class="fas fa-check"></i><?php esc_html_e('Unlimited Storage', 'cloudsync'); ?></li>
-                    <li><i class="fas fa-check"></i><?php esc_html_e('24/7 Support', 'cloudsync'); ?></li>
-                    <li><i class="fas fa-check"></i><?php esc_html_e('Custom Integrations', 'cloudsync'); ?></li>
-                    <li><i class="fas fa-check"></i><?php esc_html_e('Dedicated Manager', 'cloudsync'); ?></li>
+                    <?php
+                    $plan3_features = cloudsync_get_customizer_value('cloudsync_plan3_features', "Unlimited Users\nUnlimited Storage\n24/7 Support\nCustom Integrations\nDedicated Manager");
+                    echo cloudsync_get_pricing_features($plan3_features);
+                    ?>
                 </ul>
-                <a href="#" class="cta-btn"><?php esc_html_e('Contact Sales', 'cloudsync'); ?></a>
+                <a href="<?php echo esc_url(cloudsync_get_customizer_value('cloudsync_plan3_button_url', '#')); ?>" class="cta-btn">
+                    <?php echo esc_html(cloudsync_get_customizer_value('cloudsync_plan3_button_text', __('Contact Sales', 'cloudsync'))); ?>
+                </a>
             </div>
         </div>
     </div>

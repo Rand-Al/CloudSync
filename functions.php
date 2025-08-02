@@ -240,6 +240,56 @@ function cloudsync_get_theme_version() {
     return $theme->get('Version') ?: time();
 }
 
+/**
+ * Process and display pricing plan features from textarea input
+ * 
+ * Takes a textarea string with features (one per line) and converts it
+ * into HTML list items with checkmark icons. Handles empty lines gracefully
+ * and sanitizes each feature for security.
+ * 
+ * @param string $features_text Raw textarea input from Customizer
+ * @return string HTML list items ready for output
+ */
+function cloudsync_get_pricing_features($features_text) {
+    // If no features provided, return empty string to avoid broken HTML
+    if (empty($features_text)) {
+        return '';
+    }
+
+    // Split the textarea content by line breaks into an array
+    $features = explode("\n", $features_text);
+    $output = '';
+
+    // Process each line individually
+    foreach ($features as $feature) {
+        // Remove whitespace from beginning and end of each line
+        $feature = trim($feature);
+
+        // Skip empty lines - users might accidentally add blank lines
+        if (!empty($feature)) {
+            // Escape HTML for security and build the list item
+            $output .= '<li><i class="fas fa-check"></i>' . esc_html($feature) . '</li>';
+        }
+    }
+
+    return $output;
+}
+
+/**
+ * Helper function to safely retrieve Customizer values
+ * 
+ * This utility function provides a safe way to get theme modification values
+ * with fallback defaults. It prevents errors if settings don't exist and
+ * ensures consistent data retrieval throughout the theme.
+ * 
+ * @since 1.0.0
+ * @param string $setting_name The name of the setting to retrieve
+ * @param mixed  $default      The default value if setting doesn't exist
+ * @return mixed               The setting value or default
+ */
+function cloudsync_get_customizer_value($setting_name, $default = '') {
+    return get_theme_mod($setting_name, $default);
+}
 
 
 require_once get_template_directory() . '/inc/customizer.php';
