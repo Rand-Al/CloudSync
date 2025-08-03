@@ -250,7 +250,7 @@ get_header(); ?>
                     $<span class="price-value"><?php echo esc_html(cloudsync_get_customizer_value('cloudsync_plan3_price', '99')); ?></span>
                     <span><?php esc_html_e('/month', 'cloudsync'); ?></span>
                 </div>
-                <ul class="features-list">
+                <ul class="features-list">e
                     <?php
                     $plan3_features = cloudsync_get_customizer_value('cloudsync_plan3_features', "Unlimited Users\nUnlimited Storage\n24/7 Support\nCustom Integrations\nDedicated Manager");
                     echo cloudsync_get_pricing_features($plan3_features);
@@ -267,9 +267,15 @@ get_header(); ?>
 <!-- Final CTA Section -->
 <section class="final-cta">
     <div class="container">
-        <h2><?php esc_html_e('Ready to Transform Your Workflow?', 'cloudsync'); ?></h2>
-        <p><?php esc_html_e('Join thousands of teams already using CloudSync to boost productivity', 'cloudsync'); ?></p>
-        <a href="#" class="cta-btn" style="background: white; color: #667eea;"><?php esc_html_e('Start Your Free Trial', 'cloudsync'); ?></a>
+        <h2>
+            <?php echo esc_html(cloudsync_get_customizer_value('cloudsync_cta_title', __('Ready to Transform Your Workflow?', 'cloudsync'))); ?>
+        </h2>
+        <p>
+            <?php echo esc_html(cloudsync_get_customizer_value('cloudsync_cta_description', __('Join thousands of teams already using CloudSync to boost productivity', 'cloudsync'))); ?>
+        </p>
+        <a href="<?php echo esc_url(cloudsync_get_customizer_value('cloudsync_cta_button_url', '#')) ?>" class="cta-btn" style="background: white; color: #667eea;">
+            <?php echo esc_html(cloudsync_get_customizer_value('cloudsync_cta_button_text', __('Start Your Free Trial', 'cloudsync'))); ?>
+        </a>
     </div>
 </section>
 

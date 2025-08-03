@@ -59,6 +59,8 @@
         initializeHowItWorksPreview();
         // Initialize pricing section live preview
         initializePricingPreview();
+        // Initialize CTA section live preview
+        initializeCTAPreview();
     });
 
     /**
@@ -552,6 +554,34 @@
         });
     }
 
+    /**
+     * Initialize live preview for CTA section elements
+     *
+     * This function sets up real-time preview for the CTA section fields
+     * Each field gets its own listener that updates the corresponding
+     * DOM element when the user changes the value in Customizer.
+     */
+
+    function initializeCTAPreview() {
+        // CTA title live preview
+        wp.customize("cloudsync_cta_title", function (value) {
+            value.bind(function (newValue) {
+                updateCtaTitle(newValue);
+            });
+        });
+        // CTA description live preview
+        wp.customize("cloudsync_cta_description", function (value) {
+            value.bind(function (newValue) {
+                updateCtaDescription(newValue);
+            });
+        });
+        // CTA button text live preview
+        wp.customize("cloudsync_cta_button_text", function (value) {
+            value.bind(function (newValue) {
+                updateCtaButtonText(newValue);
+            });
+        });
+    }
     /**
      * =============================================
      *    1) Helper functions to update Hero section
@@ -2083,5 +2113,75 @@
 
         // Return false for immediate attempt (delayed attempt status is handled in callback)
         return false;
+    }
+
+    /**
+     * ==================================================
+     *    4) Helper functions to update CTA section
+     * ==================================================
+     * */
+
+    /**
+     * Update CTA title in the preview
+     *
+     * This function finds the CTA title element and updates it
+     *
+     * @param {string} newTitle The new title text from Customizer
+     */
+    function updateCtaTitle(newTitle) {
+        debugLog("Updating CTA title with:", newTitle);
+        // Find the CTA title element
+        const ctaTitle = document.querySelector(".final-cta h2");
+        if (ctaTitle) {
+            // Update the pricing title element
+            ctaTitle.textContent = newTitle;
+            debugLog("CTA title updated successfully");
+        } else {
+            debugLog(
+                'ERROR: Could not find CTA title element with selector ".final-cta h2"'
+            );
+        }
+    }
+    /**
+     * Update CTA description in the preview
+     *
+     * This function finds the CTA description paragraph and updates
+     * its content with the new text from Customizer.
+     *
+     * @param {string} newDescription The new description text from Customizer
+     */
+    function updateCtaDescription(newDescription) {
+        debugLog("Updating cta description with:", newDescription);
+
+        const ctaDescription = document.querySelector(".final-cta p");
+
+        if (ctaDescription) {
+            ctaDescription.textContent = newDescription;
+            debugLog("CTA description updated successfully");
+        } else {
+            debugLog(
+                'ERROR: Could not find CTA description element with selector ".final-cta p"'
+            );
+        }
+    }
+
+    /**
+     * Update CTA button text in the preview
+     *
+     * @param {string} newText The new button text from Customizer
+     */
+    function updateCtaButtonText(newText) {
+        debugLog("Updating CTA button text with:", newText);
+
+        const ctaButton = document.querySelector(".final-cta a");
+
+        if (ctaButton) {
+            ctaButton.textContent = newText;
+            debugLog("CTA button text updated successfully");
+        } else {
+            debugLog(
+                'ERROR: Could not find CTA button element with selector ".final-cta a"'
+            );
+        }
     }
 })();
