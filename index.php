@@ -229,7 +229,7 @@ get_header(); ?>
                 <div class="popular-badge"><?php esc_html_e('Most Popular', 'cloudsync'); ?></div>
                 <h3><?php echo esc_html(cloudsync_get_customizer_value('cloudsync_plan2_name', __('Professional', 'cloudsync'))); ?></h3>
                 <div class="price">
-                    $<?php echo esc_html(cloudsync_get_customizer_value('cloudsync_plan2_price', '29')); ?>
+                    $<span class="price-value"><?php echo esc_html(cloudsync_get_customizer_value('cloudsync_plan2_price', '29')); ?></span>
                     <span><?php esc_html_e('/month', 'cloudsync'); ?></span>
                 </div>
                 <ul class="features-list">
@@ -247,7 +247,7 @@ get_header(); ?>
             <div class="pricing-card fade-in">
                 <h3><?php echo esc_html(cloudsync_get_customizer_value('cloudsync_plan3_name', __('Enterprise', 'cloudsync'))); ?></h3>
                 <div class="price">
-                    $<?php echo esc_html(cloudsync_get_customizer_value('cloudsync_plan3_price', '99')); ?>
+                    $<span class="price-value"><?php echo esc_html(cloudsync_get_customizer_value('cloudsync_plan3_price', '99')); ?></span>
                     <span><?php esc_html_e('/month', 'cloudsync'); ?></span>
                 </div>
                 <ul class="features-list">

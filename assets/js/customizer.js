@@ -503,6 +503,29 @@
                 updatePricingPlanPrice(2, newValue);
             });
         });
+        /**
+         * ==============================
+         *  Button text
+         * ==============================
+         */
+        // PRICING PLAN 1 - Button text live preview
+        wp.customize("cloudsync_plan1_button_text", function (value) {
+            value.bind(function (newValue) {
+                updatePricingPlanButtonText(0, newValue);
+            });
+        });
+        // PRICING PLAN 2 - Button text live preview
+        wp.customize("cloudsync_plan2_button_text", function (value) {
+            value.bind(function (newValue) {
+                updatePricingPlanButtonText(1, newValue);
+            });
+        });
+        // PRICING PLAN 3 - Button text live preview
+        wp.customize("cloudsync_plan3_button_text", function (value) {
+            value.bind(function (newValue) {
+                updatePricingPlanButtonText(2, newValue);
+            });
+        });
     }
 
     /**
@@ -1782,6 +1805,121 @@
             if (!performPlanPriceUpdate()) {
                 // If even the delayed attempt fails, log an error for debugging
                 debugLog("Failed to update feature card title after delay", {
+                    planIndex: planIndex,
+                    newTitle: newValue,
+                });
+            }
+        }, 500);
+
+        // Return false for immediate attempt (delayed attempt status is handled in callback)
+        return false;
+    }
+
+    /**
+     * Universal function for updating pricing plan price with comprehensive error handling
+     * Integrates with the theme's centralized debug logging system
+     *
+     * @param {number} planIndex - Zero-based index (0-2) for the three steps
+     * @param {string} newValue - New title value
+     * @returns {boolean} - Success status of the update operation
+     */
+    function updatePricingPlanButtonText(planIndex, newValue) {
+        // Inner function that performs the actual DOM update
+        function performPlanButtonTextUpdate() {
+            // Validate planIndex parameter before proceeding
+            if (
+                typeof planIndex !== "number" ||
+                planIndex < 0 ||
+                planIndex > 2
+            ) {
+                debugLog("Invalid plan index provided. Expected: 0-2", {
+                    provided: planIndex,
+                });
+                return false;
+            }
+
+            // Validate newValue parameter to ensure it's a valid string
+            if (
+                !newValue ||
+                typeof newValue !== "string" ||
+                newValue.trim() === ""
+            ) {
+                debugLog("Invalid value provided", { value: newValue });
+                return false;
+            }
+
+            // Query all plan elements from the DOM
+            const pricingPlans = document.querySelectorAll(".pricing-card");
+            // Check if we found any pricing plan elements at all
+            if (pricingPlans.length === 0) {
+                debugLog("No pricing plans elements found in DOM");
+                return false;
+            }
+
+            // Check if the requested plan element index exists in our NodeList
+            if (planIndex >= pricingPlans.length) {
+                debugLog("Pricing plan index not found", {
+                    requested: planIndex,
+                    available: pricingPlans.length,
+                });
+                return false;
+            }
+
+            // Get the specific plan element we want to update
+            const targetPlan = pricingPlans[planIndex];
+
+            // Additional safety check for the target plan element
+            if (!targetPlan) {
+                debugLog("Plan element is null or undefined", {
+                    index: planIndex,
+                });
+                return false;
+            }
+
+            // Find the price plan button text within the target step element using the established HTML structure
+            const buttonTextElement = targetPlan.querySelector("a");
+
+            // Verify that the button text element exists within this plan element
+            if (!buttonTextElement) {
+                debugLog(
+                    "Button text element not found in pricing plan. Check HTML structure.",
+                    {
+                        planIndex: planIndex,
+                    }
+                );
+                return false;
+            }
+
+            // Clean the new value to remove any potential whitespace issues
+            const cleanButtonText = newValue.trim();
+
+            // Perform the actual title element update
+            buttonTextElement.innerText = cleanButtonText;
+
+            // Log successful update for debugging purposes
+            debugLog("Successfully updated feature card title", {
+                planIndex: planIndex,
+                newPrice: cleanButtonText,
+            });
+
+            return true;
+        }
+
+        // Attempt immediate update first (most common success case)
+        if (performPlanButtonTextUpdate()) {
+            return true; // Success on first attempt, exit early
+        }
+
+        // If immediate update failed, the DOM might not be ready yet
+        debugLog("Immediate update failed, attempting delayed update...", {
+            planIndex: planIndex,
+        });
+
+        // Schedule a retry after a short delay to allow DOM to fully load
+        setTimeout(() => {
+            if (!performPlanButtonTextUpdate()) {
+                // If even the delayed attempt fails, log an error for debugging
+                debugLog("Failed to update plan button text after delay", {
                     planIndex: planIndex,
                     newTitle: newValue,
                 });
