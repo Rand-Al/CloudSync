@@ -526,6 +526,30 @@
                 updatePricingPlanButtonText(2, newValue);
             });
         });
+
+        /**
+         * ==============================
+         *  Features
+         * ==============================
+         */
+        // PRICING PLAN 1 - Features live preview
+        wp.customize("cloudsync_plan1_features", function (value) {
+            value.bind(function (newValue) {
+                updatePricingPlanFeaturesList(0, newValue);
+            });
+        });
+        // PRICING PLAN 2 - Features live preview
+        wp.customize("cloudsync_plan2_features", function (value) {
+            value.bind(function (newValue) {
+                updatePricingPlanFeaturesList(1, newValue);
+            });
+        });
+        // PRICING PLAN 3 - Features live preview
+        wp.customize("cloudsync_plan3_features", function (value) {
+            value.bind(function (newValue) {
+                updatePricingPlanFeaturesList(2, newValue);
+            });
+        });
     }
 
     /**
@@ -1816,7 +1840,7 @@
     }
 
     /**
-     * Universal function for updating pricing plan price with comprehensive error handling
+     * Universal function for updating pricing plan button text with comprehensive error handling
      * Integrates with the theme's centralized debug logging system
      *
      * @param {number} planIndex - Zero-based index (0-2) for the three steps
@@ -1922,6 +1946,137 @@
                 debugLog("Failed to update plan button text after delay", {
                     planIndex: planIndex,
                     newTitle: newValue,
+                });
+            }
+        }, 500);
+
+        // Return false for immediate attempt (delayed attempt status is handled in callback)
+        return false;
+    }
+    /**
+     * Universal function for updating pricing plan features list with comprehensive error handling
+     * Handles textarea input with line-by-line processing and converts to HTML list items
+     * Integrates with the theme's centralized debug logging system
+     *
+     * @param {number} planIndex - Zero-based index (0-2) for the three pricing plans
+     * @param {string} newValue - New features text from textarea (one feature per line)
+     * @returns {boolean} - Success status of the update operation
+     */
+    function updatePricingPlanFeaturesList(planIndex, newValue) {
+        // Inner function that performs the actual DOM update
+        function performPlanFeaturesUpdate() {
+            // Validate planIndex parameter before proceeding
+            if (
+                typeof planIndex !== "number" ||
+                planIndex < 0 ||
+                planIndex > 2
+            ) {
+                debugLog("Invalid plan index provided. Expected: 0-2", {
+                    provided: planIndex,
+                });
+                return false;
+            }
+
+            // Validate newValue parameter - empty is allowed (will show empty list)
+            if (typeof newValue !== "string") {
+                debugLog("Invalid features value provided", {
+                    value: newValue,
+                });
+                return false;
+            }
+
+            // Query all pricing plan elements from the DOM
+            const pricingPlans = document.querySelectorAll(".pricing-card");
+
+            // Check if we found any pricing plan elements at all
+            if (pricingPlans.length === 0) {
+                debugLog("No pricing plan elements found in DOM");
+                return false;
+            }
+
+            // Check if the requested plan index exists in our NodeList
+            if (planIndex >= pricingPlans.length) {
+                debugLog("Pricing plan index not found", {
+                    requested: planIndex,
+                    available: pricingPlans.length,
+                });
+                return false;
+            }
+
+            // Get the specific pricing plan we want to update
+            const targetPlan = pricingPlans[planIndex];
+
+            // Additional safety check for the target plan
+            if (!targetPlan) {
+                debugLog("Pricing plan element is null or undefined", {
+                    index: planIndex,
+                });
+                return false;
+            }
+
+            // Find the features list element within the target plan using the established HTML structure
+            const featuresListElement =
+                targetPlan.querySelector(".features-list");
+
+            // Verify that the features list element exists within this plan
+            if (!featuresListElement) {
+                debugLog(
+                    "Features list element not found in pricing plan. Check HTML structure.",
+                    {
+                        planIndex: planIndex,
+                    }
+                );
+                return false;
+            }
+
+            // Process the textarea content into individual features
+            const features = newValue.split("\n");
+            let featuresHTML = "";
+
+            // Build HTML for each non-empty feature line
+            features.forEach(function (feature) {
+                const cleanFeature = feature.trim();
+                if (cleanFeature !== "") {
+                    // Create list item with checkmark icon for each feature
+                    featuresHTML +=
+                        '<li><i class="fas fa-check"></i>' +
+                        cleanFeature +
+                        "</li>";
+                }
+            });
+
+            // Update the features list with the new HTML content
+            featuresListElement.innerHTML = featuresHTML;
+
+            // Log successful update for debugging purposes
+            debugLog("Successfully updated pricing plan features list", {
+                planIndex: planIndex,
+                featuresCount: features.filter((f) => f.trim() !== "").length,
+            });
+
+            return true;
+        }
+
+        // Attempt immediate update first (most common success case)
+        if (performPlanFeaturesUpdate()) {
+            return true; // Success on first attempt, exit early
+        }
+
+        // If immediate update failed, the DOM might not be ready yet
+        debugLog(
+            "Immediate features update failed, attempting delayed update...",
+            {
+                planIndex: planIndex,
+            }
+        );
+
+        // Schedule a retry after a short delay to allow DOM to fully load
+        setTimeout(() => {
+            if (!performPlanFeaturesUpdate()) {
+                // If even the delayed attempt fails, log an error for debugging
+                debugLog("Failed to update pricing plan features after delay", {
+                    planIndex: planIndex,
+                    featuresText: newValue,
                 });
             }
         }, 500);
