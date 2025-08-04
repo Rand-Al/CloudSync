@@ -30,6 +30,7 @@
             this.scrollAnimations();
             this.parallaxCards();
             this.interactiveCards();
+            this.initCopyLinkButton();
         },
 
         /**
@@ -268,6 +269,69 @@
                     this.style.transform = "translateY(0)";
                     this.style.borderColor = "rgba(255, 255, 255, 0.1)";
                     this.style.transition = "all 0.3s ease";
+                });
+            });
+        },
+        /**
+         * Copy link functionality for social sharing
+         * Modern clipboard API with fallback for older browsers
+         */
+        initCopyLinkButton: function () {
+            var copyButtons = document.querySelectorAll(".share-copy");
+
+            copyButtons.forEach(function (button) {
+                button.addEventListener("click", function () {
+                    var url = this.getAttribute("data-url");
+                    var buttonText = this.querySelector("span");
+                    var originalText = buttonText.textContent;
+
+                    // Try modern clipboard API first
+                    if (navigator.clipboard && window.isSecureContext) {
+                        navigator.clipboard
+                            .writeText(url)
+                            .then(function () {
+                                showCopySuccess();
+                            })
+                            .catch(function () {
+                                fallbackCopyTextToClipboard(url);
+                            });
+                    } else {
+                        // Fallback for older browsers
+                        fallbackCopyTextToClipboard(url);
+                    }
+
+                    function showCopySuccess() {
+                        button.classList.add("copied");
+                        buttonText.textContent = "Copied!";
+
+                        setTimeout(function () {
+                            button.classList.remove("copied");
+                            buttonText.textContent = originalText;
+                        }, 2000);
+                    }
+
+                    function fallbackCopyTextToClipboard(text) {
+                        var textArea = document.createElement("textarea");
+                        textArea.value = text;
+                        textArea.style.position = "fixed";
+                        textArea.style.left = "-999999px";
+                        textArea.style.top = "-999999px";
+                        document.body.appendChild(textArea);
+                        textArea.focus();
+                        textArea.select();
+
+                        try {
+                            document.execCommand("copy");
+                            showCopySuccess();
+                        } catch (err) {
+                            console.error(
+                                "Fallback: Oops, unable to copy",
+                                err
+                            );
+                        }
+
+                        document.body.removeChild(textArea);
+                    }
                 });
             });
         },
