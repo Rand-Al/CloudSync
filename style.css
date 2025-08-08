@@ -2328,3 +2328,478 @@ select:focus {
         transform: none;
     }
 }
+
+/* ==========================================================================
+   ADVANCED TABLE OF CONTENTS - PREMIUM DESIGN
+   Modern glassmorphism design with intelligent animations
+   ========================================================================== */
+
+/* Desktop TOC - Floating sidebar */
+.advanced-toc {
+    position: fixed;
+    top: 50%;
+    right: 2rem;
+    transform: translateY(-50%);
+    width: 320px;
+    max-height: 70vh;
+    background: rgba(15, 15, 35, 0.85);
+    backdrop-filter: blur(20px) saturate(1.2);
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4),
+        0 4px 12px rgba(102, 126, 234, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    z-index: 999;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-50%) translateX(100px);
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+}
+
+/* Анимация появления TOC */
+.advanced-toc.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(-50%) translateX(0);
+}
+
+/* Состояние свернутого TOC */
+.advanced-toc.collapsed {
+    width: 60px;
+    transform: translateY(-50%) translateX(0);
+}
+
+.advanced-toc.collapsed .toc-title span,
+.advanced-toc.collapsed .toc-navigation,
+.advanced-toc.collapsed .toc-progress {
+    opacity: 0;
+    visibility: hidden;
+}
+
+/* TOC Header */
+.toc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 1.5rem 1rem;
+    background: linear-gradient(
+        135deg,
+        rgba(102, 126, 234, 0.15) 0%,
+        rgba(118, 75, 162, 0.15) 100%
+    );
+    border-bottom: 1px solid rgba(102, 126, 234, 0.2);
+    border-radius: 20px 20px 0 0;
+    position: relative;
+}
+
+.toc-header::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(102, 126, 234, 0.6) 50%,
+        transparent 100%
+    );
+    border-radius: 20px 20px 0 0;
+}
+
+.toc-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.toc-title i {
+    color: #667eea;
+    font-size: 1rem;
+    width: 18px;
+    text-align: center;
+}
+
+.toc-title span {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #ffffff;
+    transition: opacity 0.3s ease;
+}
+
+.toc-controls {
+    display: flex;
+    align-items: center;
+}
+
+.toc-collapse {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.toc-collapse:hover {
+    background: rgba(102, 126, 234, 0.3);
+    border-color: rgba(102, 126, 234, 0.4);
+    color: #ffffff;
+    transform: scale(1.05);
+}
+
+.toc-collapse i {
+    font-size: 0.85rem;
+    transition: transform 0.3s ease;
+}
+
+/* Progress Bar */
+.toc-progress {
+    height: 3px;
+    background: rgba(255, 255, 255, 0.1);
+    position: relative;
+    transition: opacity 0.3s ease;
+}
+
+.toc-progress-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    transition: width 0.3s ease;
+    position: relative;
+}
+
+.toc-progress-bar::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 4px;
+    height: 100%;
+    background: #ffffff;
+    box-shadow: 0 0 8px rgba(102, 126, 234, 0.6);
+    opacity: 0.8;
+}
+
+/* TOC Navigation */
+.toc-navigation {
+    padding: 0.75rem 0 1rem;
+    max-height: calc(70vh - 120px);
+    overflow-y: auto;
+    transition: opacity 0.3s ease;
+}
+
+/* Custom scrollbar */
+.toc-navigation::-webkit-scrollbar {
+    width: 4px;
+}
+
+.toc-navigation::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.toc-navigation::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+    border-radius: 2px;
+}
+
+.toc-navigation::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #5a6fd8 0%, #6b4190 100%);
+}
+
+/* TOC List */
+.toc-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.toc-item {
+    margin: 0;
+    position: relative;
+}
+
+.toc-link {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-left: 3px solid transparent;
+    position: relative;
+    overflow: hidden;
+}
+
+.toc-link::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 0;
+    background: linear-gradient(
+        90deg,
+        rgba(102, 126, 234, 0.2) 0%,
+        rgba(118, 75, 162, 0.1) 100%
+    );
+    transition: width 0.3s ease;
+}
+
+.toc-link:hover {
+    color: #ffffff;
+    border-left-color: rgba(102, 126, 234, 0.6);
+    background: rgba(102, 126, 234, 0.1);
+    transform: translateX(2px);
+}
+
+.toc-link:hover::before {
+    width: 100%;
+}
+
+.toc-link.active {
+    color: #667eea;
+    background: rgba(102, 126, 234, 0.2);
+    border-left-color: #667eea;
+    font-weight: 500;
+}
+
+.toc-link.active::before {
+    width: 100%;
+    background: linear-gradient(
+        90deg,
+        rgba(102, 126, 234, 0.3) 0%,
+        rgba(118, 75, 162, 0.2) 100%
+    );
+}
+
+/* Heading hierarchy */
+.toc-h1 .toc-link {
+    padding-left: 1.5rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.toc-h2 .toc-link {
+    padding-left: 1.75rem;
+    font-size: 0.9rem;
+}
+
+.toc-h3 .toc-link {
+    padding-left: 2.25rem;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.toc-h4 .toc-link {
+    padding-left: 2.75rem;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.65);
+}
+
+.toc-h5 .toc-link {
+    padding-left: 3.25rem;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.toc-h6 .toc-link {
+    padding-left: 3.75rem;
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.55);
+}
+
+/* Target highlight animation */
+.toc-target-highlight {
+    animation: highlightTarget 2s ease-out;
+}
+
+@keyframes highlightTarget {
+    0% {
+        background: rgba(102, 126, 234, 0.3);
+        transform: scale(1.02);
+    }
+    100% {
+        background: transparent;
+        transform: scale(1);
+    }
+}
+
+/* Mobile TOC */
+.mobile-toc {
+    background: rgba(15, 15, 35, 0.6);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    border-radius: 16px;
+    margin: 2rem 0;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.mobile-toc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 1.5rem;
+    background: linear-gradient(
+        135deg,
+        rgba(102, 126, 234, 0.1) 0%,
+        rgba(118, 75, 162, 0.1) 100%
+    );
+    border-bottom: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+.mobile-toc-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.mobile-toc-header h3 i {
+    color: #667eea;
+    font-size: 1rem;
+}
+
+.mobile-toc-toggle {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.mobile-toc-toggle:hover {
+    background: rgba(102, 126, 234, 0.2);
+    border-color: rgba(102, 126, 234, 0.3);
+    color: #ffffff;
+}
+
+.mobile-toc-toggle i {
+    font-size: 0.8rem;
+    transition: transform 0.3s ease;
+}
+
+.mobile-toc-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mobile-toc-list {
+    list-style: none;
+    margin: 0;
+    padding: 1rem 0;
+}
+
+.mobile-toc-list .toc-link {
+    display: block;
+    padding: 0.75rem 1.5rem;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border-left: 3px solid transparent;
+}
+
+.mobile-toc-list .toc-link:hover {
+    background: rgba(102, 126, 234, 0.1);
+    color: #ffffff;
+    border-left-color: #667eea;
+}
+
+/* Responsive breakpoints */
+@media (max-width: 1400px) {
+    .advanced-toc {
+        right: 1.5rem;
+        width: 300px;
+    }
+}
+
+@media (max-width: 1300px) {
+    .advanced-toc {
+        right: 1rem;
+        width: 280px;
+    }
+}
+
+@media (max-width: 1200px) {
+    .advanced-toc {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .mobile-toc {
+        margin: 1.5rem 0;
+        border-radius: 12px;
+    }
+
+    .mobile-toc-header {
+        padding: 1rem 1.25rem;
+    }
+
+    .mobile-toc-header h3 {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .mobile-toc {
+        margin: 1rem -10px;
+        border-radius: 8px;
+    }
+}
+
+/* Print styles - hide TOC when printing */
+@media print {
+    .advanced-toc,
+    .mobile-toc {
+        display: none !important;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .advanced-toc,
+    .toc-link,
+    .mobile-toc-content,
+    .toc-progress-bar {
+        transition: none !important;
+        animation: none !important;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .advanced-toc {
+        border-width: 2px;
+        border-color: #ffffff;
+    }
+
+    .toc-link {
+        border-left-width: 4px;
+    }
+
+    .toc-link.active {
+        border-left-color: #ffffff;
+        background: rgba(255, 255, 255, 0.2);
+    }
+}

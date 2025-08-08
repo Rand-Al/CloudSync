@@ -89,12 +89,7 @@ $page_context = cloudsync_analyze_page_context();
                 <div class="page-content-wrapper">
 
                     <!-- Table of Contents for long content -->
-                    <?php if (strpos($page_context, 'long-content') !== false) : ?>
-                        <div class="page-toc">
-                            <h3><?php esc_html_e('Table of Contents', 'cloudsync'); ?></h3>
-                            <div id="page-toc-content"></div>
-                        </div>
-                    <?php endif; ?>
+
 
                     <!-- Main Content -->
                     <article class="page-content" id="post-<?php the_ID(); ?>" <?php post_class(); ?>>

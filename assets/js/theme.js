@@ -346,7 +346,7 @@
             // Only run on actual pages, not posts or archives
             if (!document.body.classList.contains("page")) return;
 
-            this.setupTableOfContents();
+            this.initTableOfContents();
             this.setupReadingProgress();
             this.setupLegalPageNavigation();
             this.setupImageLightbox();
@@ -357,109 +357,406 @@
          * Creates navigation based on page headings for improved user experience
          * and accessibility compliance
          */
-        setupTableOfContents: function () {
-            console.log("TOC Setup started");
+        /**
+         * Advanced Table of Contents with progressive enhancement
+         * Creates an intelligent, adaptive navigation system for long-form content
+         */
+        initTableOfContents: function () {
+            // Сначала проверяем, подходит ли страница для отображения TOC
+            var contentContainer = document.querySelector(
+                ".entry-content, .page-content"
+            );
+            if (!contentContainer) {
+                return; // Выходим если нет основного контента
+            }
 
-            // Get the main element where classes are applied
-            var mainElement = document.querySelector(".site-main");
-
-            console.log("Main element:", mainElement);
-            console.log(
-                "Main classes:",
-                mainElement ? mainElement.className : "not found"
+            // Собираем все заголовки от H1 до H6 для максимальной гибкости
+            var headings = contentContainer.querySelectorAll(
+                "h1, h2, h3, h4, h5, h6"
             );
 
-            // Only activate for long content pages - check main element, not body
-            if (
-                !mainElement ||
-                !mainElement.classList.contains("long-content")
-            ) {
-                console.log("Not long-content, exiting");
-                return;
-            }
-
-            var tocContainer = document.getElementById("page-toc-content");
-            var contentArea = document.querySelector(".entry-content");
-
-            console.log("TOC Container:", tocContainer);
-            console.log("Content Area:", contentArea);
-
-            if (!tocContainer || !contentArea) {
-                console.log("Missing container or content area");
-                return;
-            }
-
-            // Find all headings in the content (H2 and H3 for optimal structure)
-            var headings = contentArea.querySelectorAll("h2, h3");
-
-            console.log("Headings found:", headings.length);
-
+            // Применяем интеллектуальную логику: нужно минимум 3 заголовка
+            // Это предотвращает появление TOC на коротких страницах
             if (headings.length < 3) {
-                // Hide TOC if insufficient headings for meaningful navigation
-                var tocSection = document.querySelector(".page-toc");
-                if (tocSection) tocSection.style.display = "none";
-                console.log("Too few headings, hiding TOC");
                 return;
             }
 
-            // Store reference to CloudSync object for use in event handlers
+            // Проверяем размер экрана - на мобильных устройствах TOC работает по-другому
+            if (window.innerWidth < 1200) {
+                this.createMobileTOC(headings, contentContainer);
+            } else {
+                this.createDesktopTOC(headings);
+            }
+
+            // Добавляем обработчик изменения размера окна для динамической адаптации
+            this.handleTOCResize(headings, contentContainer);
+        },
+
+        /**
+         * Creates desktop floating TOC with advanced features
+         * Uses modern CSS features like backdrop-filter and smooth animations
+         */
+        createDesktopTOC: function (headings) {
+            // Создаем основную структуру TOC с семантической разметкой
+            var tocContainer = document.createElement("div");
+            tocContainer.className = "advanced-toc";
+            tocContainer.setAttribute("role", "navigation");
+            tocContainer.setAttribute("aria-label", "Table of Contents");
+
+            // Используем template literal для чистого и читаемого HTML
+            tocContainer.innerHTML = `
+        <div class="toc-header">
+            <div class="toc-title">
+                <i class="fas fa-list-ul" aria-hidden="true"></i>
+                <span>Contents</span>
+            </div>
+            <div class="toc-controls">
+                <button class="toc-collapse" aria-label="Collapse table of contents" title="Collapse">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+        </div>
+        <div class="toc-progress">
+            <div class="toc-progress-bar"></div>
+        </div>
+        <nav class="toc-navigation">
+            <ul class="toc-list" role="list"></ul>
+        </nav>
+    `;
+
+            // Генерируем навигационные элементы с умной обработкой иерархии
+            this.generateTOCItems(
+                headings,
+                tocContainer.querySelector(".toc-list")
+            );
+
+            // Добавляем в DOM и запускаем все интерактивные функции
+            document.body.appendChild(tocContainer);
+
+            // Запускаем все подсистемы TOC
+            this.initTOCCollapse(tocContainer);
+            this.initTOCSmoothScroll(tocContainer);
+            this.initTOCProgressTracking(tocContainer, headings);
+
+            // Анимированное появление через небольшую задержку для лучшего UX
+            setTimeout(function () {
+                tocContainer.classList.add("visible");
+            }, 800);
+        },
+
+        /**
+         * Creates mobile-optimized TOC that appears within content
+         * Follows mobile-first principles for optimal user experience
+         */
+        createMobileTOC: function (headings, contentContainer) {
+            var mobileTOC = document.createElement("div");
+            mobileTOC.className = "mobile-toc";
+            mobileTOC.setAttribute("role", "navigation");
+            mobileTOC.setAttribute("aria-label", "Table of Contents");
+
+            mobileTOC.innerHTML = `
+        <div class="mobile-toc-header">
+            <h3>
+                <i class="fas fa-list-ul"></i>
+                Table of Contents
+            </h3>
+            <button class="mobile-toc-toggle" aria-expanded="false">
+                <span>Show</span>
+                <i class="fas fa-chevron-down"></i>
+            </button>
+        </div>
+        <nav class="mobile-toc-content">
+            <ul class="mobile-toc-list"></ul>
+        </nav>
+    `;
+
+            this.generateTOCItems(
+                headings,
+                mobileTOC.querySelector(".mobile-toc-list")
+            );
+
+            // Вставляем мобильный TOC в начало контента
+            contentContainer.insertBefore(
+                mobileTOC,
+                contentContainer.firstChild
+            );
+
+            this.initMobileTOCToggle(mobileTOC);
+            this.initTOCSmoothScroll(mobileTOC);
+        },
+
+        /**
+         * Generates TOC items with intelligent hierarchy detection
+         * Creates proper nested structure based on heading levels
+         */
+        generateTOCItems: function (headings, tocList) {
             var self = this;
 
-            // Create navigation structure with proper accessibility attributes
-            var tocList = document.createElement("ul");
-            tocList.setAttribute("role", "navigation");
-            tocList.setAttribute("aria-label", "Page contents");
-
             headings.forEach(function (heading, index) {
-                // Generate unique ID for linking if not already present
+                // Генерируем уникальный и SEO-friendly ID
                 if (!heading.id) {
-                    heading.id = "section-" + (index + 1);
+                    var headingText = heading.textContent.trim();
+                    var baseId =
+                        "toc-" +
+                        headingText
+                            .toLowerCase()
+                            .replace(/[^\w\s-]/g, "")
+                            .replace(/\s+/g, "-")
+                            .substring(0, 40);
+
+                    heading.id = self.ensureUniqueId(baseId);
                 }
 
+                // Определяем уровень заголовка для правильного стилирования
+                var headingLevel = heading.tagName.toLowerCase();
                 var listItem = document.createElement("li");
+                listItem.className = "toc-item toc-" + headingLevel;
+
                 var link = document.createElement("a");
-
                 link.href = "#" + heading.id;
+                link.className = "toc-link";
                 link.textContent = heading.textContent;
-                link.className =
-                    heading.tagName.toLowerCase() === "h3"
-                        ? "toc-subsection"
-                        : "toc-section";
-
-                // Add smooth scroll behavior for better user experience
-                link.addEventListener("click", function (event) {
-                    event.preventDefault();
-                    var target = document.getElementById(heading.id);
-                    if (target) {
-                        var headerOffset = 120;
-                        var elementPosition = target.offsetTop;
-                        var offsetPosition = elementPosition - headerOffset;
-
-                        window.scrollTo({
-                            top: offsetPosition,
-                            behavior: "smooth",
-                        });
-
-                        // Use self reference instead of CloudSync
-                        if (self.updateActiveToC) {
-                            self.updateActiveToC(link);
-                        }
-                    }
-                });
+                link.setAttribute("data-heading-id", heading.id);
 
                 listItem.appendChild(link);
                 tocList.appendChild(listItem);
             });
+        },
 
-            tocContainer.appendChild(tocList);
-            tocContainer.style.display = "block";
+        /**
+         * Ensures ID uniqueness across the document
+         * Prevents conflicts with existing IDs
+         */
+        ensureUniqueId: function (baseId) {
+            var currentId = baseId;
+            var counter = 1;
 
-            console.log("TOC created successfully");
-
-            // Initialize active section tracking
-            if (this.initActiveSectionTracking) {
-                this.initActiveSectionTracking();
+            while (document.getElementById(currentId)) {
+                currentId = baseId + "-" + counter;
+                counter++;
             }
+
+            return currentId;
+        },
+
+        /**
+         * Initializes collapse/expand functionality
+         * Provides users control over TOC visibility
+         */
+        initTOCCollapse: function (tocContainer) {
+            var collapseButton = tocContainer.querySelector(".toc-collapse");
+            var navigation = tocContainer.querySelector(".toc-navigation");
+            var title = tocContainer.querySelector(".toc-title span");
+
+            collapseButton.addEventListener("click", function () {
+                var isCollapsed = tocContainer.classList.contains("collapsed");
+                var icon = this.querySelector("i");
+
+                if (isCollapsed) {
+                    // Разворачиваем TOC
+                    tocContainer.classList.remove("collapsed");
+                    icon.classList.remove("fa-chevron-right");
+                    icon.classList.add("fa-chevron-left");
+                    this.setAttribute(
+                        "aria-label",
+                        "Collapse table of contents"
+                    );
+                    this.setAttribute("title", "Collapse");
+                } else {
+                    // Сворачиваем TOC
+                    tocContainer.classList.add("collapsed");
+                    icon.classList.remove("fa-chevron-left");
+                    icon.classList.add("fa-chevron-right");
+                    this.setAttribute("aria-label", "Expand table of contents");
+                    this.setAttribute("title", "Expand");
+                }
+            });
+        },
+
+        /**
+         * Initializes mobile TOC toggle functionality
+         * Handles accordion-style behavior on mobile devices
+         */
+        initMobileTOCToggle: function (mobileTOC) {
+            var toggleButton = mobileTOC.querySelector(".mobile-toc-toggle");
+            var content = mobileTOC.querySelector(".mobile-toc-content");
+            var buttonText = toggleButton.querySelector("span");
+            var icon = toggleButton.querySelector("i");
+
+            toggleButton.addEventListener("click", function () {
+                var isExpanded = this.getAttribute("aria-expanded") === "true";
+
+                if (isExpanded) {
+                    // Скрываем контент
+                    content.style.maxHeight = "0";
+                    this.setAttribute("aria-expanded", "false");
+                    buttonText.textContent = "Show";
+                    icon.classList.remove("fa-chevron-up");
+                    icon.classList.add("fa-chevron-down");
+                } else {
+                    // Показываем контент с плавной анимацией
+                    content.style.maxHeight = content.scrollHeight + "px";
+                    this.setAttribute("aria-expanded", "true");
+                    buttonText.textContent = "Hide";
+                    icon.classList.remove("fa-chevron-down");
+                    icon.classList.add("fa-chevron-up");
+                }
+            });
+        },
+
+        /**
+         * Enhanced smooth scrolling with header offset calculation
+         * Provides perfect scroll positioning regardless of header height
+         */
+        initTOCSmoothScroll: function (tocContainer) {
+            var tocLinks = tocContainer.querySelectorAll(".toc-link");
+
+            tocLinks.forEach(function (link) {
+                link.addEventListener("click", function (e) {
+                    e.preventDefault();
+
+                    var targetId = this.getAttribute("href");
+                    var targetElement = document.querySelector(targetId);
+
+                    if (targetElement) {
+                        // Динамически рассчитываем высоту header'а
+                        var header = document.querySelector(".site-header");
+                        var headerHeight = header
+                            ? header.offsetHeight + 20
+                            : 100;
+
+                        var targetPosition =
+                            targetElement.offsetTop - headerHeight;
+
+                        window.scrollTo({
+                            top: targetPosition,
+                            behavior: "smooth",
+                        });
+
+                        // Добавляем временную подсветку целевого заголовка
+                        targetElement.classList.add("toc-target-highlight");
+                        setTimeout(function () {
+                            targetElement.classList.remove(
+                                "toc-target-highlight"
+                            );
+                        }, 2000);
+                    }
+                });
+            });
+        },
+
+        /**
+         * Advanced progress tracking with smooth transitions
+         * Shows reading progress and highlights current section
+         */
+        initTOCProgressTracking: function (tocContainer, headings) {
+            var tocLinks = tocContainer.querySelectorAll(".toc-link");
+            var progressBar = tocContainer.querySelector(".toc-progress-bar");
+            var headingsData = [];
+
+            // Собираем данные о всех заголовках для эффективного трекинга
+            headings.forEach(function (heading, index) {
+                var tocLink = tocContainer.querySelector(
+                    '[data-heading-id="' + heading.id + '"]'
+                );
+                if (tocLink) {
+                    headingsData.push({
+                        element: heading,
+                        link: tocLink,
+                        top: heading.offsetTop,
+                    });
+                }
+            });
+
+            // Оптимизированная функция обновления активного состояния
+            function updateProgress() {
+                var scrollTop = window.pageYOffset;
+                var docHeight =
+                    document.documentElement.scrollHeight - window.innerHeight;
+                var scrollPercent = (scrollTop / docHeight) * 100;
+
+                // Обновляем прогресс-бар
+                if (progressBar) {
+                    progressBar.style.width =
+                        Math.min(scrollPercent, 100) + "%";
+                }
+
+                // Находим активный заголовок
+                var activeHeading = null;
+                var offset = 150; // Отступ для лучшего UX
+
+                for (var i = headingsData.length - 1; i >= 0; i--) {
+                    if (scrollTop + offset >= headingsData[i].top) {
+                        activeHeading = headingsData[i];
+                        break;
+                    }
+                }
+
+                // Обновляем активные состояния
+                tocLinks.forEach(function (link) {
+                    link.classList.remove("active");
+                });
+
+                if (activeHeading) {
+                    activeHeading.link.classList.add("active");
+                }
+            }
+
+            // Используем requestAnimationFrame для плавности и производительности
+            var ticking = false;
+            function requestTick() {
+                if (!ticking) {
+                    requestAnimationFrame(updateProgress);
+                    ticking = true;
+                    setTimeout(function () {
+                        ticking = false;
+                    }, 16); // ~60fps
+                }
+            }
+
+            window.addEventListener("scroll", requestTick);
+            window.addEventListener("resize", function () {
+                // Пересчитываем позиции при изменении размера окна
+                headingsData.forEach(function (item) {
+                    item.top = item.element.offsetTop;
+                });
+                requestTick();
+            });
+
+            // Инициализация
+            updateProgress();
+        },
+
+        /**
+         * Handles responsive behavior on window resize
+         * Dynamically switches between desktop and mobile TOC
+         */
+        handleTOCResize: function (headings, contentContainer) {
+            var self = this;
+            var resizeTimeout;
+
+            window.addEventListener("resize", function () {
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(function () {
+                    var currentWidth = window.innerWidth;
+                    var desktopTOC = document.querySelector(".advanced-toc");
+                    var mobileTOC = document.querySelector(".mobile-toc");
+
+                    if (currentWidth >= 1200 && !desktopTOC && mobileTOC) {
+                        // Переключаемся на desktop версию
+                        mobileTOC.remove();
+                        self.createDesktopTOC(headings);
+                    } else if (
+                        currentWidth < 1200 &&
+                        desktopTOC &&
+                        !mobileTOC
+                    ) {
+                        // Переключаемся на mobile версию
+                        desktopTOC.remove();
+                        self.createMobileTOC(headings, contentContainer);
+                    }
+                }, 250); // Debounce для производительности
+            });
         },
 
         /**
