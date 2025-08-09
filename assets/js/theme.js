@@ -26,12 +26,218 @@
         init: function () {
             this.smoothScrolling();
             this.mobileMenu();
-            this.headerScroll();
             this.scrollAnimations();
             this.parallaxCards();
             this.interactiveCards();
             this.initCopyLinkButton();
             this.initAdaptivePages();
+            this.smartHeader.init();
+        },
+        /**
+         * Smart Header Module for CloudSync Theme
+         *
+         * Provides intelligent header behavior that hides/shows based on scroll direction.
+         * Enhances user experience by maximizing content visibility while maintaining
+         * easy access to navigation when needed.
+         *
+         * @since 1.0.0
+         * @author CloudSync Theme
+         */
+        smartHeader: {
+            /**
+             * Module configuration
+             * These settings control header behavior and can be customized per implementation
+             */
+            config: {
+                offset: 100, // Scroll position to start tracking (pixels)
+                tolerance: 5, // Minimum scroll change to trigger action (pixels)
+                hideClass: "header-hidden", // CSS class for hidden state
+                scrollClass: "header-scrolled", // CSS class for scrolled state
+                headerSelector: ".site-header", // DOM selector for header element
+            },
+
+            /**
+             * Internal module state
+             * Tracks current scroll position and animation frame optimization
+             */
+            state: {
+                lastScrollPosition: 0, // Previous scroll position for direction detection
+                ticking: false, // requestAnimationFrame optimization flag
+                headerElement: null, // Cached DOM reference to header
+                isInitialized: false, // Prevents duplicate initialization
+            },
+
+            /**
+             * Get current scroll position
+             * Cross-browser compatible method for retrieving scroll offset
+             *
+             * @returns {number} Current vertical scroll position in pixels
+             */
+            getCurrentScrollPosition: function () {
+                return window.pageYOffset || window.scrollY || 0;
+            },
+
+            /**
+             * Hide header element
+             * Applies CSS class that should contain transform animation for smooth hiding
+             */
+            hideHeader: function () {
+                if (this.state.headerElement) {
+                    this.state.headerElement.classList.add(
+                        this.config.hideClass
+                    );
+                }
+            },
+
+            /**
+             * Show header element
+             * Removes hiding CSS class to restore header visibility
+             */
+            showHeader: function () {
+                if (this.state.headerElement) {
+                    this.state.headerElement.classList.remove(
+                        this.config.hideClass
+                    );
+                }
+            },
+
+            /**
+             * Main header update logic
+             * Analyzes scroll direction and applies appropriate header state.
+             * Called via requestAnimationFrame for optimal performance.
+             */
+            updateHeader: function () {
+                const currentScrollPosition = this.getCurrentScrollPosition();
+                const scrollDifference =
+                    currentScrollPosition - this.state.lastScrollPosition;
+
+                // Ignore micro-movements to prevent header jitter
+                if (Math.abs(scrollDifference) < this.config.tolerance) {
+                    this.state.ticking = false;
+                    return;
+                }
+
+                // Page top: always show header without scroll styling
+                if (currentScrollPosition <= 0) {
+                    this.showHeader();
+                    this.state.headerElement.classList.remove(
+                        this.config.scrollClass
+                    );
+                }
+                // Past offset threshold: apply smart hiding logic
+                else if (currentScrollPosition > this.config.offset) {
+                    // Add scrolled styling for background/shadow effects
+                    this.state.headerElement.classList.add(
+                        this.config.scrollClass
+                    );
+
+                    // Hide on downward scroll, show on upward scroll
+                    if (scrollDifference > 0) {
+                        this.hideHeader();
+                    } else {
+                        this.showHeader();
+                    }
+                }
+                // Between top and offset: show header without scroll styling
+                else {
+                    this.showHeader();
+                    this.state.headerElement.classList.remove(
+                        this.config.scrollClass
+                    );
+                }
+
+                // Update position tracking for next frame
+                this.state.lastScrollPosition = currentScrollPosition;
+                this.state.ticking = false;
+            },
+
+            /**
+             * Optimized scroll event handler
+             * Uses requestAnimationFrame to throttle updates to screen refresh rate
+             */
+            requestUpdate: function () {
+                if (!this.state.ticking) {
+                    window.requestAnimationFrame(this.updateHeader.bind(this));
+                    this.state.ticking = true;
+                }
+            },
+
+            /**
+             * Initialize smart header functionality
+             * Sets up event listeners and applies initial state based on current scroll position
+             *
+             * @returns {boolean} True if initialization successful, false otherwise
+             */
+            init: function () {
+                // Prevent duplicate initialization
+                if (this.state.isInitialized) {
+                    return false;
+                }
+
+                // Locate header element in DOM
+                this.state.headerElement = document.querySelector(
+                    this.config.headerSelector
+                );
+
+                if (!this.state.headerElement) {
+                    console.error(
+                        "CloudSync SmartHeader: Header element not found with selector:",
+                        this.config.headerSelector
+                    );
+                    return false;
+                }
+
+                // Bind scroll event with context preservation
+                this.scrollHandler = this.requestUpdate.bind(this);
+                window.addEventListener("scroll", this.scrollHandler, {
+                    passive: true,
+                });
+
+                // Apply initial state if page is already scrolled
+                const currentPosition = this.getCurrentScrollPosition();
+                if (currentPosition > this.config.offset) {
+                    this.state.headerElement.classList.add(
+                        this.config.scrollClass
+                    );
+                }
+
+                this.state.isInitialized = true;
+                return true;
+            },
+
+            /**
+             * Clean up module resources
+             * Removes event listeners and resets header to default state
+             */
+            destroy: function () {
+                if (this.scrollHandler) {
+                    window.removeEventListener("scroll", this.scrollHandler);
+                }
+
+                // Reset header to visible state with no styling
+                if (this.state.headerElement) {
+                    this.showHeader();
+                    this.state.headerElement.classList.remove(
+                        this.config.scrollClass
+                    );
+                }
+
+                // Reset internal state
+                this.state.lastScrollPosition = 0;
+                this.state.ticking = false;
+                this.state.headerElement = null;
+                this.state.isInitialized = false;
+            },
+
+            /**
+             * Update module configuration
+             * Allows runtime modification of behavior settings
+             *
+             * @param {Object} newConfig - Configuration object with properties to override
+             */
+            updateConfig: function (newConfig) {
+                Object.assign(this.config, newConfig);
+            },
         },
 
         /**
@@ -67,7 +273,7 @@
 
         /**
          * Mobile navigation menu functionality
-         * Handles hamburger menu toggle and accessibility
+         * Handles hamburger menu toggle, accessibility, and scroll lock
          */
         mobileMenu: function () {
             var menuToggle = document.querySelector(".menu-toggle");
@@ -75,26 +281,62 @@
 
             if (!menuToggle || !navigation) return;
 
+            /**
+             * Lock page scroll when mobile menu is open
+             * Prevents background content from scrolling on mobile devices
+             */
+            var lockScroll = function () {
+                document.body.style.overflow = "hidden";
+            };
+
+            /**
+             * Unlock page scroll when mobile menu is closed
+             * Restores normal scrolling behavior
+             */
+            var unlockScroll = function () {
+                document.body.style.overflow = "";
+            };
+
+            /**
+             * Close mobile menu and restore scroll
+             * Centralizes menu closing logic to ensure consistent behavior
+             */
+            var closeMenu = function () {
+                navigation.classList.remove("show");
+                menuToggle.setAttribute("aria-expanded", "false");
+                unlockScroll(); // Always unlock scroll when closing menu
+
+                var icon = menuToggle.querySelector("i");
+                if (icon) {
+                    icon.classList.remove("fa-times");
+                    icon.classList.add("fa-bars");
+                }
+            };
+
+            /**
+             * Open mobile menu and lock scroll
+             * Centralizes menu opening logic
+             */
+            var openMenu = function () {
+                navigation.classList.add("show");
+                menuToggle.setAttribute("aria-expanded", "true");
+                lockScroll(); // Lock scroll when opening menu
+
+                var icon = menuToggle.querySelector("i");
+                if (icon) {
+                    icon.classList.remove("fa-bars");
+                    icon.classList.add("fa-times");
+                }
+            };
+
             // Toggle menu when hamburger button is clicked
             menuToggle.addEventListener("click", function () {
                 var isExpanded = this.getAttribute("aria-expanded") === "true";
-                var icon = this.querySelector("i");
 
-                // Toggle menu visibility
-                navigation.classList.toggle("show");
-
-                // Update accessibility attributes
-                this.setAttribute("aria-expanded", !isExpanded);
-
-                // Switch between hamburger and close icons
-                if (icon) {
-                    if (isExpanded) {
-                        icon.classList.remove("fa-times");
-                        icon.classList.add("fa-bars");
-                    } else {
-                        icon.classList.remove("fa-bars");
-                        icon.classList.add("fa-times");
-                    }
+                if (isExpanded) {
+                    closeMenu();
+                } else {
+                    openMenu();
                 }
             });
 
@@ -104,35 +346,22 @@
                     navigation.contains(event.target) ||
                     menuToggle.contains(event.target);
 
-                if (!isClickInside) {
-                    navigation.classList.remove("show");
-                    menuToggle.setAttribute("aria-expanded", "false");
+                // Only close if menu is currently open
+                var isMenuOpen = navigation.classList.contains("show");
 
-                    var icon = menuToggle.querySelector("i");
-                    if (icon) {
-                        icon.classList.remove("fa-times");
-                        icon.classList.add("fa-bars");
-                    }
+                if (!isClickInside && isMenuOpen) {
+                    closeMenu();
                 }
             });
-        },
 
-        /**
-         * Dynamic header styling based on scroll position
-         * Changes header appearance to improve readability
-         */
-        headerScroll: function () {
-            var header = document.querySelector(".site-header");
+            // Close menu on window resize to desktop size
+            // This prevents issues when users rotate devices or resize browser
+            window.addEventListener("resize", function () {
+                var isMenuOpen = navigation.classList.contains("show");
 
-            if (!header) return;
-
-            window.addEventListener("scroll", function () {
-                var scrollPosition = window.pageYOffset;
-
-                if (scrollPosition > 100) {
-                    header.classList.add("scrolled");
-                } else {
-                    header.classList.remove("scrolled");
+                // Close menu if screen becomes desktop size
+                if (window.innerWidth >= 768 && isMenuOpen) {
+                    closeMenu();
                 }
             });
         },

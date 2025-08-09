@@ -48,11 +48,11 @@ $page_context = cloudsync_analyze_page_context();
                     <header class="page-header">
                         <h1 class="page-title"><?php the_title(); ?></h1>
 
-                        <?php if (get_the_excerpt()) : ?>
+                        <!-- <?php if (get_the_excerpt()) : ?>
                             <div class="page-subtitle">
                                 <?php the_excerpt(); ?>
                             </div>
-                        <?php endif; ?>
+                        <?php endif; ?> -->
 
                         <!-- Context-sensitive meta information -->
                         <?php if (strpos($page_context, 'page-type-legal') !== false) : ?>

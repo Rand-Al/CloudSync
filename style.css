@@ -335,7 +335,7 @@ a:focus {
 }
 
 .site-main {
-    flex: 1;
+    flex: 1 1 auto;
 }
 
 /* 5. Component Styles (Buttons, Forms, Cards)
@@ -449,8 +449,14 @@ select:focus {
     transition: all 0.3s ease;
 }
 
-.site-header.scrolled {
+.site-header.header-scrolled {
     background: rgba(15, 15, 35, 0.98);
+}
+.site-header.header-hidden {
+    transform: translate(0px, -400px);
+}
+.site-branding .site-title {
+    margin-bottom: 0px !important;
 }
 
 .header-content {
@@ -1104,6 +1110,7 @@ select:focus {
         top: 100%;
         left: 0;
         right: 0;
+        overflow: scroll;
         background: rgba(15, 15, 35, 0.98);
         flex-direction: column;
         padding: 1rem;

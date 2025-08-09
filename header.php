@@ -55,17 +55,17 @@
                     </nav>
                 <?php endif; ?>
 
-                <!-- Mobile Menu Toggle -->
-                <button class="menu-toggle" aria-controls="primary-menu" aria-expanded="false">
-                    <span class="sr-only"><?php esc_html_e('Menu', 'cloudsync'); ?></span>
-                    <i class="fas fa-bars"></i>
-                </button>
 
                 <!-- CTA Button -->
                 <a href="#" class="cta-btn header-cta">
                     <?php esc_html_e('Get Started', 'cloudsync'); ?>
                 </a>
 
+                <!-- Mobile Menu Toggle -->
+                <button class="menu-toggle" aria-controls="primary-menu" aria-expanded="false">
+                    <span class="sr-only"><?php esc_html_e('Menu', 'cloudsync'); ?></span>
+                    <i class="fas fa-bars"></i>
+                </button>
             </div>
         </nav>
     </header>
