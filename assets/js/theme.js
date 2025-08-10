@@ -273,7 +273,7 @@
 
         /**
          * Mobile navigation menu functionality
-         * Handles hamburger menu toggle, accessibility, and scroll lock
+         * Handles hamburger menu toggle, accessibility, and selective scroll lock
          */
         mobileMenu: function () {
             var menuToggle = document.querySelector(".menu-toggle");
@@ -282,19 +282,29 @@
             if (!menuToggle || !navigation) return;
 
             /**
-             * Lock page scroll when mobile menu is open
-             * Prevents background content from scrolling on mobile devices
+             * Lock body scroll but allow menu scroll
+             * Prevents background content scrolling while keeping menu navigable
              */
-            var lockScroll = function () {
+            var lockBodyScroll = function () {
+                // Lock body scroll
                 document.body.style.overflow = "hidden";
+
+                // Ensure menu container can scroll if needed
+                navigation.style.overflowY = "auto";
+                navigation.style.maxHeight = "calc(100vh - 80px)"; // Account for header height
             };
 
             /**
-             * Unlock page scroll when mobile menu is closed
-             * Restores normal scrolling behavior
+             * Unlock body scroll and reset menu scroll properties
+             * Restores normal scrolling behavior for the entire page
              */
-            var unlockScroll = function () {
+            var unlockBodyScroll = function () {
+                // Restore body scroll
                 document.body.style.overflow = "";
+
+                // Reset menu scroll properties
+                navigation.style.overflowY = "";
+                navigation.style.maxHeight = "";
             };
 
             /**
@@ -304,7 +314,7 @@
             var closeMenu = function () {
                 navigation.classList.remove("show");
                 menuToggle.setAttribute("aria-expanded", "false");
-                unlockScroll(); // Always unlock scroll when closing menu
+                unlockBodyScroll(); // Always unlock body scroll when closing menu
 
                 var icon = menuToggle.querySelector("i");
                 if (icon) {
@@ -314,13 +324,13 @@
             };
 
             /**
-             * Open mobile menu and lock scroll
+             * Open mobile menu and lock body scroll
              * Centralizes menu opening logic
              */
             var openMenu = function () {
                 navigation.classList.add("show");
                 menuToggle.setAttribute("aria-expanded", "true");
-                lockScroll(); // Lock scroll when opening menu
+                lockBodyScroll(); // Lock body scroll but allow menu scroll
 
                 var icon = menuToggle.querySelector("i");
                 if (icon) {
@@ -346,7 +356,6 @@
                     navigation.contains(event.target) ||
                     menuToggle.contains(event.target);
 
-                // Only close if menu is currently open
                 var isMenuOpen = navigation.classList.contains("show");
 
                 if (!isClickInside && isMenuOpen) {
@@ -355,11 +364,9 @@
             });
 
             // Close menu on window resize to desktop size
-            // This prevents issues when users rotate devices or resize browser
             window.addEventListener("resize", function () {
                 var isMenuOpen = navigation.classList.contains("show");
 
-                // Close menu if screen becomes desktop size
                 if (window.innerWidth >= 768 && isMenuOpen) {
                     closeMenu();
                 }

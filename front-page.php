@@ -205,7 +205,7 @@ get_header(); ?>
                 <?php echo esc_html(cloudsync_get_customizer_value('cloudsync_pricing_description', 'Choose the plan that\'s right for your team')); ?>
             </p>
         </div>
-        <div class="pricing-grid">
+        <div class="pricing-container">
             <!-- Plan 1: Starter -->
             <div class="pricing-card fade-in">
                 <h3><?php echo esc_html(cloudsync_get_customizer_value('cloudsync_plan1_name', __('Starter', 'cloudsync'))); ?></h3>
@@ -250,7 +250,7 @@ get_header(); ?>
                     $<span class="price-value"><?php echo esc_html(cloudsync_get_customizer_value('cloudsync_plan3_price', '99')); ?></span>
                     <span><?php esc_html_e('/month', 'cloudsync'); ?></span>
                 </div>
-                <ul class="features-list">e
+                <ul class="features-list">
                     <?php
                     $plan3_features = cloudsync_get_customizer_value('cloudsync_plan3_features', "Unlimited Users\nUnlimited Storage\n24/7 Support\nCustom Integrations\nDedicated Manager");
                     echo cloudsync_get_pricing_features($plan3_features);
