@@ -45,14 +45,14 @@ $page_context = cloudsync_analyze_page_context();
                     </nav>
 
                     <!-- Adaptive Page Header -->
-                    <header class="page-header">
+                    <div class="page-header">
                         <h1 class="page-title"><?php the_title(); ?></h1>
 
-                        <!-- <?php if (get_the_excerpt()) : ?>
+                        <?php if (get_the_excerpt()) : ?>
                             <div class="page-subtitle">
-                                <?php the_excerpt(); ?>
+                                <?php echo esc_html(truncateWords(get_the_excerpt(), 6)); ?>
                             </div>
-                        <?php endif; ?> -->
+                        <?php endif; ?>
 
                         <!-- Context-sensitive meta information -->
                         <?php if (strpos($page_context, 'page-type-legal') !== false) : ?>
@@ -63,7 +63,7 @@ $page_context = cloudsync_analyze_page_context();
                                 </p>
                             </div>
                         <?php endif; ?>
-                    </header>
+                    </div>
 
                 </div>
             </div>

@@ -547,4 +547,26 @@ function cloudsync_count_words_intelligently($content) {
 }
 
 
+
+function truncateWords($text, $wordLimit = 5) {
+    // Убираем HTML теги
+    $text = strip_tags($text);
+
+    // Убираем лишние пробелы
+    $text = trim(preg_replace('/\s+/', ' ', $text));
+
+    // Разбиваем на слова
+    $words = explode(' ', $text);
+
+    if (count($words) > $wordLimit) {
+        $truncated = implode(' ', array_slice($words, 0, $wordLimit));
+        // Убираем знаки препинания в конце, если есть
+        $truncated = rtrim($truncated, '.,!?;:');
+        return $truncated . '...';
+    }
+
+    return $text;
+}
+
+
 require_once get_template_directory() . '/inc/customizer.php';
