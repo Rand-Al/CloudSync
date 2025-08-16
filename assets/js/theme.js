@@ -602,7 +602,7 @@
             enableProgress: true,
             enableLegalNav: true,
             enableLightbox: true,
-            debug: false,
+            debug: true,
         },
 
         state: {
@@ -612,7 +612,377 @@
             pageContext: null,
         },
 
-        modules: {},
+        modules: {
+            tableOfContents: {
+                config: {
+                    minHeadings: 3,
+                    maxDepth: 6,
+                    headingSelector:
+                        ".entry-content h1, .entry-content h2, .entry-content h3, .entry-content h4, .entry-content h5, .entry-content h6",
+                    containerSelector: ".page-content-wrapper",
+                    scrollOffset: 120,
+                },
+                state: {
+                    // Lifecycle states
+                    isInitialized: false,
+                    isReady: false,
+
+                    // Content data
+                    headings: [],
+                    tocStructure: null,
+
+                    // Responsive behavior
+                    currentBreakpoint: null,
+                    currentMode: "hidden", // 'desktop', 'mobile', 'hidden'
+
+                    // User interaction
+                    activeHeading: null,
+                    isScrolling: false,
+
+                    // DOM references for performance
+                    tocElements: {
+                        desktopContainer: null,
+                        mobileContainer: null,
+                        progressBar: null,
+                        tocList: null,
+                    },
+
+                    // Intersection Observer for performance
+                    observer: null,
+
+                    // Event handlers for cleanup
+                    eventHandlers: {
+                        scroll: null,
+                        resize: null,
+                        click: null,
+                    },
+                },
+                init: function () {
+                    // Create utility reference for cleaner code
+                    var utils = CloudSync.adaptivePages.utils;
+
+                    utils.log(
+                        "Starting Table of Contents module initialization"
+                    );
+                    try {
+                        // Prevent duplicate initialization
+                        if (this.state.isInitialized) {
+                            utils.log(
+                                "TOC module already initialized, skipping"
+                            );
+                            return true;
+                        }
+
+                        // Check if we're on a suitable page for TOC
+                        if (
+                            !document.body ||
+                            !document.body.classList.contains("page")
+                        ) {
+                            utils.log(
+                                "Not on a page context, TOC initialization cancelled"
+                            );
+                            return false;
+                        }
+
+                        // Scan page content for headings
+                        utils.log("Scanning page for headings...");
+                        var headingsScanResult = this.scanHeadings();
+
+                        if (
+                            !headingsScanResult ||
+                            this.state.headings.length === 0
+                        ) {
+                            utils.log(
+                                "No headings found on page, TOC not needed"
+                            );
+                            return false;
+                        }
+
+                        if (
+                            this.state.headings.length < this.config.minHeadings
+                        ) {
+                            utils.log(
+                                "Insufficient headings for TOC: found " +
+                                    this.state.headings.length +
+                                    ", minimum required " +
+                                    this.config.minHeadings
+                            );
+                            return false;
+                        }
+                        utils.log(
+                            "Successfully found " +
+                                this.state.headings.length +
+                                " headings for TOC"
+                        );
+                        // Determine display mode based on current breakpoint
+                        var currentBreakpoint =
+                            CloudSync.adaptivePages.state.currentBreakpoint;
+                        utils.log("Current breakpoint: " + currentBreakpoint);
+
+                        if (currentBreakpoint === "desktop") {
+                            this.state.currentMode = "desktop";
+                            utils.log("TOC will use desktop floating mode");
+                        } else {
+                            this.state.currentMode = "mobile";
+                            utils.log("TOC will use mobile collapsible mode");
+                        }
+                        // Create TOC interface based on selected mode
+                        utils.log(
+                            "Creating TOC interface for " +
+                                this.state.currentMode +
+                                " mode"
+                        );
+
+                        var interfaceCreated = false;
+
+                        if (this.state.currentMode === "desktop") {
+                            interfaceCreated = this.createDesktopTOC();
+                        } else if (this.state.currentMode === "mobile") {
+                            interfaceCreated = this.createMobileTOC();
+                        }
+
+                        if (!interfaceCreated) {
+                            utils.log(
+                                "Failed to create TOC interface, initialization aborted",
+                                "error"
+                            );
+                            return false;
+                        }
+
+                        utils.log("TOC interface created successfully");
+                        // Bind interactive events and behaviors
+                        utils.log("Binding TOC interactive events");
+
+                        var eventsBindingResult = this.bindEvents();
+
+                        if (!eventsBindingResult) {
+                            utils.log(
+                                "Failed to bind TOC events, initialization incomplete",
+                                "error"
+                            );
+                            return false;
+                        }
+
+                        utils.log("TOC events bound successfully");
+                        // Mark module as fully initialized and ready
+                        this.state.isInitialized = true;
+                        this.state.isReady = true;
+
+                        utils.log(
+                            "Table of Contents module initialization completed successfully"
+                        );
+                        utils.log(
+                            "Active mode: " +
+                                this.state.currentMode +
+                                ", headings: " +
+                                this.state.headings.length
+                        );
+
+                        return true;
+                    } catch (error) {
+                        utils.log(
+                            "Critical error during TOC initialization",
+                            "error",
+                            error
+                        );
+                        utils.log("Error message: " + error.message, "error");
+                        if (error.stack) {
+                            utils.log("Error stack: " + error.stack, "error");
+                        }
+
+                        // Ensure state remains clean after error
+                        this.state.isInitialized = false;
+                        this.state.isReady = false;
+
+                        return false;
+                    }
+                },
+                destroy: function () {},
+                scanHeadings: function () {
+                    var utils = CloudSync.adaptivePages.utils;
+                    utils.log("Starting headings scan process");
+
+                    // Clear any existing headings data
+                    this.state.headings = [];
+
+                    // Find all headings using configured selector
+                    var headingElements = document.querySelectorAll(
+                        this.config.headingSelector
+                    );
+                    utils.log(
+                        "Found " +
+                            headingElements.length +
+                            " potential heading elements"
+                    );
+
+                    if (headingElements.length === 0) {
+                        utils.log(
+                            "No heading elements found with selector: " +
+                                this.config.headingSelector
+                        );
+                        return false;
+                    }
+
+                    // Process each heading element to extract navigation data
+                    for (var i = 0; i < headingElements.length; i++) {
+                        var headingElement = headingElements[i];
+
+                        // Extract heading level from tag name (H1 = 1, H2 = 2, etc.)
+                        var tagName = headingElement.tagName.toLowerCase();
+                        var level = parseInt(tagName.charAt(1), 10);
+
+                        // Get the text content, cleaned of any HTML markup
+                        var text =
+                            headingElement.textContent ||
+                            headingElement.innerText ||
+                            "";
+                        text = text.trim();
+
+                        // Skip empty headings - they provide no value for navigation
+                        if (!text) {
+                            utils.log(
+                                "Skipping empty heading element at position " +
+                                    i
+                            );
+                            continue;
+                        }
+
+                        utils.log(
+                            'Processing heading: "' +
+                                text +
+                                '" (level ' +
+                                level +
+                                ")"
+                        );
+
+                        // Handle heading ID - use existing or generate new unique one
+                        var headingId = headingElement.id;
+
+                        if (!headingId) {
+                            // Generate new ID based on heading text
+                            headingId = utils.generateUniqueId(text, "heading");
+                            headingElement.id = headingId;
+                            utils.log(
+                                "Generated new ID for heading: " + headingId
+                            );
+                        } else {
+                            // Verify existing ID is unique in document
+                            var duplicateElements = document.querySelectorAll(
+                                "#" + headingId
+                            );
+                            if (duplicateElements.length > 1) {
+                                // ID conflict detected, generate new unique ID
+                                var newId = utils.generateUniqueId(
+                                    text,
+                                    "heading"
+                                );
+                                headingElement.id = newId;
+                                headingId = newId;
+                                utils.log(
+                                    "Resolved ID conflict, assigned new ID: " +
+                                        headingId
+                                );
+                            } else {
+                                utils.log(
+                                    "Using existing unique ID: " + headingId
+                                );
+                            }
+                        }
+                        // Create heading data object with all necessary information
+                        var headingData = {
+                            element: headingElement, // Reference to DOM element
+                            id: headingId, // Unique identifier for navigation
+                            text: text, // Display text for TOC link
+                            level: level, // Heading hierarchy level (1-6)
+                            offsetTop: 0, // Will be calculated later for scroll positioning
+                        };
+
+                        // Add processed heading to our collection
+                        this.state.headings.push(headingData);
+                        utils.log(
+                            "Added heading to collection: " +
+                                text +
+                                " (ID: " +
+                                headingId +
+                                ")"
+                        );
+                    }
+                    // Calculate accurate scroll positions for all processed headings
+                    utils.log(
+                        "Calculating scroll positions for navigation accuracy"
+                    );
+
+                    for (var j = 0; j < this.state.headings.length; j++) {
+                        var heading = this.state.headings[j];
+                        heading.offsetTop = heading.element.offsetTop;
+
+                        utils.log(
+                            'Heading "' +
+                                heading.text +
+                                '" position: ' +
+                                heading.offsetTop +
+                                "px"
+                        );
+                    }
+                    // Final validation and summary of scan results
+                    if (this.state.headings.length === 0) {
+                        utils.log(
+                            "Scan completed but no valid headings were processed",
+                            "warn"
+                        );
+                        return false;
+                    }
+
+                    utils.log("Headings scan completed successfully");
+                    utils.log(
+                        "Total headings processed: " +
+                            this.state.headings.length
+                    );
+                    utils.log(
+                        "Heading levels found: " + this.getHeadingLevelsRange()
+                    );
+
+                    return true;
+                },
+                getHeadingLevelsRange: function () {
+                    // Return empty indicator if no headings processed
+                    if (
+                        !this.state.headings ||
+                        this.state.headings.length === 0
+                    ) {
+                        return "none";
+                    }
+
+                    // Extract all unique heading levels from processed headings
+                    var levels = [];
+                    for (var i = 0; i < this.state.headings.length; i++) {
+                        var level = this.state.headings[i].level;
+                        if (levels.indexOf(level) === -1) {
+                            levels.push(level);
+                        }
+                    }
+
+                    // Sort levels numerically for proper range calculation
+                    levels.sort(function (a, b) {
+                        return a - b;
+                    });
+
+                    // Format the range information for human readability
+                    if (levels.length === 1) {
+                        return "H" + levels[0];
+                    } else {
+                        return (
+                            "H" + levels[0] + "-H" + levels[levels.length - 1]
+                        );
+                    }
+                },
+                generateTOC: function () {},
+                bindEvents: function () {},
+                createDesktopTOC: function () {},
+                createMobileTOC: function () {},
+                handleBreakpointChange: function () {},
+            },
+        },
 
         /**
          * Core utilities that provide shared functionality across all modules
@@ -1382,48 +1752,6 @@
                     error
                 );
             }
-        },
-        /**
-         * Special diagnostic method to check timing and execution order
-         * This method helps identify when and why initialization steps fail
-         */
-        diagnosticCheck: function () {
-            console.log("=== DIAGNOSTIC CHECK START ===");
-
-            // Check if we're in the right context
-            console.log("Document ready state:", document.readyState);
-            console.log("Body element exists:", !!document.body);
-            console.log(
-                "Body classes:",
-                document.body ? document.body.className : "no body"
-            );
-
-            // Check window dimensions
-            console.log("Window inner width:", window.innerWidth);
-            console.log("Window inner height:", window.innerHeight);
-            console.log(
-                "Screen width:",
-                window.screen ? window.screen.width : "not available"
-            );
-
-            // Check CloudSync object structure
-            console.log("CloudSync exists:", typeof CloudSync !== "undefined");
-            console.log(
-                "AdaptivePages exists:",
-                typeof CloudSync.adaptivePages !== "undefined"
-            );
-            console.log(
-                "Utils exists:",
-                typeof CloudSync.adaptivePages.utils !== "undefined"
-            );
-
-            // Check current state
-            if (typeof CloudSync.adaptivePages !== "undefined") {
-                console.log("Current state:", CloudSync.adaptivePages.state);
-                console.log("Current config:", CloudSync.adaptivePages.config);
-            }
-
-            console.log("=== DIAGNOSTIC CHECK END ===");
         },
     };
 
