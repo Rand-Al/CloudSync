@@ -29,217 +29,10 @@
             this.scrollAnimations();
             this.parallaxCards();
             this.interactiveCards();
-            this.initCopyLinkButton();
-            this.initAdaptivePages();
+            this.initCopyLinkButton(); //TODO What is this!!???
+            this.adaptivePages.init();
             this.smartHeader.init();
         },
-        /**
-         * Smart Header Module for CloudSync Theme
-         *
-         * Provides intelligent header behavior that hides/shows based on scroll direction.
-         * Enhances user experience by maximizing content visibility while maintaining
-         * easy access to navigation when needed.
-         *
-         * @since 1.0.0
-         * @author CloudSync Theme
-         */
-        smartHeader: {
-            /**
-             * Module configuration
-             * These settings control header behavior and can be customized per implementation
-             */
-            config: {
-                offset: 100, // Scroll position to start tracking (pixels)
-                tolerance: 5, // Minimum scroll change to trigger action (pixels)
-                hideClass: "header-hidden", // CSS class for hidden state
-                scrollClass: "header-scrolled", // CSS class for scrolled state
-                headerSelector: ".site-header", // DOM selector for header element
-            },
-
-            /**
-             * Internal module state
-             * Tracks current scroll position and animation frame optimization
-             */
-            state: {
-                lastScrollPosition: 0, // Previous scroll position for direction detection
-                ticking: false, // requestAnimationFrame optimization flag
-                headerElement: null, // Cached DOM reference to header
-                isInitialized: false, // Prevents duplicate initialization
-            },
-
-            /**
-             * Get current scroll position
-             * Cross-browser compatible method for retrieving scroll offset
-             *
-             * @returns {number} Current vertical scroll position in pixels
-             */
-            getCurrentScrollPosition: function () {
-                return window.pageYOffset || window.scrollY || 0;
-            },
-
-            /**
-             * Hide header element
-             * Applies CSS class that should contain transform animation for smooth hiding
-             */
-            hideHeader: function () {
-                if (this.state.headerElement) {
-                    this.state.headerElement.classList.add(
-                        this.config.hideClass
-                    );
-                }
-            },
-
-            /**
-             * Show header element
-             * Removes hiding CSS class to restore header visibility
-             */
-            showHeader: function () {
-                if (this.state.headerElement) {
-                    this.state.headerElement.classList.remove(
-                        this.config.hideClass
-                    );
-                }
-            },
-
-            /**
-             * Main header update logic
-             * Analyzes scroll direction and applies appropriate header state.
-             * Called via requestAnimationFrame for optimal performance.
-             */
-            updateHeader: function () {
-                const currentScrollPosition = this.getCurrentScrollPosition();
-                const scrollDifference =
-                    currentScrollPosition - this.state.lastScrollPosition;
-
-                // Ignore micro-movements to prevent header jitter
-                if (Math.abs(scrollDifference) < this.config.tolerance) {
-                    this.state.ticking = false;
-                    return;
-                }
-
-                // Page top: always show header without scroll styling
-                if (currentScrollPosition <= 0) {
-                    this.showHeader();
-                    this.state.headerElement.classList.remove(
-                        this.config.scrollClass
-                    );
-                }
-                // Past offset threshold: apply smart hiding logic
-                else if (currentScrollPosition > this.config.offset) {
-                    // Add scrolled styling for background/shadow effects
-                    this.state.headerElement.classList.add(
-                        this.config.scrollClass
-                    );
-
-                    // Hide on downward scroll, show on upward scroll
-                    if (scrollDifference > 0) {
-                        this.hideHeader();
-                    } else {
-                        this.showHeader();
-                    }
-                }
-                // Between top and offset: show header without scroll styling
-                else {
-                    this.showHeader();
-                    this.state.headerElement.classList.remove(
-                        this.config.scrollClass
-                    );
-                }
-
-                // Update position tracking for next frame
-                this.state.lastScrollPosition = currentScrollPosition;
-                this.state.ticking = false;
-            },
-
-            /**
-             * Optimized scroll event handler
-             * Uses requestAnimationFrame to throttle updates to screen refresh rate
-             */
-            requestUpdate: function () {
-                if (!this.state.ticking) {
-                    window.requestAnimationFrame(this.updateHeader.bind(this));
-                    this.state.ticking = true;
-                }
-            },
-
-            /**
-             * Initialize smart header functionality
-             * Sets up event listeners and applies initial state based on current scroll position
-             *
-             * @returns {boolean} True if initialization successful, false otherwise
-             */
-            init: function () {
-                // Prevent duplicate initialization
-                if (this.state.isInitialized) {
-                    return false;
-                }
-
-                // Locate header element in DOM
-                this.state.headerElement = document.querySelector(
-                    this.config.headerSelector
-                );
-
-                if (!this.state.headerElement) {
-                    console.error(
-                        "CloudSync SmartHeader: Header element not found with selector:",
-                        this.config.headerSelector
-                    );
-                    return false;
-                }
-
-                // Bind scroll event with context preservation
-                this.scrollHandler = this.requestUpdate.bind(this);
-                window.addEventListener("scroll", this.scrollHandler, {
-                    passive: true,
-                });
-
-                // Apply initial state if page is already scrolled
-                const currentPosition = this.getCurrentScrollPosition();
-                if (currentPosition > this.config.offset) {
-                    this.state.headerElement.classList.add(
-                        this.config.scrollClass
-                    );
-                }
-
-                this.state.isInitialized = true;
-                return true;
-            },
-
-            /**
-             * Clean up module resources
-             * Removes event listeners and resets header to default state
-             */
-            destroy: function () {
-                if (this.scrollHandler) {
-                    window.removeEventListener("scroll", this.scrollHandler);
-                }
-
-                // Reset header to visible state with no styling
-                if (this.state.headerElement) {
-                    this.showHeader();
-                    this.state.headerElement.classList.remove(
-                        this.config.scrollClass
-                    );
-                }
-
-                // Reset internal state
-                this.state.lastScrollPosition = 0;
-                this.state.ticking = false;
-                this.state.headerElement = null;
-                this.state.isInitialized = false;
-            },
-
-            /**
-             * Update module configuration
-             * Allows runtime modification of behavior settings
-             *
-             * @param {Object} newConfig - Configuration object with properties to override
-             */
-            updateConfig: function (newConfig) {
-                Object.assign(this.config, newConfig);
-            },
-        },
-
         /**
          * Smooth scrolling for internal anchor links
          * Enhances navigation experience with smooth transitions
@@ -572,656 +365,1068 @@
                 });
             });
         },
+        /**
+         * Smart Header Module for CloudSync Theme
+         *
+         * Provides intelligent header behavior that hides/shows based on scroll direction.
+         * Enhances user experience by maximizing content visibility while maintaining
+         * easy access to navigation when needed.
+         *
+         * @since 1.0.0
+         * @author CloudSync Theme
+         */
+        smartHeader: {
+            /**
+             * Module configuration
+             * These settings control header behavior and can be customized per implementation
+             */
+            config: {
+                offset: 100, // Scroll position to start tracking (pixels)
+                tolerance: 5, // Minimum scroll change to trigger action (pixels)
+                hideClass: "header-hidden", // CSS class for hidden state
+                scrollClass: "header-scrolled", // CSS class for scrolled state
+                headerSelector: ".site-header", // DOM selector for header element
+            },
+
+            /**
+             * Internal module state
+             * Tracks current scroll position and animation frame optimization
+             */
+            state: {
+                lastScrollPosition: 0, // Previous scroll position for direction detection
+                ticking: false, // requestAnimationFrame optimization flag
+                headerElement: null, // Cached DOM reference to header
+                isInitialized: false, // Prevents duplicate initialization
+            },
+
+            /**
+             * Get current scroll position
+             * Cross-browser compatible method for retrieving scroll offset
+             *
+             * @returns {number} Current vertical scroll position in pixels
+             */
+            getCurrentScrollPosition: function () {
+                return window.pageYOffset || window.scrollY || 0;
+            },
+
+            /**
+             * Hide header element
+             * Applies CSS class that should contain transform animation for smooth hiding
+             */
+            hideHeader: function () {
+                if (this.state.headerElement) {
+                    this.state.headerElement.classList.add(
+                        this.config.hideClass
+                    );
+                }
+            },
+
+            /**
+             * Show header element
+             * Removes hiding CSS class to restore header visibility
+             */
+            showHeader: function () {
+                if (this.state.headerElement) {
+                    this.state.headerElement.classList.remove(
+                        this.config.hideClass
+                    );
+                }
+            },
+
+            /**
+             * Main header update logic
+             * Analyzes scroll direction and applies appropriate header state.
+             * Called via requestAnimationFrame for optimal performance.
+             */
+            updateHeader: function () {
+                const currentScrollPosition = this.getCurrentScrollPosition();
+                const scrollDifference =
+                    currentScrollPosition - this.state.lastScrollPosition;
+
+                // Ignore micro-movements to prevent header jitter
+                if (Math.abs(scrollDifference) < this.config.tolerance) {
+                    this.state.ticking = false;
+                    return;
+                }
+
+                // Page top: always show header without scroll styling
+                if (currentScrollPosition <= 0) {
+                    this.showHeader();
+                    this.state.headerElement.classList.remove(
+                        this.config.scrollClass
+                    );
+                }
+                // Past offset threshold: apply smart hiding logic
+                else if (currentScrollPosition > this.config.offset) {
+                    // Add scrolled styling for background/shadow effects
+                    this.state.headerElement.classList.add(
+                        this.config.scrollClass
+                    );
+
+                    // Hide on downward scroll, show on upward scroll
+                    if (scrollDifference > 0) {
+                        this.hideHeader();
+                    } else {
+                        this.showHeader();
+                    }
+                }
+                // Between top and offset: show header without scroll styling
+                else {
+                    this.showHeader();
+                    this.state.headerElement.classList.remove(
+                        this.config.scrollClass
+                    );
+                }
+
+                // Update position tracking for next frame
+                this.state.lastScrollPosition = currentScrollPosition;
+                this.state.ticking = false;
+            },
+
+            /**
+             * Optimized scroll event handler
+             * Uses requestAnimationFrame to throttle updates to screen refresh rate
+             */
+            requestUpdate: function () {
+                if (!this.state.ticking) {
+                    window.requestAnimationFrame(this.updateHeader.bind(this));
+                    this.state.ticking = true;
+                }
+            },
+
+            /**
+             * Initialize smart header functionality
+             * Sets up event listeners and applies initial state based on current scroll position
+             *
+             * @returns {boolean} True if initialization successful, false otherwise
+             */
+            init: function () {
+                // Prevent duplicate initialization
+                if (this.state.isInitialized) {
+                    return false;
+                }
+
+                // Locate header element in DOM
+                this.state.headerElement = document.querySelector(
+                    this.config.headerSelector
+                );
+
+                if (!this.state.headerElement) {
+                    console.error(
+                        "CloudSync SmartHeader: Header element not found with selector:",
+                        this.config.headerSelector
+                    );
+                    return false;
+                }
+
+                // Bind scroll event with context preservation
+                this.scrollHandler = this.requestUpdate.bind(this);
+                window.addEventListener("scroll", this.scrollHandler, {
+                    passive: true,
+                });
+
+                // Apply initial state if page is already scrolled
+                const currentPosition = this.getCurrentScrollPosition();
+                if (currentPosition > this.config.offset) {
+                    this.state.headerElement.classList.add(
+                        this.config.scrollClass
+                    );
+                }
+
+                this.state.isInitialized = true;
+                return true;
+            },
+
+            /**
+             * Clean up module resources
+             * Removes event listeners and resets header to default state
+             */
+            destroy: function () {
+                if (this.scrollHandler) {
+                    window.removeEventListener("scroll", this.scrollHandler);
+                }
+
+                // Reset header to visible state with no styling
+                if (this.state.headerElement) {
+                    this.showHeader();
+                    this.state.headerElement.classList.remove(
+                        this.config.scrollClass
+                    );
+                }
+
+                // Reset internal state
+                this.state.lastScrollPosition = 0;
+                this.state.ticking = false;
+                this.state.headerElement = null;
+                this.state.isInitialized = false;
+            },
+
+            /**
+             * Update module configuration
+             * Allows runtime modification of behavior settings
+             *
+             * @param {Object} newConfig - Configuration object with properties to override
+             */
+            updateConfig: function (newConfig) {
+                Object.assign(this.config, newConfig);
+            },
+        },
+    };
+    /**
+     * CloudSync Adaptive Pages System - Production Architecture
+     *
+     * This system automatically enhances pages based on content analysis,
+     * providing intelligent navigation, reading progress, and interactive features.
+     * Built with modular architecture for maintainability and extensibility.
+     *
+     * Architecture Overview:
+     * - Core: Main coordinator and shared utilities
+     * - TOC: Table of contents with desktop/mobile adaptations
+     * - Progress: Reading progress tracking
+     * - Legal: Enhanced navigation for legal documents
+     * - Lightbox: Image viewing enhancement
+     *
+     * @package CloudSync
+     * @since 1.0.0
+     */
+
+    CloudSync.adaptivePages = {
+        // Основная конфигурация остается той же
+        config: {
+            tocMinHeadings: 3,
+            tocDesktopBreakpoint: 768,
+            tocScrollOffset: 150,
+            scrollThrottle: 16,
+            resizeDebounce: 250,
+            enableTOC: true,
+            enableProgress: true,
+            enableLegalNav: true,
+            enableLightbox: true,
+            debug: false,
+        },
+
+        state: {
+            isInitialized: false,
+            activeModules: [],
+            currentBreakpoint: null,
+            pageContext: null,
+        },
+
+        modules: {},
 
         /**
-         * Initialize adaptive page functionality for intelligent content presentation
-         * This system automatically enhances pages based on their content characteristics
-         * without requiring manual configuration from users
+         * Core utilities that provide shared functionality across all modules
+         * Think of this as the "standard library" for our adaptive pages system
          */
-        initAdaptivePages: function () {
-            // Only run on actual pages, not posts or archives
-            if (!document.body.classList.contains("page")) return;
+        utils: {
+            /**
+             * Internal state for utilities
+             */
+            state: {
+                isInitialized: false,
+                eventListeners: [], // Track listeners for cleanup
+                throttledFunctions: new Map(), // Cache throttled functions
+            },
 
-            this.initTableOfContents();
-            this.setupReadingProgress();
-            this.setupLegalPageNavigation();
-            this.setupImageLightbox();
+            /**
+             * Initialize utility system
+             * Sets up performance monitoring and shared resources
+             */
+            init: function () {
+                if (this.state.isInitialized) return;
+                this.log("Initializing utility system", "info");
+                this.state.isInitialized = true;
+            },
+
+            /**
+             * Intelligent logging system with debug levels
+             * Only logs when debug mode is enabled, preventing console spam in production
+             *
+             * @param {string} message - The message to log
+             * @param {string} level - Log level: 'info', 'warn', 'error'
+             * @param {*} data - Optional additional data to log
+             */
+            log: function (message, level, data) {
+                if (!CloudSync.adaptivePages.config.debug) return;
+
+                var prefix = "[CloudSync AdaptivePages]";
+                var timestamp = new Date().toISOString().substr(11, 8);
+                var fullMessage = prefix + " " + timestamp + " " + message;
+
+                switch (level) {
+                    case "warn":
+                        console.warn(fullMessage, data || "");
+                        break;
+                    case "error":
+                        console.error(fullMessage, data || "");
+                        break;
+                    default:
+                        console.log(fullMessage, data || "");
+                }
+            },
+
+            /**
+             * Enhanced DOM query with error handling and caching
+             * Provides better error messages and prevents null reference errors
+             *
+             * @param {string} selector - CSS selector
+             * @param {Element} context - Optional context element (default: document)
+             * @returns {Element|null} Found element or null
+             */
+            querySelector: function (selector, context) {
+                context = context || document;
+
+                try {
+                    var element = context.querySelector(selector);
+                    if (!element) {
+                        this.log("Element not found: " + selector, "warn");
+                    }
+                    return element;
+                } catch (error) {
+                    this.log("Invalid selector: " + selector, "error", error);
+                    return null;
+                }
+            },
+
+            /**
+             * Enhanced DOM query for multiple elements
+             *
+             * @param {string} selector - CSS selector
+             * @param {Element} context - Optional context element
+             * @returns {NodeList} Found elements (may be empty)
+             */
+            querySelectorAll: function (selector, context) {
+                context = context || document;
+
+                try {
+                    return context.querySelectorAll(selector);
+                } catch (error) {
+                    this.log("Invalid selector: " + selector, "error", error);
+                    return document.createDocumentFragment().childNodes; // Empty NodeList
+                }
+            },
+
+            /**
+             * Performance-optimized throttle function with caching
+             * Prevents excessive function calls during scroll/resize events
+             * Uses Map for O(1) lookup performance
+             *
+             * @param {Function} func - Function to throttle
+             * @param {number} delay - Throttle delay in milliseconds
+             * @param {string} key - Unique identifier for caching
+             * @returns {Function} Throttled function
+             */
+            throttle: function (func, delay, key) {
+                // Check if we already have a throttled version of this function
+                if (this.state.throttledFunctions.has(key)) {
+                    return this.state.throttledFunctions.get(key);
+                }
+
+                var lastExecution = 0;
+                var timeoutId = null;
+
+                var throttledFunction = function () {
+                    var context = this;
+                    var args = arguments;
+                    var now = Date.now();
+
+                    if (now - lastExecution >= delay) {
+                        lastExecution = now;
+                        func.apply(context, args);
+                    } else if (!timeoutId) {
+                        timeoutId = setTimeout(function () {
+                            lastExecution = Date.now();
+                            timeoutId = null;
+                            func.apply(context, args);
+                        }, delay - (now - lastExecution));
+                    }
+                };
+
+                // Cache the throttled function for reuse
+                this.state.throttledFunctions.set(key, throttledFunction);
+                return throttledFunction;
+            },
+
+            /**
+             * Debounce function for resize events and user input
+             * Delays execution until after the specified wait period has elapsed
+             *
+             * @param {Function} func - Function to debounce
+             * @param {number} delay - Debounce delay in milliseconds
+             * @returns {Function} Debounced function
+             */
+            debounce: function (func, delay) {
+                var timeoutId;
+
+                return function () {
+                    var context = this;
+                    var args = arguments;
+
+                    clearTimeout(timeoutId);
+                    timeoutId = setTimeout(function () {
+                        func.apply(context, args);
+                    }, delay);
+                };
+            },
+
+            /**
+             * Safe event listener registration with automatic cleanup tracking
+             * Prevents memory leaks by tracking all listeners for later removal
+             *
+             * @param {Element} element - Element to attach listener to
+             * @param {string} event - Event type
+             * @param {Function} handler - Event handler function
+             * @param {Object} options - Event listener options
+             */
+            addEventListener: function (element, event, handler, options) {
+                if (!element || typeof handler !== "function") {
+                    this.log("Invalid addEventListener parameters", "error");
+                    return;
+                }
+
+                element.addEventListener(event, handler, options);
+
+                // Track for cleanup
+                this.state.eventListeners.push({
+                    element: element,
+                    event: event,
+                    handler: handler,
+                    options: options,
+                });
+            },
+
+            /**
+             * Generate unique, SEO-friendly IDs for headings
+             * Ensures IDs are unique across the document and URL-safe
+             *
+             * @param {string} text - Text to convert to ID
+             * @param {string} prefix - Optional prefix for the ID
+             * @returns {string} Unique, URL-safe ID
+             */
+            generateUniqueId: function (text, prefix) {
+                prefix = prefix || "toc";
+
+                // Create base ID from text
+                var baseId =
+                    prefix +
+                    "-" +
+                    text
+                        .toLowerCase()
+                        .trim()
+                        .replace(/[^\w\s-]/g, "") // Remove special characters
+                        .replace(/\s+/g, "-") // Replace spaces with hyphens
+                        .replace(/-+/g, "-") // Collapse multiple hyphens
+                        .substring(0, 50); // Limit length for readability
+
+                // Ensure uniqueness
+                var finalId = baseId;
+                var counter = 1;
+
+                while (document.getElementById(finalId)) {
+                    finalId = baseId + "-" + counter;
+                    counter++;
+                }
+
+                return finalId;
+            },
+
+            /**
+             * Calculate dynamic header height for scroll positioning
+             * Accounts for fixed headers, admin bars, and mobile variations
+             *
+             * @returns {number} Current header height in pixels
+             */
+            getHeaderHeight: function () {
+                var header = this.querySelector(".site-header");
+                var adminBar = this.querySelector("#wpadminbar");
+
+                var headerHeight = header ? header.offsetHeight : 0;
+                var adminBarHeight = adminBar ? adminBar.offsetHeight : 0;
+
+                return headerHeight + adminBarHeight;
+            },
+
+            /**
+             * Cross-browser compatible smooth scroll to element
+             * Handles fixed header offset and provides fallback for older browsers
+             *
+             * @param {Element} targetElement - Element to scroll to
+             * @param {number} additionalOffset - Additional offset in pixels
+             */
+            scrollToElement: function (targetElement, additionalOffset) {
+                if (!targetElement) return;
+
+                additionalOffset = additionalOffset || 0;
+                var headerHeight = this.getHeaderHeight();
+                var totalOffset = headerHeight + additionalOffset + 20; // 20px breathing room
+
+                var targetPosition = Math.max(
+                    0,
+                    targetElement.offsetTop - totalOffset
+                );
+
+                // Use modern smooth scroll if available
+                if ("scrollBehavior" in document.documentElement.style) {
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: "smooth",
+                    });
+                } else {
+                    // Fallback for older browsers
+                    window.scrollTo(0, targetPosition);
+                }
+            },
+
+            /**
+             * Cleanup all tracked event listeners
+             * Prevents memory leaks when destroying the system
+             */
+            cleanup: function () {
+                this.log("Cleaning up utility system");
+
+                // Remove all tracked event listeners
+                this.state.eventListeners.forEach(function (listener) {
+                    if (
+                        listener.element &&
+                        listener.element.removeEventListener
+                    ) {
+                        listener.element.removeEventListener(
+                            listener.event,
+                            listener.handler,
+                            listener.options
+                        );
+                    }
+                });
+
+                // Clear tracking arrays
+                this.state.eventListeners = [];
+                this.state.throttledFunctions.clear();
+                this.state.isInitialized = false;
+            },
+        },
+        /**
+         * Main initialization coordinator for the adaptive pages system
+         * This method serves as the central hub that orchestrates all system components
+         * Think of it as the conductor of an orchestra, ensuring each section plays in harmony
+         */
+        /**
+         * Enhanced main initialization with comprehensive error handling
+         * This version includes multiple checkpoints and graceful error recovery
+         */
+        init: function () {
+            try {
+                this.utils.log("=== STARTING SYSTEM INITIALIZATION ===");
+
+                // Prevent duplicate initialization
+                if (this.state.isInitialized) {
+                    this.utils.log("System already initialized, skipping");
+                    return false;
+                }
+
+                // Only run on actual pages, not posts or archives
+                if (
+                    !document.body ||
+                    !document.body.classList.contains("page")
+                ) {
+                    this.utils.log(
+                        "Not a page context, initialization cancelled"
+                    );
+                    return false;
+                }
+
+                // Step 1: Initialize the utility system
+                this.utils.log("Step 1: Initializing utility system");
+                if (this.utils && typeof this.utils.init === "function") {
+                    this.utils.init();
+                    this.utils.log("✓ Utility system initialized successfully");
+                } else {
+                    this.utils.log("✗ Utils system not available", "error");
+                    return false;
+                }
+
+                // Step 2: Analyze page context
+                this.utils.log("Step 2: Analyzing page context");
+                this.state.pageContext = this.analyzePageContext();
+                if (!Array.isArray(this.state.pageContext)) {
+                    this.utils.log(
+                        "Page context analysis failed, using empty array",
+                        "warn"
+                    );
+                    this.state.pageContext = [];
+                }
+                this.utils.log(
+                    "✓ Page context: " +
+                        (this.state.pageContext.length > 0
+                            ? this.state.pageContext.join(", ")
+                            : "standard page")
+                );
+
+                // Step 3: Detect device breakpoint
+                this.utils.log("Step 3: Detecting device breakpoint");
+                var detectedBreakpoint = this.detectBreakpoint();
+                this.utils.log(
+                    "Breakpoint detection returned: " + detectedBreakpoint
+                );
+
+                if (detectedBreakpoint) {
+                    this.state.currentBreakpoint = detectedBreakpoint;
+                    this.utils.log(
+                        "✓ Breakpoint set to: " + this.state.currentBreakpoint
+                    );
+                } else {
+                    this.utils.log(
+                        "Breakpoint detection failed, using mobile fallback",
+                        "warn"
+                    );
+                    this.state.currentBreakpoint = "mobile";
+                }
+
+                // Step 4: Setup global listeners
+                this.utils.log("Step 4: Setting up global event listeners");
+                this.setupGlobalListeners();
+                this.utils.log("✓ Global listeners established");
+
+                // Step 5: Initialize modules
+                this.utils.log("Step 5: Initializing modules");
+                this.initializeModules();
+                this.utils.log("✓ Module initialization completed");
+
+                // Final step: Mark as initialized
+                this.state.isInitialized = true;
+                this.utils.log(
+                    "=== SYSTEM INITIALIZATION COMPLETED SUCCESSFULLY ==="
+                );
+
+                // Automatically run debug output to show final state
+                setTimeout(function () {
+                    CloudSync.adaptivePages.debugSystem();
+                }, 100);
+
+                return true;
+            } catch (error) {
+                this.utils.log(
+                    "CRITICAL ERROR during initialization",
+                    "error",
+                    error
+                );
+                return false;
+            }
         },
 
         /**
-         * Automatically generate table of contents for long-form content
-         * Creates navigation based on page headings for improved user experience
-         * and accessibility compliance
+         * Analyze the current page to understand its content and context
+         * This method examines page characteristics to help modules make smart decisions
+         * Now includes protective checks to prevent null reference errors
          */
-        /**
-         * Advanced Table of Contents with progressive enhancement
-         * Creates an intelligent, adaptive navigation system for long-form content
-         */
-        initTableOfContents: function () {
-            // Сначала проверяем, подходит ли страница для отображения TOC
-            var contentContainer = document.querySelector(
-                ".entry-content, .page-content"
-            );
-            if (!contentContainer) {
-                return; // Выходим если нет основного контента
+        analyzePageContext: function () {
+            // Start with empty array to ensure we always return a valid array
+            var context = [];
+
+            try {
+                // Safely check for body element and its classes
+                if (
+                    document.querySelector("main") &&
+                    document.querySelector("main").className
+                ) {
+                    var mainClasses = document.querySelector("main").className;
+
+                    // Detect content type based on WordPress body classes
+                    if (mainClasses.indexOf("page-type-legal") !== -1) {
+                        context.push("legal-document");
+                    }
+
+                    if (mainClasses.indexOf("long-content") !== -1) {
+                        context.push("long-form-content");
+                    }
+
+                    if (mainClasses.indexOf("image-rich") !== -1) {
+                        context.push("visual-heavy");
+                    }
+                }
+
+                // Safely analyze URL patterns for additional context
+                if (window.location && window.location.pathname) {
+                    var currentPath = window.location.pathname.toLowerCase();
+                    if (
+                        currentPath.indexOf("privacy") !== -1 ||
+                        currentPath.indexOf("terms") !== -1
+                    ) {
+                        context.push("legal-document");
+                    }
+                }
+
+                this.utils.log(
+                    "Page context analyzed: " +
+                        (context.length > 0
+                            ? context.join(", ")
+                            : "standard page")
+                );
+            } catch (error) {
+                this.utils.log(
+                    "Error during page context analysis",
+                    "error",
+                    error
+                );
+                // Return empty array on error to maintain expected data type
             }
 
-            // Собираем все заголовки от H1 до H6 для максимальной гибкости
-            var headings = contentContainer.querySelectorAll(
-                "h1, h2, h3, h4, h5, h6"
+            return context;
+        },
+
+        /**
+         * Enhanced breakpoint detection with comprehensive logging
+         * This version provides detailed information about the detection process
+         */
+        detectBreakpoint: function () {
+            var utils = CloudSync.adaptivePages.utils;
+
+            try {
+                // Gather comprehensive window information
+                var windowWidth = window.innerWidth || 0;
+                var windowHeight = window.innerHeight || 0;
+                var screenWidth = window.screen ? window.screen.width : 0;
+                var outerWidth = window.outerWidth || 0;
+
+                utils.log(
+                    "Window dimensions: " + windowWidth + "x" + windowHeight
+                );
+                utils.log(
+                    "Screen width: " +
+                        screenWidth +
+                        ", Outer width: " +
+                        outerWidth
+                );
+                utils.log(
+                    "Breakpoint threshold: " +
+                        this.config.tocDesktopBreakpoint +
+                        "px"
+                );
+
+                // Determine breakpoint based on window width
+                var breakpoint;
+                if (windowWidth >= this.config.tocDesktopBreakpoint) {
+                    breakpoint = "desktop";
+                } else if (windowWidth >= 768) {
+                    breakpoint = "tablet";
+                } else {
+                    breakpoint = "mobile";
+                }
+
+                utils.log(
+                    "Calculated breakpoint: " +
+                        breakpoint +
+                        " (based on width: " +
+                        windowWidth +
+                        "px)"
+                );
+                return breakpoint;
+            } catch (error) {
+                utils.log("Error in breakpoint detection", "error", error);
+                return "mobile"; // Safe fallback
+            }
+        },
+
+        /**
+         * Set up global event listeners that multiple modules might need
+         * This prevents duplicate listeners and provides centralized event management
+         * Like setting up a central communication system for a building
+         */
+        setupGlobalListeners: function () {
+            var self = this;
+
+            // Set up responsive breakpoint monitoring
+            var resizeHandler = this.utils.debounce(function () {
+                var oldBreakpoint = self.state.currentBreakpoint;
+                var newBreakpoint = self.detectBreakpoint();
+
+                if (oldBreakpoint !== newBreakpoint) {
+                    self.utils.log(
+                        "Breakpoint changed from " +
+                            oldBreakpoint +
+                            " to " +
+                            newBreakpoint
+                    );
+                    self.state.currentBreakpoint = newBreakpoint;
+                    self.handleBreakpointChange(oldBreakpoint, newBreakpoint);
+                }
+            }, this.config.resizeDebounce);
+
+            this.utils.addEventListener(window, "resize", resizeHandler, {
+                passive: true,
+            });
+            this.utils.log("Global event listeners established");
+        },
+
+        /**
+         * Handle breakpoint changes by notifying active modules
+         * This method coordinates responsive behavior across all modules
+         * Like a traffic controller directing flow when conditions change
+         */
+        handleBreakpointChange: function (oldBreakpoint, newBreakpoint) {
+            this.utils.log(
+                "Handling breakpoint change: " +
+                    oldBreakpoint +
+                    " → " +
+                    newBreakpoint
             );
 
-            // Применяем интеллектуальную логику: нужно минимум 3 заголовка
-            // Это предотвращает появление TOC на коротких страницах
-            if (headings.length < 3) {
+            // Notify all active modules about the breakpoint change
+            // Each module can decide how to respond to the change
+            this.state.activeModules.forEach(
+                function (moduleName) {
+                    var module = this.modules[moduleName];
+                    if (
+                        module &&
+                        typeof module.handleBreakpointChange === "function"
+                    ) {
+                        module.handleBreakpointChange(
+                            oldBreakpoint,
+                            newBreakpoint
+                        );
+                    }
+                }.bind(this)
+            );
+        },
+
+        /**
+         * Initialize all enabled modules in the correct order
+         * This method serves as the module coordinator, ensuring proper initialization sequence
+         * Like a project manager ensuring tasks are completed in the right order
+         */
+        initializeModules: function () {
+            var enabledModules = [];
+
+            // Check which modules are enabled and add them to the initialization queue
+            if (this.config.enableTOC) {
+                enabledModules.push("tableOfContents");
+            }
+
+            if (this.config.enableProgress) {
+                enabledModules.push("readingProgress");
+            }
+
+            if (this.config.enableLegalNav) {
+                enabledModules.push("legalNavigation");
+            }
+
+            if (this.config.enableLightbox) {
+                enabledModules.push("imageLightbox");
+            }
+
+            this.utils.log(
+                "Initializing " +
+                    enabledModules.length +
+                    " enabled modules: " +
+                    enabledModules.join(", ")
+            );
+
+            // Initialize each enabled module and track successful initializations
+            enabledModules.forEach(
+                function (moduleName) {
+                    if (
+                        this.modules[moduleName] &&
+                        typeof this.modules[moduleName].init === "function"
+                    ) {
+                        try {
+                            var success = this.modules[moduleName].init();
+                            if (success) {
+                                this.state.activeModules.push(moduleName);
+                                this.utils.log(
+                                    "Module " +
+                                        moduleName +
+                                        " initialized successfully"
+                                );
+                            } else {
+                                this.utils.log(
+                                    "Module " +
+                                        moduleName +
+                                        " initialization returned false",
+                                    "warn"
+                                );
+                            }
+                        } catch (error) {
+                            this.utils.log(
+                                "Module " +
+                                    moduleName +
+                                    " initialization failed",
+                                "error",
+                                error
+                            );
+                        }
+                    } else {
+                        this.utils.log(
+                            "Module " +
+                                moduleName +
+                                " not found or missing init method",
+                            "warn"
+                        );
+                    }
+                }.bind(this)
+            );
+
+            this.utils.log(
+                "Module initialization completed. Active modules: " +
+                    this.state.activeModules.length
+            );
+        },
+
+        /**
+         * Enhanced debug system with more comprehensive state reporting
+         * This version shows the actual values being stored and retrieved
+         */
+        debugSystem: function () {
+            if (!this.config.debug) {
+                console.log(
+                    "Debug mode is disabled. Enable debug in config to use this method."
+                );
                 return;
             }
 
-            // Проверяем размер экрана - на мобильных устройствах TOC работает по-другому
-            if (window.innerWidth < 1200) {
-                this.createMobileTOC(headings, contentContainer);
-            } else {
-                this.createDesktopTOC(headings);
-            }
+            try {
+                this.utils.log("=== COMPREHENSIVE SYSTEM STATE DEBUG ===");
 
-            // Добавляем обработчик изменения размера окна для динамической адаптации
-            this.handleTOCResize(headings, contentContainer);
-        },
+                // Show initialization state with detailed breakdown
+                this.utils.log("System Status:");
+                this.utils.log("  - Initialized: " + this.state.isInitialized);
+                this.utils.log(
+                    "  - Utils initialized: " +
+                        (this.utils.state
+                            ? this.utils.state.isInitialized
+                            : "utils.state not available")
+                );
 
-        /**
-         * Creates desktop floating TOC with advanced features
-         * Uses modern CSS features like backdrop-filter and smooth animations
-         */
-        createDesktopTOC: function (headings) {
-            // Создаем основную структуру TOC с семантической разметкой
-            var tocContainer = document.createElement("div");
-            tocContainer.className = "advanced-toc";
-            tocContainer.setAttribute("role", "navigation");
-            tocContainer.setAttribute("aria-label", "Table of Contents");
+                // Show breakpoint information with detailed analysis
+                this.utils.log("Breakpoint Information:");
+                this.utils.log(
+                    "  - Stored breakpoint: " +
+                        (this.state.currentBreakpoint || "null")
+                );
+                this.utils.log(
+                    "  - Current window width: " +
+                        (window.innerWidth || "not available")
+                );
+                this.utils.log(
+                    "  - Breakpoint threshold: " +
+                        this.config.tocDesktopBreakpoint
+                );
 
-            // Используем template literal для чистого и читаемого HTML
-            tocContainer.innerHTML = `
-        <div class="toc-header">
-            <div class="toc-title">
-                <i class="fas fa-list-ul" aria-hidden="true"></i>
-                <span>Contents</span>
-            </div>
-            <div class="toc-controls">
-                <button class="toc-collapse" aria-label="Collapse table of contents" title="Collapse">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-            </div>
-        </div>
-        <div class="toc-progress">
-            <div class="toc-progress-bar"></div>
-        </div>
-        <nav class="toc-navigation">
-            <ul class="toc-list" role="list"></ul>
-        </nav>
-    `;
+                // Re-test breakpoint detection in real-time
+                var realtimeBreakpoint = this.detectBreakpoint();
+                this.utils.log(
+                    "  - Real-time detection: " + realtimeBreakpoint
+                );
 
-            // Генерируем навигационные элементы с умной обработкой иерархии
-            this.generateTOCItems(
-                headings,
-                tocContainer.querySelector(".toc-list")
-            );
-
-            // Добавляем в DOM и запускаем все интерактивные функции
-            document.body.appendChild(tocContainer);
-
-            // Запускаем все подсистемы TOC
-            this.initTOCCollapse(tocContainer);
-            this.initTOCSmoothScroll(tocContainer);
-            this.initTOCProgressTracking(tocContainer, headings);
-
-            // Анимированное появление через небольшую задержку для лучшего UX
-            setTimeout(function () {
-                tocContainer.classList.add("visible");
-            }, 800);
-        },
-
-        /**
-         * Creates mobile-optimized TOC that appears within content
-         * Follows mobile-first principles for optimal user experience
-         */
-        createMobileTOC: function (headings, contentContainer) {
-            var mobileTOC = document.createElement("div");
-            mobileTOC.className = "mobile-toc";
-            mobileTOC.setAttribute("role", "navigation");
-            mobileTOC.setAttribute("aria-label", "Table of Contents");
-
-            mobileTOC.innerHTML = `
-        <div class="mobile-toc-header">
-            <h3>
-                <i class="fas fa-list-ul"></i>
-                Table of Contents
-            </h3>
-            <button class="mobile-toc-toggle" aria-expanded="false">
-                <span>Show</span>
-                <i class="fas fa-chevron-down"></i>
-            </button>
-        </div>
-        <nav class="mobile-toc-content">
-            <ul class="mobile-toc-list"></ul>
-        </nav>
-    `;
-
-            this.generateTOCItems(
-                headings,
-                mobileTOC.querySelector(".mobile-toc-list")
-            );
-
-            // Вставляем мобильный TOC в начало контента
-            contentContainer.insertBefore(
-                mobileTOC,
-                contentContainer.firstChild
-            );
-
-            this.initMobileTOCToggle(mobileTOC);
-            this.initTOCSmoothScroll(mobileTOC);
-        },
-
-        /**
-         * Generates TOC items with intelligent hierarchy detection
-         * Creates proper nested structure based on heading levels
-         */
-        generateTOCItems: function (headings, tocList) {
-            var self = this;
-
-            headings.forEach(function (heading, index) {
-                // Генерируем уникальный и SEO-friendly ID
-                if (!heading.id) {
-                    var headingText = heading.textContent.trim();
-                    var baseId =
-                        "toc-" +
-                        headingText
-                            .toLowerCase()
-                            .replace(/[^\w\s-]/g, "")
-                            .replace(/\s+/g, "-")
-                            .substring(0, 40);
-
-                    heading.id = self.ensureUniqueId(baseId);
+                // Show page context with validation
+                var contextInfo = "none";
+                if (
+                    this.state.pageContext &&
+                    Array.isArray(this.state.pageContext)
+                ) {
+                    if (this.state.pageContext.length > 0) {
+                        contextInfo = this.state.pageContext.join(", ");
+                    }
+                } else {
+                    contextInfo =
+                        "invalid (not an array): " +
+                        typeof this.state.pageContext;
                 }
+                this.utils.log("Page Context: " + contextInfo);
 
-                // Определяем уровень заголовка для правильного стилирования
-                var headingLevel = heading.tagName.toLowerCase();
-                var listItem = document.createElement("li");
-                listItem.className = "toc-item toc-" + headingLevel;
+                // Show module information
+                var activeModulesInfo = "none";
+                if (
+                    this.state.activeModules &&
+                    Array.isArray(this.state.activeModules)
+                ) {
+                    if (this.state.activeModules.length > 0) {
+                        activeModulesInfo = this.state.activeModules.join(", ");
+                    }
+                } else {
+                    activeModulesInfo =
+                        "invalid (not an array): " +
+                        typeof this.state.activeModules;
+                }
+                this.utils.log("Active Modules: " + activeModulesInfo);
 
-                var link = document.createElement("a");
-                link.href = "#" + heading.id;
-                link.className = "toc-link";
-                link.textContent = heading.textContent;
-                link.setAttribute("data-heading-id", heading.id);
-
-                listItem.appendChild(link);
-                tocList.appendChild(listItem);
-            });
-        },
-
-        /**
-         * Ensures ID uniqueness across the document
-         * Prevents conflicts with existing IDs
-         */
-        ensureUniqueId: function (baseId) {
-            var currentId = baseId;
-            var counter = 1;
-
-            while (document.getElementById(currentId)) {
-                currentId = baseId + "-" + counter;
-                counter++;
-            }
-
-            return currentId;
-        },
-
-        /**
-         * Initializes collapse/expand functionality
-         * Provides users control over TOC visibility
-         */
-        initTOCCollapse: function (tocContainer) {
-            var collapseButton = tocContainer.querySelector(".toc-collapse");
-            var navigation = tocContainer.querySelector(".toc-navigation");
-            var title = tocContainer.querySelector(".toc-title span");
-
-            collapseButton.addEventListener("click", function () {
-                var isCollapsed = tocContainer.classList.contains("collapsed");
-                var icon = this.querySelector("i");
-
-                if (isCollapsed) {
-                    // Разворачиваем TOC
-                    tocContainer.classList.remove("collapsed");
-                    icon.classList.remove("fa-chevron-right");
-                    icon.classList.add("fa-chevron-left");
-                    this.setAttribute(
-                        "aria-label",
-                        "Collapse table of contents"
+                // Show utility system statistics
+                if (this.utils && this.utils.state) {
+                    this.utils.log("Utility Statistics:");
+                    this.utils.log(
+                        "  - Event listeners: " +
+                            (this.utils.state.eventListeners
+                                ? this.utils.state.eventListeners.length
+                                : "not available")
                     );
-                    this.setAttribute("title", "Collapse");
-                } else {
-                    // Сворачиваем TOC
-                    tocContainer.classList.add("collapsed");
-                    icon.classList.remove("fa-chevron-left");
-                    icon.classList.add("fa-chevron-right");
-                    this.setAttribute("aria-label", "Expand table of contents");
-                    this.setAttribute("title", "Expand");
+                    this.utils.log(
+                        "  - Throttled functions: " +
+                            (this.utils.state.throttledFunctions
+                                ? this.utils.state.throttledFunctions.size
+                                : "not available")
+                    );
                 }
-            });
-        },
 
-        /**
-         * Initializes mobile TOC toggle functionality
-         * Handles accordion-style behavior on mobile devices
-         */
-        initMobileTOCToggle: function (mobileTOC) {
-            var toggleButton = mobileTOC.querySelector(".mobile-toc-toggle");
-            var content = mobileTOC.querySelector(".mobile-toc-content");
-            var buttonText = toggleButton.querySelector("span");
-            var icon = toggleButton.querySelector("i");
-
-            toggleButton.addEventListener("click", function () {
-                var isExpanded = this.getAttribute("aria-expanded") === "true";
-
-                if (isExpanded) {
-                    // Скрываем контент
-                    content.style.maxHeight = "0";
-                    this.setAttribute("aria-expanded", "false");
-                    buttonText.textContent = "Show";
-                    icon.classList.remove("fa-chevron-up");
-                    icon.classList.add("fa-chevron-down");
-                } else {
-                    // Показываем контент с плавной анимацией
-                    content.style.maxHeight = content.scrollHeight + "px";
-                    this.setAttribute("aria-expanded", "true");
-                    buttonText.textContent = "Hide";
-                    icon.classList.remove("fa-chevron-down");
-                    icon.classList.add("fa-chevron-up");
-                }
-            });
-        },
-
-        /**
-         * Enhanced smooth scrolling with header offset calculation
-         * Provides perfect scroll positioning regardless of header height
-         */
-        initTOCSmoothScroll: function (tocContainer) {
-            var tocLinks = tocContainer.querySelectorAll(".toc-link");
-
-            tocLinks.forEach(function (link) {
-                link.addEventListener("click", function (e) {
-                    e.preventDefault();
-
-                    var targetId = this.getAttribute("href");
-                    var targetElement = document.querySelector(targetId);
-
-                    if (targetElement) {
-                        // Динамически рассчитываем высоту header'а
-                        var header = document.querySelector(".site-header");
-                        var headerHeight = header
-                            ? header.offsetHeight + 20
-                            : 100;
-
-                        var targetPosition =
-                            targetElement.offsetTop - headerHeight;
-
-                        window.scrollTo({
-                            top: targetPosition,
-                            behavior: "smooth",
-                        });
-
-                        // Добавляем временную подсветку целевого заголовка
-                        targetElement.classList.add("toc-target-highlight");
-                        setTimeout(function () {
-                            targetElement.classList.remove(
-                                "toc-target-highlight"
-                            );
-                        }, 2000);
-                    }
-                });
-            });
-        },
-
-        /**
-         * Advanced progress tracking with smooth transitions
-         * Shows reading progress and highlights current section
-         */
-        initTOCProgressTracking: function (tocContainer, headings) {
-            var tocLinks = tocContainer.querySelectorAll(".toc-link");
-            var progressBar = tocContainer.querySelector(".toc-progress-bar");
-            var headingsData = [];
-
-            // Собираем данные о всех заголовках для эффективного трекинга
-            headings.forEach(function (heading, index) {
-                var tocLink = tocContainer.querySelector(
-                    '[data-heading-id="' + heading.id + '"]'
+                // Show configuration
+                this.utils.log("Configuration:");
+                this.utils.log("  - Debug mode: " + this.config.debug);
+                this.utils.log("  - TOC enabled: " + this.config.enableTOC);
+                this.utils.log(
+                    "  - Desktop breakpoint: " +
+                        this.config.tocDesktopBreakpoint +
+                        "px"
                 );
-                if (tocLink) {
-                    headingsData.push({
-                        element: heading,
-                        link: tocLink,
-                        top: heading.offsetTop,
-                    });
-                }
-            });
 
-            // Оптимизированная функция обновления активного состояния
-            function updateProgress() {
-                var scrollTop = window.pageYOffset;
-                var docHeight =
-                    document.documentElement.scrollHeight - window.innerHeight;
-                var scrollPercent = (scrollTop / docHeight) * 100;
-
-                // Обновляем прогресс-бар
-                if (progressBar) {
-                    progressBar.style.width =
-                        Math.min(scrollPercent, 100) + "%";
-                }
-
-                // Находим активный заголовок
-                var activeHeading = null;
-                var offset = 150; // Отступ для лучшего UX
-
-                for (var i = headingsData.length - 1; i >= 0; i--) {
-                    if (scrollTop + offset >= headingsData[i].top) {
-                        activeHeading = headingsData[i];
-                        break;
-                    }
-                }
-
-                // Обновляем активные состояния
-                tocLinks.forEach(function (link) {
-                    link.classList.remove("active");
-                });
-
-                if (activeHeading) {
-                    activeHeading.link.classList.add("active");
-                }
+                this.utils.log("=== END COMPREHENSIVE DEBUG ===");
+            } catch (error) {
+                console.error(
+                    "[CloudSync AdaptivePages] Error in debugSystem:",
+                    error
+                );
             }
-
-            // Используем requestAnimationFrame для плавности и производительности
-            var ticking = false;
-            function requestTick() {
-                if (!ticking) {
-                    requestAnimationFrame(updateProgress);
-                    ticking = true;
-                    setTimeout(function () {
-                        ticking = false;
-                    }, 16); // ~60fps
-                }
-            }
-
-            window.addEventListener("scroll", requestTick);
-            window.addEventListener("resize", function () {
-                // Пересчитываем позиции при изменении размера окна
-                headingsData.forEach(function (item) {
-                    item.top = item.element.offsetTop;
-                });
-                requestTick();
-            });
-
-            // Инициализация
-            updateProgress();
         },
-
         /**
-         * Handles responsive behavior on window resize
-         * Dynamically switches between desktop and mobile TOC
+         * Special diagnostic method to check timing and execution order
+         * This method helps identify when and why initialization steps fail
          */
-        handleTOCResize: function (headings, contentContainer) {
-            var self = this;
-            var resizeTimeout;
+        diagnosticCheck: function () {
+            console.log("=== DIAGNOSTIC CHECK START ===");
 
-            window.addEventListener("resize", function () {
-                clearTimeout(resizeTimeout);
-                resizeTimeout = setTimeout(function () {
-                    var currentWidth = window.innerWidth;
-                    var desktopTOC = document.querySelector(".advanced-toc");
-                    var mobileTOC = document.querySelector(".mobile-toc");
-
-                    if (currentWidth >= 1200 && !desktopTOC && mobileTOC) {
-                        // Переключаемся на desktop версию
-                        mobileTOC.remove();
-                        self.createDesktopTOC(headings);
-                    } else if (
-                        currentWidth < 1200 &&
-                        desktopTOC &&
-                        !mobileTOC
-                    ) {
-                        // Переключаемся на mobile версию
-                        desktopTOC.remove();
-                        self.createMobileTOC(headings, contentContainer);
-                    }
-                }, 250); // Debounce для производительности
-            });
-        },
-
-        /**
-         * Track active section and update table of contents highlighting
-         * Provides visual feedback about user's current reading position
-         */
-        initActiveSectionTracking: function () {
-            var headings = document.querySelectorAll(
-                ".entry-content h2, .entry-content h3"
+            // Check if we're in the right context
+            console.log("Document ready state:", document.readyState);
+            console.log("Body element exists:", !!document.body);
+            console.log(
+                "Body classes:",
+                document.body ? document.body.className : "no body"
             );
-            var tocLinks = document.querySelectorAll("#page-toc-content a");
 
-            if (headings.length === 0 || tocLinks.length === 0) return;
+            // Check window dimensions
+            console.log("Window inner width:", window.innerWidth);
+            console.log("Window inner height:", window.innerHeight);
+            console.log(
+                "Screen width:",
+                window.screen ? window.screen.width : "not available"
+            );
 
-            // Use Intersection Observer for efficient scroll tracking
-            if ("IntersectionObserver" in window) {
-                var observer = new IntersectionObserver(
-                    function (entries) {
-                        entries.forEach(function (entry) {
-                            if (entry.isIntersecting) {
-                                var activeLink = document.querySelector(
-                                    '#page-toc-content a[href="#' +
-                                        entry.target.id +
-                                        '"]'
-                                );
-                                if (activeLink) {
-                                    CloudSync.updateActiveToC(activeLink);
-                                }
-                            }
-                        });
-                    },
-                    {
-                        rootMargin: "-20% 0px -70% 0px", // Activate when heading is in middle area of viewport
-                        threshold: 0,
-                    }
-                );
+            // Check CloudSync object structure
+            console.log("CloudSync exists:", typeof CloudSync !== "undefined");
+            console.log(
+                "AdaptivePages exists:",
+                typeof CloudSync.adaptivePages !== "undefined"
+            );
+            console.log(
+                "Utils exists:",
+                typeof CloudSync.adaptivePages.utils !== "undefined"
+            );
 
-                headings.forEach(function (heading) {
-                    observer.observe(heading);
-                });
-            }
-        },
-
-        /**
-         * Update active table of contents link for visual feedback
-         * @param {Element} activeLink - The link element to mark as active
-         */
-        updateActiveToC: function (activeLink) {
-            // Remove active class from all links
-            var allTocLinks = document.querySelectorAll("#page-toc-content a");
-            allTocLinks.forEach(function (link) {
-                link.classList.remove("active");
-            });
-
-            // Add active class to current link
-            if (activeLink) {
-                activeLink.classList.add("active");
-            }
-        },
-
-        /**
-         * Setup reading progress bar for long-form content
-         * Provides visual feedback about reading progress through the document
-         */
-        setupReadingProgress: function () {
-            // Only show progress bar for long content
-            if (!document.body.classList.contains("long-content")) return;
-
-            var progressBar = document.getElementById("reading-progress-bar");
-            var contentArea = document.querySelector(".entry-content");
-
-            if (!progressBar || !contentArea) return;
-
-            // Calculate progress based on content area scroll position
-            function updateProgress() {
-                var windowHeight = window.innerHeight;
-                var documentHeight = contentArea.offsetHeight;
-                var scrollTop = window.pageYOffset;
-                var contentTop = contentArea.offsetTop;
-
-                // Calculate percentage of content that has been scrolled through
-                var progress = Math.max(
-                    0,
-                    Math.min(
-                        100,
-                        ((scrollTop - contentTop + windowHeight) /
-                            documentHeight) *
-                            100
-                    )
-                );
-
-                progressBar.style.width = progress + "%";
+            // Check current state
+            if (typeof CloudSync.adaptivePages !== "undefined") {
+                console.log("Current state:", CloudSync.adaptivePages.state);
+                console.log("Current config:", CloudSync.adaptivePages.config);
             }
 
-            // Use throttled scroll event for performance optimization
-            var throttleTimer = null;
-            window.addEventListener("scroll", function () {
-                if (throttleTimer) return;
-
-                throttleTimer = setTimeout(function () {
-                    updateProgress();
-                    throttleTimer = null;
-                }, 16); // ~60fps for smooth animation
-            });
-        },
-
-        /**
-         * Enhanced navigation for legal documents with section jumping
-         * Improves accessibility and usability of policy pages and legal content
-         */
-        setupLegalPageNavigation: function () {
-            if (!document.body.classList.contains("page-type-legal")) return;
-
-            var contentArea = document.querySelector(".entry-content");
-            if (!contentArea) return;
-
-            // Add quick navigation for legal sections
-            var legalHeadings = contentArea.querySelectorAll("h2, h3");
-
-            if (legalHeadings.length > 5) {
-                // Create floating navigation for easy section jumping
-                var quickNav = document.createElement("div");
-                quickNav.className = "legal-quick-nav";
-                quickNav.innerHTML =
-                    '<button type="button" class="quick-nav-toggle">Sections</button>';
-
-                var navList = document.createElement("ul");
-                navList.className = "quick-nav-list";
-
-                legalHeadings.forEach(function (heading, index) {
-                    if (!heading.id) {
-                        heading.id = "legal-section-" + (index + 1);
-                    }
-
-                    var listItem = document.createElement("li");
-                    var link = document.createElement("a");
-                    link.href = "#" + heading.id;
-                    link.textContent = heading.textContent;
-
-                    link.addEventListener("click", function (event) {
-                        event.preventDefault();
-                        heading.scrollIntoView({
-                            behavior: "smooth",
-                            block: "start",
-                        });
-                        quickNav.classList.remove("active");
-                    });
-
-                    listItem.appendChild(link);
-                    navList.appendChild(listItem);
-                });
-
-                quickNav.appendChild(navList);
-
-                // Toggle functionality for mobile-friendly navigation
-                quickNav
-                    .querySelector(".quick-nav-toggle")
-                    .addEventListener("click", function () {
-                        quickNav.classList.toggle("active");
-                    });
-
-                document.body.appendChild(quickNav);
-            }
-        },
-
-        /**
-         * Simple lightbox functionality for image-rich pages
-         * Enhances image viewing experience without external dependencies
-         */
-        setupImageLightbox: function () {
-            if (!document.body.classList.contains("image-rich")) return;
-
-            var contentImages = document.querySelectorAll(".entry-content img");
-
-            contentImages.forEach(function (img) {
-                // Skip small images that don't benefit from lightbox
-                if (img.width < 400) return;
-
-                img.style.cursor = "pointer";
-                img.addEventListener("click", function () {
-                    CloudSync.openImageLightbox(this);
-                });
-            });
-        },
-
-        /**
-         * Open image in simple overlay lightbox
-         * @param {Element} imageElement - The image to display in lightbox
-         */
-        openImageLightbox: function (imageElement) {
-            var lightbox = document.createElement("div");
-            lightbox.className = "image-lightbox";
-            lightbox.innerHTML =
-                '<div class="lightbox-content">' +
-                '<img src="' +
-                imageElement.src +
-                '" alt="' +
-                (imageElement.alt || "") +
-                '">' +
-                '<button type="button" class="lightbox-close" aria-label="Close lightbox">&times;</button>' +
-                "</div>";
-
-            // Close lightbox functionality
-            function closeLightbox() {
-                lightbox.remove();
-                document.body.style.overflow = "";
-            }
-
-            lightbox.addEventListener("click", function (event) {
-                if (event.target === lightbox) {
-                    closeLightbox();
-                }
-            });
-
-            lightbox
-                .querySelector(".lightbox-close")
-                .addEventListener("click", closeLightbox);
-
-            // Keyboard accessibility
-            document.addEventListener("keydown", function (event) {
-                if (event.key === "Escape") {
-                    closeLightbox();
-                }
-            });
-
-            document.body.appendChild(lightbox);
-            document.body.style.overflow = "hidden"; // Prevent background scrolling
+            console.log("=== DIAGNOSTIC CHECK END ===");
         },
     };
+
     // Временно делаем CloudSync глобальным для отладки
     // Удалить в продакшене
     if (typeof window !== "undefined") {

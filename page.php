@@ -111,7 +111,7 @@ $page_context = cloudsync_analyze_page_context();
                         </div>
 
                         <!-- Context-sensitive footer elements -->
-                        <footer class="entry-footer">
+                        <div class="entry-footer">
 
                             <!-- Contact CTA for product pages -->
                             <?php if (strpos($page_context, 'page-type-product') !== false) : ?>
@@ -152,7 +152,7 @@ $page_context = cloudsync_analyze_page_context();
                                 </div>
                             <?php endif; ?>
 
-                        </footer>
+                        </div>
 
                     </article>
 

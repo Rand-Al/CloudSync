@@ -134,6 +134,7 @@ function cloudsync_scripts() {
         cloudsync_get_theme_version()        // Version number for cache busting
     );
 
+
     // Enqueue theme JavaScript with proper dependencies
     wp_enqueue_script(
         'cloudsync-theme-js',                        // Unique handle for this script
