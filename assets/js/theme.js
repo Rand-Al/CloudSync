@@ -1490,6 +1490,301 @@
                         );
                     }
                 },
+                setupProgressTracking: function () {
+                    var utils = CloudSync.adaptivePages.utils;
+                    var self = this;
+
+                    utils.log("Setting up reading progress tracking system");
+
+                    // Configuration for progress tracking behavior
+                    var progressConfig = {
+                        updateThreshold: 25, // Minimum scroll distance to update progress
+                        smoothingFactor: 0.1, // Controls smoothness of progress updates
+                        completionThreshold: 0.95, // Consider reading "complete" at 95% to account for footer
+                    };
+
+                    // State tracking for progress calculations
+                    var progressState = {
+                        lastCalculatedProgress: 0, // Previous progress value for comparison
+                        lastScrollPosition: 0, // Previous scroll position for threshold checking
+                        documentHeight: 0, // Cached document height for performance
+                        viewportHeight: 0, // Cached viewport height for performance
+                    };
+
+                    // Function to recalculate document dimensions when needed
+                    var updateDocumentDimensions = function () {
+                        progressState.documentHeight = Math.max(
+                            document.body.scrollHeight,
+                            document.body.offsetHeight,
+                            document.documentElement.clientHeight,
+                            document.documentElement.scrollHeight,
+                            document.documentElement.offsetHeight
+                        );
+                        progressState.viewportHeight = window.innerHeight;
+                        utils.log(
+                            "Updated document dimensions: height=" +
+                                progressState.documentHeight +
+                                "px, viewport=" +
+                                progressState.viewportHeight +
+                                "px"
+                        );
+                    };
+
+                    // Initial calculation of document dimensions
+                    updateDocumentDimensions();
+
+                    // Create optimized progress tracker with throttling for smooth performance
+                    var progressTracker = utils.throttle(
+                        function () {
+                            var currentScrollPosition =
+                                window.pageYOffset ||
+                                document.documentElement.scrollTop;
+                            var scrollDifference = Math.abs(
+                                currentScrollPosition -
+                                    progressState.lastScrollPosition
+                            );
+
+                            // Only update progress if significant scroll movement occurred
+                            if (
+                                scrollDifference >=
+                                progressConfig.updateThreshold
+                            ) {
+                                var newProgress = self.calculateReadingProgress(
+                                    currentScrollPosition,
+                                    progressState,
+                                    progressConfig
+                                );
+
+                                // Apply smoothing to prevent jarring progress jumps
+                                var smoothedProgress =
+                                    self.smoothProgressTransition(
+                                        progressState.lastCalculatedProgress,
+                                        newProgress,
+                                        progressConfig.smoothingFactor
+                                    );
+
+                                // Update visual progress bar with calculated value
+                                self.updateProgressBar(smoothedProgress);
+
+                                progressState.lastCalculatedProgress =
+                                    smoothedProgress;
+                                progressState.lastScrollPosition =
+                                    currentScrollPosition;
+                            }
+                        },
+                        50,
+                        "toc-progress-tracking"
+                    ); // 50ms throttling for smooth visual updates
+
+                    // Attach progress tracker to monitor user reading behavior
+                    utils.addEventListener(window, "scroll", progressTracker, {
+                        passive: true,
+                    });
+
+                    // Update dimensions when window is resized to maintain accuracy
+                    utils.addEventListener(
+                        window,
+                        "resize",
+                        utils.throttle(
+                            function () {
+                                updateDocumentDimensions();
+                                // Trigger immediate progress recalculation after resize
+                                progressTracker();
+                            },
+                            250,
+                            "toc-progress-resize"
+                        ),
+                        { passive: true }
+                    );
+
+                    utils.log(
+                        "Reading progress tracking system initialized successfully"
+                    );
+                },
+                calculateReadingProgress: function (
+                    currentScrollPosition,
+                    progressState,
+                    progressConfig
+                ) {
+                    var utils = CloudSync.adaptivePages.utils;
+
+                    // Let's diagnose what's happening with our calculations
+                    utils.log("=== PROGRESS CALCULATION DIAGNOSIS ===");
+                    utils.log(
+                        "Current scroll position: " +
+                            currentScrollPosition +
+                            "px"
+                    );
+                    utils.log(
+                        "Document height: " +
+                            progressState.documentHeight +
+                            "px"
+                    );
+                    utils.log(
+                        "Viewport height: " +
+                            progressState.viewportHeight +
+                            "px"
+                    );
+
+                    // The key insight: maximum scrollable distance is where the user can actually scroll to
+                    // When user reaches bottom, scrollTop equals (documentHeight - viewportHeight)
+                    var maxScrollableDistance =
+                        progressState.documentHeight -
+                        progressState.viewportHeight;
+                    utils.log(
+                        "Calculated max scrollable distance: " +
+                            maxScrollableDistance +
+                            "px"
+                    );
+
+                    // Ensure we don't divide by zero or negative numbers
+                    if (maxScrollableDistance <= 0) {
+                        utils.log(
+                            "Document shorter than viewport - progress should be 100%"
+                        );
+                        return 1; // Document is shorter than viewport, so we're always "complete"
+                    }
+
+                    // Calculate raw progress as simple ratio
+                    var rawProgress =
+                        currentScrollPosition / maxScrollableDistance;
+                    utils.log(
+                        "Raw progress calculation: " +
+                            currentScrollPosition +
+                            " / " +
+                            maxScrollableDistance +
+                            " = " +
+                            rawProgress
+                    );
+
+                    // Clamp the value between 0 and 1 to handle edge cases
+                    var clampedProgress = Math.min(1, Math.max(0, rawProgress));
+                    utils.log("Clamped progress (0-1): " + clampedProgress);
+
+                    // For now, let's skip adjustments to see if basic calculation works
+                    var progressPercentage = Math.round(clampedProgress * 100);
+                    utils.log("Final percentage: " + progressPercentage + "%");
+                    utils.log("=== END DIAGNOSIS ===");
+
+                    return clampedProgress;
+                },
+                applyProgressAdjustments: function (
+                    rawProgress,
+                    progressConfig
+                ) {
+                    var adjustedProgress = rawProgress;
+
+                    // Early completion recognition: users feel "done" before reaching absolute bottom
+                    // This accounts for footers, comment sections, or other non-essential content
+                    if (rawProgress >= progressConfig.completionThreshold) {
+                        // Gradually approach 100% as user gets very close to bottom
+                        // This creates satisfying completion feeling without premature 100% display
+                        var remainingDistance =
+                            1 - progressConfig.completionThreshold;
+                        var progressBeyondThreshold =
+                            rawProgress - progressConfig.completionThreshold;
+                        var completionMultiplier =
+                            progressBeyondThreshold / remainingDistance;
+
+                        // Use easing function to smooth approach to 100%
+                        adjustedProgress =
+                            progressConfig.completionThreshold +
+                            remainingDistance *
+                                this.easeInOutQuad(completionMultiplier);
+                    }
+
+                    // Early progress enhancement: make initial reading feel more rewarding
+                    // Small amounts of scrolling in the beginning feel like bigger achievements
+                    if (rawProgress <= 0.1) {
+                        // Slightly boost early progress to encourage continued reading
+                        adjustedProgress = rawProgress * 1.2;
+                    }
+
+                    // Ensure final result stays within valid bounds
+                    return Math.min(1, Math.max(0, adjustedProgress));
+                },
+                easeInOutQuad: function (t) {
+                    // Quadratic easing function for smooth animation curves
+                    // Creates natural acceleration and deceleration in progress changes
+                    return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+                },
+
+                smoothProgressTransition: function (
+                    previousProgress,
+                    newProgress,
+                    smoothingFactor
+                ) {
+                    // Calculate the difference between current and target progress
+                    var progressDifference = Math.abs(
+                        newProgress - previousProgress
+                    );
+
+                    // Use adaptive smoothing based on the size of change and proximity to completion
+                    var adaptiveFactor = smoothingFactor;
+
+                    // Increase responsiveness for large changes (user jumping around document)
+                    if (progressDifference > 0.1) {
+                        adaptiveFactor = 0.4; // Much more responsive for big jumps
+                    }
+
+                    // Increase responsiveness significantly when approaching 100%
+                    if (newProgress > 0.9) {
+                        adaptiveFactor = 0.6; // Very responsive near completion
+                    }
+
+                    // For the final approach to 100%, use minimal smoothing
+                    if (newProgress > 0.95) {
+                        adaptiveFactor = 0.8; // Almost immediate response at the very end
+                    }
+
+                    // Apply the adaptive smoothing
+                    var actualDifference = newProgress - previousProgress;
+                    var smoothedChange = actualDifference * adaptiveFactor;
+
+                    return previousProgress + smoothedChange;
+                },
+
+                updateProgressBar: function (progressValue) {
+                    var utils = CloudSync.adaptivePages.utils;
+                    var progressBar = this.state.tocElements.progressBar;
+
+                    if (!progressBar) {
+                        utils.log(
+                            "Progress bar element not found, cannot update display",
+                            "warn"
+                        );
+                        return;
+                    }
+
+                    // Convert progress value to percentage for CSS width
+                    var progressPercentage = Math.round(progressValue * 100);
+
+                    // Update the visual width of the progress bar using CSS
+                    progressBar.style.width = progressPercentage + "%";
+
+                    // Update ARIA attributes for accessibility
+                    progressBar.setAttribute(
+                        "aria-valuenow",
+                        progressPercentage
+                    );
+
+                    // Provide readable progress information for screen readers
+                    var readableProgress =
+                        progressPercentage + " percent complete";
+                    progressBar.setAttribute(
+                        "aria-valuetext",
+                        readableProgress
+                    );
+
+                    // Log progress updates for debugging and user behavior analysis
+                    utils.log(
+                        "Progress bar updated to " +
+                            progressPercentage +
+                            "% (value: " +
+                            Math.round(progressValue * 1000) / 1000 +
+                            ")"
+                    );
+                },
                 createMobileTOC: function () {},
                 handleBreakpointChange: function () {},
                 setupSmartVisibility: function () {
