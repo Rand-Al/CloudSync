@@ -2687,3 +2687,285 @@ select:focus {
         transform: scale(1);
     }
 }
+
+/* ==========================================================================
+   MOBILE TOC FLOATING BUTTON SYSTEM
+   Modern glassmorphism design with intelligent progress indication
+   ========================================================================== */
+
+/* Mobile TOC System Container */
+.mobile-toc-system {
+    /* Use fixed positioning to ensure the system stays visible during scroll */
+    position: fixed;
+    /* High z-index ensures the mobile TOC appears above all other content */
+    z-index: 1000;
+    /* Disable pointer events on container to allow clicks through to page content */
+    pointer-events: none;
+    /* This approach allows the container to overlay content without blocking interaction */
+}
+
+/* Floating TOC Button - Main Interactive Element */
+.floating-toc-button {
+    /* Fixed positioning relative to viewport for consistent placement */
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+
+    /* Perfect circle dimensions for balanced proportions */
+    width: 60px;
+    height: 60px;
+
+    /* Modern glassmorphism background with depth and transparency */
+    background: rgba(15, 15, 35, 0.85);
+    backdrop-filter: blur(20px) saturate(1.2);
+
+    /* Subtle border that adds definition without harshness */
+    border: 1px solid rgba(102, 126, 234, 0.3);
+    border-radius: 50%;
+
+    /* Re-enable pointer events specifically for the button */
+    pointer-events: auto;
+    cursor: pointer;
+
+    /* Modern shadow system that creates floating effect */
+    box-shadow: 
+        /* Primary shadow for depth perception */ 0 8px 32px
+            rgba(0, 0, 0, 0.3),
+        /* Secondary shadow with brand color for premium feel */ 0 4px 16px
+            rgba(102, 126, 234, 0.2),
+        /* Inner highlight for dimensional effect */ inset 0 1px 0
+            rgba(255, 255, 255, 0.1);
+
+    /* Smooth transitions for all interactive states */
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Flexbox for perfect center alignment of child elements */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    /* Prevent text selection to maintain clean interaction */
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+}
+
+/* Hover State - Enhanced interaction feedback */
+.floating-toc-button:hover {
+    /* Subtle lift effect that suggests interactivity */
+    transform: translateY(-2px) scale(1.05);
+
+    /* Enhanced shadows for more dramatic floating effect */
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4),
+        0 6px 24px rgba(102, 126, 234, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+
+    /* Brighter border for increased visual prominence */
+    border-color: rgba(102, 126, 234, 0.5);
+}
+
+/* Active State - Immediate tactile feedback */
+.floating-toc-button:active {
+    /* Quick scale down to simulate button press */
+    transform: translateY(0) scale(0.98);
+
+    /* Reduced shadows to simulate button being pressed down */
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3),
+        0 2px 8px rgba(102, 126, 234, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Focus State - Accessibility enhancement for keyboard navigation */
+.floating-toc-button:focus {
+    /* Clear focus indicator without disrupting design */
+    outline: 2px solid rgba(102, 126, 234, 0.6);
+    outline-offset: 4px;
+}
+
+/* Progress Ring Container - Holds the SVG progress indicator */
+.progress-ring {
+    /* Absolute positioning allows precise placement over button background */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    /* Exact dimensions to fit perfectly within button bounds */
+    width: 56px;
+    height: 56px;
+
+    /* Ensure the ring doesn't interfere with button interactions */
+    pointer-events: none;
+}
+
+/* Progress SVG - Vector graphics for crisp rendering at any scale */
+.progress-svg {
+    /* Fill entire container while maintaining aspect ratio */
+    width: 100%;
+    height: 100%;
+
+    /* Rotate to start progress from top instead of right */
+    transform: rotate(-90deg);
+
+    /* Smooth transitions for progress updates */
+    transition: all 0.3s ease;
+}
+
+/* Progress Circle - The actual animated progress indicator */
+.progress-circle {
+    /* Smooth animation for progress changes as user scrolls */
+    transition: stroke-dashoffset 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Ensure progress appears above background circle */
+    z-index: 2;
+}
+
+/* Background Circle - Provides visual reference for total progress */
+.progress-background {
+    /* Subtle background that doesn't compete with progress indicator */
+    opacity: 0.3;
+}
+
+/* TOC Button Icon - Central visual element that indicates functionality */
+.toc-button-icon {
+    /* Absolute positioning for precise control over icon placement */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    /* Icon sizing and color for optimal visibility and brand consistency */
+    font-size: 1.25rem;
+    color: rgba(255, 255, 255, 0.9);
+
+    /* Ensure icon appears above all other button elements */
+    z-index: 3;
+
+    /* Smooth transitions for any icon state changes */
+    transition: all 0.3s ease;
+
+    /* Prevent icon from interfering with button interactions */
+    pointer-events: none;
+}
+
+/* Icon hover enhancement - Subtle animation for increased engagement */
+.floating-toc-button:hover .toc-button-icon {
+    /* Slight scale increase for more dynamic interaction */
+    transform: translate(-50%, -50%) scale(1.1);
+
+    /* Full opacity for maximum visibility on hover */
+    color: rgba(255, 255, 255, 1);
+}
+
+/* Button Pulse Animation - Subtle life and attention-drawing effect */
+.button-pulse {
+    /* Absolute positioning to cover entire button area */
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    /* Match button's circular shape */
+    border-radius: 50%;
+
+    /* Transparent background that will be animated */
+    background: rgba(102, 126, 234, 0.1);
+
+    /* Position below other elements but above button background */
+    z-index: 1;
+
+    /* Start invisible - animation will control visibility */
+    opacity: 0;
+    transform: scale(1);
+
+    /* Smooth animation properties */
+    transition: all 2s ease-in-out;
+}
+
+/* Pulse Animation Keyframes - Creates gentle breathing effect */
+@keyframes buttonPulse {
+    0% {
+        opacity: 0;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.3;
+        transform: scale(1.1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.2);
+    }
+}
+
+/* Apply pulse animation when button is in idle state */
+.floating-toc-button:not(:hover) .button-pulse {
+    /* Infinite gentle pulsing to subtly indicate interactivity */
+    animation: buttonPulse 3s ease-in-out infinite;
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 480px) {
+    .floating-toc-button {
+        /* Slightly smaller on very small screens to preserve content space */
+        width: 56px;
+        height: 56px;
+
+        /* Adjust positioning for smaller viewports */
+        bottom: 1.5rem;
+        right: 1.5rem;
+    }
+
+    .progress-ring {
+        /* Proportionally smaller progress ring */
+        width: 52px;
+        height: 52px;
+    }
+
+    .toc-button-icon {
+        /* Slightly smaller icon for better proportion */
+        font-size: 1.1rem;
+    }
+}
+
+/* High contrast mode support for accessibility */
+@media (prefers-contrast: high) {
+    .floating-toc-button {
+        /* Enhanced borders for better visibility in high contrast mode */
+        border: 2px solid rgba(255, 255, 255, 0.8);
+
+        /* More pronounced shadows for better depth perception */
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6),
+            0 4px 16px rgba(102, 126, 234, 0.4);
+    }
+
+    .toc-button-icon {
+        /* Full opacity for maximum contrast */
+        color: rgba(255, 255, 255, 1);
+    }
+}
+
+/* Reduced motion support for users with vestibular disorders */
+@media (prefers-reduced-motion: reduce) {
+    .floating-toc-button,
+    .progress-circle,
+    .toc-button-icon,
+    .button-pulse {
+        /* Disable all animations for users who prefer reduced motion */
+        animation: none;
+        transition: none;
+    }
+
+    .floating-toc-button:hover {
+        /* Static hover state without transforms */
+        transform: none;
+    }
+}
+/* Ensure mobile TOC button only appears on appropriate screen sizes */
+@media (min-width: 769px) {
+    .floating-toc-button {
+        /* Hide button on desktop screens as fallback protection */
+        display: none !important;
+    }
+}
