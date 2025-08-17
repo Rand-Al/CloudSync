@@ -2687,173 +2687,169 @@ select:focus {
         transform: scale(1);
     }
 }
+// Mobile TOC Floating Button
 
-/* Mobile TOC */
-.mobile-toc {
-    background: rgba(15, 15, 35, 0.6);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(102, 126, 234, 0.2);
-    border-radius: 16px;
-    margin: 2rem 0;
-    overflow: hidden;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+/* Mobile TOC System Container */
+.mobile-toc-system {
+    position: fixed;
+    z-index: 1000;
+    pointer-events: none; /* Allow clicks through container to page content */
 }
 
-.mobile-toc-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1.25rem 1.5rem;
-    background: linear-gradient(
-        135deg,
-        rgba(102, 126, 234, 0.1) 0%,
-        rgba(118, 75, 162, 0.1) 100%
-    );
-    border-bottom: 1px solid rgba(102, 126, 234, 0.2);
-}
-
-.mobile-toc-header h3 {
-    margin: 0;
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #ffffff;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-.mobile-toc-header h3 i {
-    color: #667eea;
-    font-size: 1rem;
-}
-
-.mobile-toc-toggle {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 8px;
-    padding: 0.5rem 1rem;
+/* Floating TOC Button - Main Interactive Element */
+.floating-toc-button {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 60px;
+    height: 60px;
+    background: rgba(15, 15, 35, 0.85);
+    backdrop-filter: blur(20px) saturate(1.2);
+    border: 1px solid rgba(102, 126, 234, 0.3);
+    border-radius: 50%;
     cursor: pointer;
-    transition: all 0.3s ease;
-    color: rgba(255, 255, 255, 0.8);
+    pointer-events: auto; /* Re-enable pointer events for the button itself */
+
+    /* Modern shadow system for depth perception */
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3),
+        0 4px 16px rgba(102, 126, 234, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+
+    /* Smooth transitions for all interactive states */
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Ensure proper stacking and visibility */
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    font-size: 0.9rem;
+    justify-content: center;
+
+    /* Prevent text selection on button */
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
 }
 
-.mobile-toc-toggle:hover {
-    background: rgba(102, 126, 234, 0.2);
-    border-color: rgba(102, 126, 234, 0.3);
-    color: #ffffff;
+/* Hover and Active States for Enhanced Interaction */
+.floating-toc-button:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4),
+        0 6px 24px rgba(102, 126, 234, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    border-color: rgba(102, 126, 234, 0.5);
 }
 
-.mobile-toc-toggle i {
-    font-size: 0.8rem;
-    transition: transform 0.3s ease;
+.floating-toc-button:active {
+    transform: translateY(0) scale(0.98);
+    transition-duration: 0.1s;
 }
 
-.mobile-toc-content {
-    max-height: 0;
+/* Focus state for keyboard navigation accessibility */
+.floating-toc-button:focus {
+    outline: none;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3),
+        0 4px 16px rgba(102, 126, 234, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        0 0 0 3px rgba(102, 126, 234, 0.4); /* Focus ring */
+}
+
+/* Progress Ring Container */
+.toc-progress-ring {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* Don't interfere with button clicks */
+}
+
+/* SVG Progress Circle Styling */
+.progress-circle {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: rotate(-90deg); /* Start progress from top */
+    pointer-events: none;
+}
+
+/* Progress indicator with smooth animations */
+.progress-indicator {
+    transition: stroke-dashoffset 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    filter: drop-shadow(0 0 6px rgba(102, 126, 234, 0.6));
+}
+
+/* Button Icon Container */
+.toc-button-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 16px;
+    z-index: 2; /* Ensure icon appears above progress ring */
+}
+
+/* Icon animation states */
+.floating-toc-button:hover .toc-button-icon {
+    color: rgba(255, 255, 255, 1);
+    transform: scale(1.1);
+}
+
+/* Screen reader only text */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
     overflow: hidden;
-    transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
 }
 
-.mobile-toc-list {
-    list-style: none;
-    margin: 0;
-    padding: 1rem 0;
-}
-
-.mobile-toc-list .toc-link {
-    display: block;
-    padding: 0.75rem 1.5rem;
-    color: rgba(255, 255, 255, 0.8);
-    text-decoration: none;
-    transition: all 0.3s ease;
-    border-left: 3px solid transparent;
-}
-
-.mobile-toc-list .toc-link:hover {
-    background: rgba(102, 126, 234, 0.1);
-    color: #ffffff;
-    border-left-color: #667eea;
-}
-
-/* Responsive breakpoints */
-@media (max-width: 1400px) {
-    .advanced-toc {
-        right: 1.5rem;
-        width: 300px;
-    }
-}
-
-@media (max-width: 1300px) {
-    .advanced-toc {
-        right: 1rem;
-        width: 280px;
-    }
-}
-
-@media (max-width: 1200px) {
-    .advanced-toc {
-        display: none;
-    }
-}
-
+/* Mobile Responsive Adjustments */
 @media (max-width: 768px) {
-    .mobile-toc {
-        margin: 1.5rem 0;
-        border-radius: 12px;
+    .floating-toc-button {
+        bottom: 1.5rem;
+        right: 1.5rem;
+        width: 56px;
+        height: 56px;
     }
 
-    .mobile-toc-header {
-        padding: 1rem 1.25rem;
-    }
-
-    .mobile-toc-header h3 {
-        font-size: 1rem;
+    .toc-button-icon {
+        width: 22px;
+        height: 22px;
+        font-size: 15px;
     }
 }
 
 @media (max-width: 480px) {
-    .mobile-toc {
-        margin: 1rem -10px;
-        border-radius: 8px;
+    .floating-toc-button {
+        bottom: 1rem;
+        right: 1rem;
+        width: 52px;
+        height: 52px;
+    }
+
+    .toc-button-icon {
+        width: 20px;
+        height: 20px;
+        font-size: 14px;
     }
 }
 
-/* Print styles - hide TOC when printing */
-@media print {
-    .advanced-toc,
-    .mobile-toc {
-        display: none !important;
-    }
-}
-
-/* Reduced motion support */
+/* Accessibility: Reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
-    .advanced-toc,
-    .toc-link,
-    .mobile-toc-content,
-    .toc-progress-bar {
-        transition: none !important;
-        animation: none !important;
-    }
-}
-
-/* High contrast mode support */
-@media (prefers-contrast: high) {
-    .advanced-toc {
-        border-width: 2px;
-        border-color: #ffffff;
+    .floating-toc-button,
+    .progress-indicator,
+    .toc-button-icon {
+        transition: none;
+        transform: none;
     }
 
-    .toc-link {
-        border-left-width: 4px;
-    }
-
-    .toc-link.active {
-        border-left-color: #ffffff;
-        background: rgba(255, 255, 255, 0.2);
+    .floating-toc-button:hover {
+        transform: none;
     }
 }
