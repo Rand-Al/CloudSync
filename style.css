@@ -2969,3 +2969,324 @@ select:focus {
         display: none !important;
     }
 }
+
+/* Mobile TOC Panel System - Complete styling for slide-up navigation panel */
+
+/* Main panel container - handles positioning and z-index layering */
+.mobile-toc-panel {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 9999;
+
+    /* Initially hidden from view and screen readers */
+    visibility: hidden;
+    display: none;
+
+    /* Prevent interaction when closed */
+    pointer-events: none;
+}
+
+/* Panel overlay - provides modal backdrop and touch target for closing */
+.mobile-toc-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    /* Extends above viewport to cover entire screen */
+    height: 100vh;
+
+    /* Semi-transparent backdrop */
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+
+    /* Initially hidden for animation */
+    opacity: 0;
+    visibility: hidden;
+
+    /* Enable touch interaction for closing */
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+/* Main panel content container - houses all navigation elements */
+.mobile-toc-content {
+    position: relative;
+
+    /* Modern rounded top corners for mobile sheet design */
+    border-radius: 1.5rem 1.5rem 0 0;
+
+    /* Modern glassmorphism background */
+    background: rgba(15, 15, 35, 0.95);
+    backdrop-filter: blur(20px) saturate(1.2);
+
+    /* Subtle border for definition */
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    border-bottom: none;
+
+    /* Maximum height to prevent overflow on small screens */
+    max-height: 80vh;
+
+    /* Enable internal scrolling if content exceeds height */
+    overflow-y: auto;
+
+    /* Modern shadow system for depth */
+    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.3),
+        0 -4px 16px rgba(102, 126, 234, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+
+    /* Initially positioned below viewport for slide-up animation */
+    transform: translateY(100%);
+    visibility: hidden;
+
+    /* Enable interaction with panel content */
+    pointer-events: auto;
+}
+
+/* Panel header - contains title, progress, and close button */
+.mobile-toc-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 1.5rem 1rem 1.5rem;
+
+    /* Subtle bottom border for visual separation */
+    border-bottom: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+/* Panel title styling */
+.mobile-toc-title {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* Progress summary text in header */
+.mobile-toc-progress {
+    color: rgba(102, 126, 234, 0.8);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* Close button styling */
+.mobile-toc-close {
+    background: rgba(102, 126, 234, 0.1);
+    border: 1px solid rgba(102, 126, 234, 0.3);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+}
+
+.mobile-toc-close:hover {
+    background: rgba(102, 126, 234, 0.2);
+    border-color: rgba(102, 126, 234, 0.5);
+    color: rgba(255, 255, 255, 1);
+    transform: scale(1.05);
+}
+
+/* Navigation area - scrollable list of sections */
+.mobile-toc-navigation {
+    padding: 0;
+    max-height: 40vh;
+    overflow-y: auto;
+}
+
+/* Navigation list styling */
+.mobile-toc-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* Individual navigation item styling */
+.mobile-toc-item {
+    border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.mobile-toc-item:last-child {
+    border-bottom: none;
+}
+
+/* Navigation link styling with hierarchy support */
+.mobile-toc-link {
+    display: block;
+    padding: 1rem 1.5rem;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    font-size: 0.95rem;
+    line-height: 1.4;
+
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.mobile-toc-link:hover {
+    background: rgba(102, 126, 234, 0.1);
+    color: rgba(255, 255, 255, 1);
+    padding-left: 2rem;
+}
+
+/* Active section highlighting */
+.mobile-toc-item.active-section .mobile-toc-link {
+    background: rgba(102, 126, 234, 0.2);
+    color: rgba(255, 255, 255, 1);
+    border-left: 3px solid rgba(102, 126, 234, 0.8);
+}
+
+/* Heading level hierarchy indentation */
+.mobile-toc-item.toc-h1 .mobile-toc-link {
+    padding-left: 1.5rem;
+    font-weight: 600;
+}
+.mobile-toc-item.toc-h2 .mobile-toc-link {
+    padding-left: 2rem;
+}
+.mobile-toc-item.toc-h3 .mobile-toc-link {
+    padding-left: 2.5rem;
+    opacity: 0.9;
+}
+.mobile-toc-item.toc-h4 .mobile-toc-link {
+    padding-left: 3rem;
+    opacity: 0.8;
+}
+.mobile-toc-item.toc-h5 .mobile-toc-link {
+    padding-left: 3.5rem;
+    opacity: 0.7;
+}
+.mobile-toc-item.toc-h6 .mobile-toc-link {
+    padding-left: 4rem;
+    opacity: 0.6;
+}
+
+/* Panel footer with quick actions */
+.mobile-toc-footer {
+    padding: 1rem 1.5rem 1.5rem 1.5rem;
+    border-top: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+/* Quick action buttons container */
+.mobile-toc-quick-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+/* Quick action button styling */
+.quick-action-btn {
+    background: rgba(102, 126, 234, 0.1);
+    border: 1px solid rgba(102, 126, 234, 0.3);
+    border-radius: 0.5rem;
+    padding: 0.75rem 1.5rem;
+
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+}
+
+.quick-action-btn:hover {
+    background: rgba(102, 126, 234, 0.2);
+    border-color: rgba(102, 126, 234, 0.5);
+    color: rgba(255, 255, 255, 1);
+    transform: translateY(-1px);
+}
+
+/* Animation state classes */
+.mobile-toc-panel.panel-opening,
+.mobile-toc-panel.panel-open {
+    visibility: visible !important;
+    display: block !important;
+    pointer-events: auto !important;
+}
+
+.mobile-toc-panel.panel-open .mobile-toc-content {
+    transform: translateY(0) !important;
+    visibility: visible !important;
+}
+
+.mobile-toc-panel.panel-open .mobile-toc-overlay {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Smooth scrolling for navigation area */
+.mobile-toc-navigation {
+    scroll-behavior: smooth;
+}
+
+/* Custom scrollbar styling for webkit browsers */
+.mobile-toc-navigation::-webkit-scrollbar {
+    width: 6px;
+}
+
+.mobile-toc-navigation::-webkit-scrollbar-track {
+    background: rgba(102, 126, 234, 0.1);
+    border-radius: 3px;
+}
+
+.mobile-toc-navigation::-webkit-scrollbar-thumb {
+    background: rgba(102, 126, 234, 0.3);
+    border-radius: 3px;
+}
+
+.mobile-toc-navigation::-webkit-scrollbar-thumb:hover {
+    background: rgba(102, 126, 234, 0.5);
+}
+
+/* Responsive adjustments for very small screens */
+@media (max-width: 480px) {
+    .mobile-toc-content {
+        border-radius: 1rem 1rem 0 0;
+        max-height: 85vh;
+    }
+
+    .mobile-toc-header {
+        padding: 1.25rem 1.25rem 0.75rem 1.25rem;
+    }
+
+    .mobile-toc-title {
+        font-size: 1rem;
+    }
+
+    .mobile-toc-link {
+        padding: 0.875rem 1.25rem;
+        font-size: 0.9rem;
+    }
+
+    .mobile-toc-footer {
+        padding: 0.75rem 1.25rem 1.25rem 1.25rem;
+    }
+
+    .quick-action-btn {
+        padding: 0.625rem 1.25rem;
+        font-size: 0.85rem;
+    }
+}
+
+/* Accessibility: Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .mobile-toc-content,
+    .mobile-toc-overlay,
+    .mobile-toc-link,
+    .quick-action-btn {
+        transition: none !important;
+    }
+}
