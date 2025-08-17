@@ -657,6 +657,16 @@
                         click: null,
                     },
                 },
+                /**
+                 * Table of Contents Module for CloudSync Theme
+                 *
+                 * Automatically generates an intelligent table of contents from page headings
+                 * with smooth scrolling navigation and reading progress tracking. Enhances
+                 * content discoverability and user navigation experience on content-heavy pages.
+                 *
+                 * @since 1.0.0
+                 * @author CloudSync Theme
+                 */
                 init: function () {
                     // Create utility reference for cleaner code
                     var utils = CloudSync.adaptivePages.utils;
@@ -797,7 +807,568 @@
                         return false;
                     }
                 },
-                destroy: function () {},
+                /**
+                 * Bind Interactive Events for Table of Contents
+                 *
+                 * Establishes comprehensive event handling system for TOC functionality including
+                 * smooth scrolling navigation, visibility management, progress tracking, and
+                 * responsive collapse behavior. Creates seamless user interaction patterns
+                 * that enhance content navigation and reading experience.
+                 *
+                 * @since 1.0.0
+                 * @author CloudSync Theme
+                 * @return {boolean} True if all events bound successfully, false on failure
+                 */
+                bindEvents: function () {
+                    var utils = CloudSync.adaptivePages.utils;
+                    utils.log("Setting up TOC event handlers");
+
+                    // Verify that required elements exist
+                    if (!this.state.tocElements.desktopContainer) {
+                        utils.log(
+                            "Desktop TOC container not found, cannot bind events",
+                            "error"
+                        );
+                        return false;
+                    }
+
+                    // Setup intelligent visibility management instead of immediate activation
+                    this.setupSmartVisibility();
+
+                    // Setup navigation link handlers for smooth scrolling
+                    this.setupNavigationHandlers();
+
+                    // Setup collapse/expand functionality
+                    this.setupCollapseHandlers();
+
+                    // Setup scroll tracking for active section highlighting
+                    this.setupScrollTracking();
+
+                    // Setup reading progress bar updates
+                    this.setupProgressTracking();
+
+                    utils.log("TOC event handlers bound successfully");
+
+                    return true;
+                },
+                /**
+                 * Setup Intelligent Visibility Management for Table of Contents
+                 *
+                 * Implements sophisticated behavioral analysis to determine optimal timing
+                 * for TOC appearance based on user engagement patterns. Monitors scroll depth,
+                 * time investment, and reading behavior to show navigation assistance only when
+                 * users demonstrate genuine content engagement, preventing interface clutter
+                 * while maximizing utility for committed readers.
+                 *
+                 * @since 1.0.0
+                 * @author CloudSync Theme
+                 */
+                setupSmartVisibility: function () {
+                    var utils = CloudSync.adaptivePages.utils;
+                    var self = this;
+
+                    utils.log(
+                        "Setting up intelligent TOC visibility management"
+                    );
+
+                    // Configuration for smart visibility behavior
+                    var visibilityConfig = {
+                        scrollThreshold: 0.1, // Show TOC after 15% of content scrolled
+                        timeThreshold: 5000, // Minimum time on page (10 seconds)
+                        hideOnTop: true, // Hide when user returns to top
+                        topThreshold: 0.05, // Consider "top" as first 5% of content
+                    };
+
+                    // State tracking for user behavior analysis
+                    var behaviorState = {
+                        pageLoadTime: Date.now(), // When user arrived on page
+                        isVisible: false, // Current TOC visibility state
+                        hasBeenVisible: false, // Whether TOC has ever been shown
+                        lastScrollPosition: 0, // Previous scroll position for direction detection
+                        scrollDirection: "down", // Current scroll direction
+                    };
+
+                    var scrollHandler = utils.throttle(
+                        function () {
+                            var currentTime = Date.now();
+                            var timeOnPage =
+                                currentTime - behaviorState.pageLoadTime;
+
+                            // Calculate scroll position as percentage of total content
+                            var scrollTop =
+                                window.pageYOffset ||
+                                document.documentElement.scrollTop;
+                            var documentHeight =
+                                document.documentElement.scrollHeight -
+                                window.innerHeight;
+                            var scrollPercent = scrollTop / documentHeight;
+
+                            // Detect scroll direction for behavior analysis
+                            var newDirection =
+                                scrollTop > behaviorState.lastScrollPosition
+                                    ? "down"
+                                    : "up";
+                            behaviorState.scrollDirection = newDirection;
+                            behaviorState.lastScrollPosition = scrollTop;
+
+                            // Log detailed behavior analysis for debugging
+                            utils.log(
+                                "Behavior analysis: " +
+                                    Math.round(scrollPercent * 100) +
+                                    "% scrolled, " +
+                                    Math.round(timeOnPage / 1000) +
+                                    "s on page, scrolling " +
+                                    newDirection
+                            );
+
+                            // Apply visibility logic based on analyzed behavior
+                            self.evaluateVisibilityConditions(
+                                scrollPercent,
+                                timeOnPage,
+                                behaviorState,
+                                visibilityConfig
+                            );
+                        },
+                        100,
+                        "toc-smart-visibility"
+                    ); // Throttle to 100ms for smooth performance
+
+                    // Attach the scroll handler to monitor user behavior
+                    utils.addEventListener(window, "scroll", scrollHandler, {
+                        passive: true,
+                    });
+
+                    utils.log("Smart visibility system initialized");
+                },
+                /**
+                 * Setup Navigation Event Handlers for Table of Contents
+                 *
+                 * Establishes intelligent click handlers for TOC navigation links that provide
+                 * enhanced smooth scrolling with dynamic header offset calculation. Prevents
+                 * default browser anchor behavior and implements precise positioning that
+                 * accounts for varying header heights and viewport considerations, ensuring
+                 * target content appears optimally positioned for comfortable reading.
+                 *
+                 * @since 1.0.0
+                 * @author CloudSync Theme
+                 */
+                setupNavigationHandlers: function () {
+                    var utils = CloudSync.adaptivePages.utils;
+                    var self = this;
+
+                    utils.log("Setting up intelligent navigation handlers");
+
+                    // Find all TOC navigation links for event binding
+                    var tocLinks =
+                        this.state.tocElements.tocList.querySelectorAll(
+                            ".toc-link"
+                        );
+
+                    // Attach smart navigation handler to each link
+                    for (var i = 0; i < tocLinks.length; i++) {
+                        var link = tocLinks[i];
+
+                        utils.addEventListener(
+                            link,
+                            "click",
+                            function (event) {
+                                // Prevent default browser anchor behavior
+                                event.preventDefault();
+
+                                // Extract target heading ID from the link
+                                var targetId =
+                                    this.getAttribute("href").substring(1); // Remove # symbol
+                                var targetElement =
+                                    document.getElementById(targetId);
+
+                                if (!targetElement) {
+                                    utils.log(
+                                        "Navigation target not found: " +
+                                            targetId,
+                                        "error"
+                                    );
+                                    return;
+                                }
+
+                                // Calculate optimal scroll position accounting for dynamic header
+                                var optimalPosition =
+                                    self.calculateOptimalScrollPosition(
+                                        targetElement
+                                    );
+
+                                // Perform smooth scroll to calculated position
+                                self.performSmoothScroll(
+                                    optimalPosition,
+                                    targetElement
+                                );
+
+                                // Update browser history for proper back/forward button behavior
+                                if (history.pushState) {
+                                    history.pushState(
+                                        null,
+                                        null,
+                                        "#" + targetId
+                                    );
+                                }
+                            },
+                            { passive: false }
+                        ); // passive: false allows preventDefault()
+                    }
+
+                    utils.log(
+                        "Navigation handlers attached to " +
+                            tocLinks.length +
+                            " TOC links"
+                    );
+                },
+                /**
+                 * Setup Collapse/Expand Event Handlers for Table of Contents
+                 *
+                 * Implements sophisticated toggle functionality that allows users to minimize
+                 * the TOC to a compact view when screen space is premium, while maintaining
+                 * quick access to full navigation. Manages visual state transitions, icon
+                 * updates, and accessibility attributes to ensure seamless user experience
+                 * across different viewport sizes and interaction patterns.
+                 *
+                 * @since 1.0.0
+                 * @author CloudSync Theme
+                 * @return {boolean} True if collapse handlers configured successfully
+                 */
+                setupCollapseHandlers: function () {
+                    var utils = CloudSync.adaptivePages.utils;
+                    var self = this;
+
+                    utils.log("Setting up TOC collapse/expand functionality");
+
+                    // Find the collapse button that was created in createDesktopTOC
+                    var collapseButton =
+                        this.state.tocElements.desktopContainer.querySelector(
+                            ".toc-collapse"
+                        );
+                    if (!collapseButton) {
+                        utils.log(
+                            "Collapse button not found, cannot setup collapse handlers",
+                            "error"
+                        );
+                        return false;
+                    }
+
+                    // Initialize collapse state tracking
+                    this.state.isCollapsed = false;
+
+                    // Set up click handler for toggle functionality
+                    utils.addEventListener(
+                        collapseButton,
+                        "click",
+                        function (event) {
+                            event.preventDefault();
+
+                            // Toggle the collapsed state
+                            self.state.isCollapsed = !self.state.isCollapsed;
+
+                            // Apply visual changes through CSS classes
+                            self.updateCollapseState();
+
+                            // Log state change for debugging and user behavior analysis
+                            utils.log(
+                                "TOC " +
+                                    (self.state.isCollapsed
+                                        ? "collapsed"
+                                        : "expanded") +
+                                    " by user interaction"
+                            );
+                        },
+                        { passive: false }
+                    );
+
+                    utils.log("Collapse functionality activated successfully");
+                    return true;
+                },
+                /**
+                 * Update Visual State and Accessibility Attributes for TOC Collapse
+                 *
+                 * Synchronizes all interface elements when TOC transitions between collapsed
+                 * and expanded states. Orchestrates CSS class changes, icon transformations,
+                 * and accessibility attribute updates to maintain consistent visual feedback
+                 * and screen reader compatibility. Ensures state changes are communicated
+                 * clearly to both sighted users and assistive technology users.
+                 *
+                 * @since 1.0.0
+                 * @author CloudSync Theme
+                 */
+                updateCollapseState: function () {
+                    var utils = CloudSync.adaptivePages.utils;
+                    var tocContainer = this.state.tocElements.desktopContainer;
+                    var collapseButton =
+                        tocContainer.querySelector(".toc-collapse");
+                    var buttonIcon = collapseButton.querySelector("i");
+
+                    if (this.state.isCollapsed) {
+                        // Apply collapsed visual state
+                        tocContainer.classList.add("collapsed");
+
+                        // Update button icon to indicate expand action
+                        buttonIcon.className = "fas fa-plus";
+
+                        // Update accessibility attributes for screen readers
+                        collapseButton.setAttribute(
+                            "aria-label",
+                            "Expand table of contents"
+                        );
+                        collapseButton.setAttribute("aria-expanded", "false");
+
+                        utils.log(
+                            "Applied collapsed state: TOC minimized to compact view"
+                        );
+                    } else {
+                        // Apply expanded visual state
+                        tocContainer.classList.remove("collapsed");
+
+                        // Update button icon to indicate collapse action
+                        buttonIcon.className = "fas fa-minus";
+
+                        // Update accessibility attributes for screen readers
+                        collapseButton.setAttribute(
+                            "aria-label",
+                            "Collapse table of contents"
+                        );
+                        collapseButton.setAttribute("aria-expanded", "true");
+
+                        utils.log(
+                            "Applied expanded state: TOC showing full navigation view"
+                        );
+                    }
+                },
+                /**
+                 * Setup Intelligent Scroll Tracking for Active Section Detection
+                 *
+                 * Implements sophisticated viewport analysis to automatically highlight the
+                 * currently visible content section in the table of contents. Uses optimized
+                 * scroll detection with throttling and intelligent activation zones to provide
+                 * accurate visual feedback about user's reading position without impacting
+                 * performance. Creates intuitive navigation experience where TOC highlights
+                 * dynamically follow the user's reading progress.
+                 *
+                 * @since 1.0.0
+                 * @author CloudSync Theme
+                 */
+                setupScrollTracking: function () {
+                    var utils = CloudSync.adaptivePages.utils;
+                    var self = this;
+
+                    utils.log("Setting up intelligent active section tracking");
+
+                    // Configuration for scroll tracking behavior
+                    var trackingConfig = {
+                        activationLine: -0.5,
+                        updateThreshold: 50, // Minimum scroll distance to trigger updates
+                        debounceDelay: 100, // Delay to prevent excessive updates during rapid scrolling
+                    };
+
+                    // State for tracking scroll behavior and active sections
+                    var trackingState = {
+                        lastScrollPosition: 0, // Previous scroll position for comparison
+                        currentActiveId: null, // ID of currently highlighted section
+                        lastUpdateTime: 0, // Timestamp of last update to control frequency
+                    };
+
+                    // Create optimized scroll handler using throttling for performance
+                    var scrollTracker = utils.throttle(
+                        function () {
+                            var currentTime = Date.now();
+                            var currentScroll =
+                                window.pageYOffset ||
+                                document.documentElement.scrollTop;
+                            var scrollDifference = Math.abs(
+                                currentScroll - trackingState.lastScrollPosition
+                            );
+
+                            // Only process updates if significant scroll movement occurred
+                            if (
+                                scrollDifference >=
+                                trackingConfig.updateThreshold
+                            ) {
+                                var activeHeadingId =
+                                    self.determineActiveSection(
+                                        currentScroll,
+                                        trackingConfig.activationLine
+                                    );
+
+                                // Update highlighting only if active section actually changed
+                                if (
+                                    activeHeadingId !==
+                                    trackingState.currentActiveId
+                                ) {
+                                    self.updateActiveHighlight(
+                                        trackingState.currentActiveId,
+                                        activeHeadingId
+                                    );
+                                    trackingState.currentActiveId =
+                                        activeHeadingId;
+
+                                    utils.log(
+                                        "Active section changed to: " +
+                                            (activeHeadingId || "none")
+                                    );
+                                }
+
+                                trackingState.lastScrollPosition =
+                                    currentScroll;
+                                trackingState.lastUpdateTime = currentTime;
+                            }
+                        },
+                        trackingConfig.debounceDelay,
+                        "toc-scroll-tracking"
+                    );
+
+                    // Attach the scroll tracker to monitor user movement through document
+                    utils.addEventListener(window, "scroll", scrollTracker, {
+                        passive: true,
+                    });
+
+                    utils.log(
+                        "Active section tracking system initialized successfully"
+                    );
+                },
+                /**
+                 * Setup Reading Progress Tracking System for Content Navigation
+                 *
+                 * Establishes sophisticated progress measurement that converts scroll position
+                 * into meaningful reading completion percentage. Implements intelligent document
+                 * dimension analysis, smooth progress transitions, and psychological progress
+                 * enhancements to create engaging user feedback. Optimizes calculations for
+                 * performance while providing accurate visual representation of reading journey
+                 * through complex content structures.
+                 *
+                 * @since 1.0.0
+                 * @author CloudSync Theme
+                 */
+                setupProgressTracking: function () {
+                    var utils = CloudSync.adaptivePages.utils;
+                    var self = this;
+
+                    utils.log("Setting up reading progress tracking system");
+
+                    // Configuration for progress tracking behavior
+                    var progressConfig = {
+                        updateThreshold: 25, // Minimum scroll distance to update progress
+                        smoothingFactor: 0.1, // Controls smoothness of progress updates
+                        completionThreshold: 0.95, // Consider reading "complete" at 95% to account for footer
+                    };
+
+                    // State tracking for progress calculations
+                    var progressState = {
+                        lastCalculatedProgress: 0, // Previous progress value for comparison
+                        lastScrollPosition: 0, // Previous scroll position for threshold checking
+                        documentHeight: 0, // Cached document height for performance
+                        viewportHeight: 0, // Cached viewport height for performance
+                    };
+
+                    // Function to recalculate document dimensions when needed
+                    var updateDocumentDimensions = function () {
+                        progressState.documentHeight = Math.max(
+                            document.body.scrollHeight,
+                            document.body.offsetHeight,
+                            document.documentElement.clientHeight,
+                            document.documentElement.scrollHeight,
+                            document.documentElement.offsetHeight
+                        );
+                        progressState.viewportHeight = window.innerHeight;
+                        utils.log(
+                            "Updated document dimensions: height=" +
+                                progressState.documentHeight +
+                                "px, viewport=" +
+                                progressState.viewportHeight +
+                                "px"
+                        );
+                    };
+
+                    // Initial calculation of document dimensions
+                    updateDocumentDimensions();
+
+                    // Create optimized progress tracker with throttling for smooth performance
+                    var progressTracker = utils.throttle(
+                        function () {
+                            var currentScrollPosition =
+                                window.pageYOffset ||
+                                document.documentElement.scrollTop;
+                            var scrollDifference = Math.abs(
+                                currentScrollPosition -
+                                    progressState.lastScrollPosition
+                            );
+
+                            // Only update progress if significant scroll movement occurred
+                            if (
+                                scrollDifference >=
+                                progressConfig.updateThreshold
+                            ) {
+                                var newProgress = self.calculateReadingProgress(
+                                    currentScrollPosition,
+                                    progressState,
+                                    progressConfig
+                                );
+
+                                // Apply smoothing to prevent jarring progress jumps
+                                var smoothedProgress =
+                                    self.smoothProgressTransition(
+                                        progressState.lastCalculatedProgress,
+                                        newProgress,
+                                        progressConfig.smoothingFactor
+                                    );
+
+                                // Update visual progress bar with calculated value
+                                self.updateProgressBar(smoothedProgress);
+
+                                progressState.lastCalculatedProgress =
+                                    smoothedProgress;
+                                progressState.lastScrollPosition =
+                                    currentScrollPosition;
+                            }
+                        },
+                        50,
+                        "toc-progress-tracking"
+                    ); // 50ms throttling for smooth visual updates
+
+                    // Attach progress tracker to monitor user reading behavior
+                    utils.addEventListener(window, "scroll", progressTracker, {
+                        passive: true,
+                    });
+
+                    // Update dimensions when window is resized to maintain accuracy
+                    utils.addEventListener(
+                        window,
+                        "resize",
+                        utils.throttle(
+                            function () {
+                                updateDocumentDimensions();
+                                // Trigger immediate progress recalculation after resize
+                                progressTracker();
+                            },
+                            250,
+                            "toc-progress-resize"
+                        ),
+                        { passive: true }
+                    );
+
+                    utils.log(
+                        "Reading progress tracking system initialized successfully"
+                    );
+                },
+
+                /**
+                 * Scan Document Content for Navigation-Worthy Headings
+                 *
+                 * Performs comprehensive document analysis to identify and catalog heading
+                 * elements suitable for table of contents generation. Implements intelligent
+                 * content filtering, unique ID management, and hierarchical structure detection.
+                 * Processes both existing and dynamically generated content while ensuring
+                 * accessibility compliance and navigation reliability through robust heading
+                 * validation and cleanup procedures.
+                 *
+                 * @since 1.0.0
+                 * @author CloudSync Theme
+                 * @return {boolean} True if suitable headings found and processed successfully
+                 */
                 scanHeadings: function () {
                     var utils = CloudSync.adaptivePages.utils;
                     utils.log("Starting headings scan process");
@@ -944,6 +1515,19 @@
 
                     return true;
                 },
+                /**
+                 * Generate Human-Readable Summary of Document Heading Structure
+                 *
+                 * Analyzes the hierarchical distribution of processed headings to create
+                 * a concise textual representation of the document's structural complexity.
+                 * Provides valuable debugging information and user feedback about content
+                 * organization depth, helping both developers and content creators understand
+                 * the navigational scope and heading hierarchy patterns within the document.
+                 *
+                 * @since 1.0.0
+                 * @author CloudSync Theme
+                 * @return {string} Formatted range description (e.g., "H2-H4", "H1", "none")
+                 */
                 getHeadingLevelsRange: function () {
                     // Return empty indicator if no headings processed
                     if (
@@ -976,43 +1560,21 @@
                         );
                     }
                 },
-                generateTOC: function () {},
 
-                bindEvents: function () {
-                    var utils = CloudSync.adaptivePages.utils;
-                    var self = this; // Store reference for use in event handlers
-
-                    utils.log("Setting up TOC event handlers");
-
-                    // Verify that required elements exist
-                    if (!this.state.tocElements.desktopContainer) {
-                        utils.log(
-                            "Desktop TOC container not found, cannot bind events",
-                            "error"
-                        );
-                        return false;
-                    }
-
-                    // Setup intelligent visibility management instead of immediate activation
-                    this.setupSmartVisibility();
-
-                    // Setup navigation link handlers for smooth scrolling
-                    this.setupNavigationHandlers();
-
-                    // Setup collapse/expand functionality
-                    this.setupCollapseHandlers();
-
-                    // Setup scroll tracking for active section highlighting
-                    this.setupScrollTracking();
-
-                    // Setup reading progress bar updates
-                    this.setupProgressTracking();
-
-                    utils.log("TOC event handlers bound successfully");
-
-                    return true;
-                },
-
+                /**
+                 * Create Advanced Desktop Table of Contents Interface
+                 *
+                 * Constructs sophisticated floating navigation panel with modern glassmorphism
+                 * design and comprehensive accessibility features. Builds hierarchical heading
+                 * structure, implements interactive progress tracking, and establishes
+                 * collapsible interface elements. Creates premium user experience through
+                 * carefully orchestrated DOM construction, semantic markup, and intelligent
+                 * content organization optimized for desktop navigation patterns.
+                 *
+                 * @since 1.0.0
+                 * @author CloudSync Theme
+                 * @return {boolean} True if desktop TOC interface created successfully
+                 */
                 createDesktopTOC: function () {
                     var utils = CloudSync.adaptivePages.utils;
                     // Check for existing TOC to prevent duplicates
@@ -1141,177 +1703,22 @@
 
                     return true;
                 },
-                setupCollapseHandlers: function () {
-                    var utils = CloudSync.adaptivePages.utils;
-                    var self = this;
-
-                    utils.log("Setting up TOC collapse/expand functionality");
-
-                    // Find the collapse button that was created in createDesktopTOC
-                    var collapseButton =
-                        this.state.tocElements.desktopContainer.querySelector(
-                            ".toc-collapse"
-                        );
-                    if (!collapseButton) {
-                        utils.log(
-                            "Collapse button not found, cannot setup collapse handlers",
-                            "error"
-                        );
-                        return false;
-                    }
-
-                    // Initialize collapse state tracking
-                    this.state.isCollapsed = false;
-
-                    // Set up click handler for toggle functionality
-                    utils.addEventListener(
-                        collapseButton,
-                        "click",
-                        function (event) {
-                            event.preventDefault();
-
-                            // Toggle the collapsed state
-                            self.state.isCollapsed = !self.state.isCollapsed;
-
-                            // Apply visual changes through CSS classes
-                            self.updateCollapseState();
-
-                            // Log state change for debugging and user behavior analysis
-                            utils.log(
-                                "TOC " +
-                                    (self.state.isCollapsed
-                                        ? "collapsed"
-                                        : "expanded") +
-                                    " by user interaction"
-                            );
-                        },
-                        { passive: false }
-                    );
-
-                    utils.log("Collapse functionality activated successfully");
-                    return true;
-                },
-                updateCollapseState: function () {
-                    var utils = CloudSync.adaptivePages.utils;
-                    var tocContainer = this.state.tocElements.desktopContainer;
-                    var collapseButton =
-                        tocContainer.querySelector(".toc-collapse");
-                    var buttonIcon = collapseButton.querySelector("i");
-
-                    if (this.state.isCollapsed) {
-                        // Apply collapsed visual state
-                        tocContainer.classList.add("collapsed");
-
-                        // Update button icon to indicate expand action
-                        buttonIcon.className = "fas fa-plus";
-
-                        // Update accessibility attributes for screen readers
-                        collapseButton.setAttribute(
-                            "aria-label",
-                            "Expand table of contents"
-                        );
-                        collapseButton.setAttribute("aria-expanded", "false");
-
-                        utils.log(
-                            "Applied collapsed state: TOC minimized to compact view"
-                        );
-                    } else {
-                        // Apply expanded visual state
-                        tocContainer.classList.remove("collapsed");
-
-                        // Update button icon to indicate collapse action
-                        buttonIcon.className = "fas fa-minus";
-
-                        // Update accessibility attributes for screen readers
-                        collapseButton.setAttribute(
-                            "aria-label",
-                            "Collapse table of contents"
-                        );
-                        collapseButton.setAttribute("aria-expanded", "true");
-
-                        utils.log(
-                            "Applied expanded state: TOC showing full navigation view"
-                        );
-                    }
-                },
-                setupScrollTracking: function () {
-                    var utils = CloudSync.adaptivePages.utils;
-                    var self = this;
-
-                    utils.log("Setting up intelligent active section tracking");
-
-                    // Configuration for scroll tracking behavior
-                    var trackingConfig = {
-                        activationLine: -0.5,
-                        updateThreshold: 50, // Minimum scroll distance to trigger updates
-                        debounceDelay: 100, // Delay to prevent excessive updates during rapid scrolling
-                    };
-
-                    // State for tracking scroll behavior and active sections
-                    var trackingState = {
-                        lastScrollPosition: 0, // Previous scroll position for comparison
-                        currentActiveId: null, // ID of currently highlighted section
-                        lastUpdateTime: 0, // Timestamp of last update to control frequency
-                    };
-
-                    // Create optimized scroll handler using throttling for performance
-                    var scrollTracker = utils.throttle(
-                        function () {
-                            var currentTime = Date.now();
-                            var currentScroll =
-                                window.pageYOffset ||
-                                document.documentElement.scrollTop;
-                            var scrollDifference = Math.abs(
-                                currentScroll - trackingState.lastScrollPosition
-                            );
-
-                            // Only process updates if significant scroll movement occurred
-                            if (
-                                scrollDifference >=
-                                trackingConfig.updateThreshold
-                            ) {
-                                var activeHeadingId =
-                                    self.determineActiveSection(
-                                        currentScroll,
-                                        trackingConfig.activationLine
-                                    );
-
-                                // Update highlighting only if active section actually changed
-                                if (
-                                    activeHeadingId !==
-                                    trackingState.currentActiveId
-                                ) {
-                                    self.updateActiveHighlight(
-                                        trackingState.currentActiveId,
-                                        activeHeadingId
-                                    );
-                                    trackingState.currentActiveId =
-                                        activeHeadingId;
-
-                                    utils.log(
-                                        "Active section changed to: " +
-                                            (activeHeadingId || "none")
-                                    );
-                                }
-
-                                trackingState.lastScrollPosition =
-                                    currentScroll;
-                                trackingState.lastUpdateTime = currentTime;
-                            }
-                        },
-                        trackingConfig.debounceDelay,
-                        "toc-scroll-tracking"
-                    );
-
-                    // Attach the scroll tracker to monitor user movement through document
-                    utils.addEventListener(window, "scroll", scrollTracker, {
-                        passive: true,
-                    });
-
-                    utils.log(
-                        "Active section tracking system initialized successfully"
-                    );
-                },
+                /**
+                 * Determine Currently Active Content Section Based on Reading Position
+                 *
+                 * Implements sophisticated viewport analysis algorithm that calculates which
+                 * document section the user is actively reading by evaluating scroll position
+                 * against heading locations using configurable activation zones. Employs
+                 * geometric proximity calculations and intelligent threshold detection to
+                 * provide accurate section highlighting that reflects genuine reading progress
+                 * rather than simple scroll position, enhancing navigation relevance.
+                 *
+                 * @since 1.0.0
+                 * @author CloudSync Theme
+                 * @param {number} currentScrollPosition Current vertical scroll offset in pixels
+                 * @param {number} activationLineRatio Viewport percentage for activation zone
+                 * @return {string|null} ID of active heading element, or null if none active
+                 */
                 determineActiveSection: function (
                     currentScrollPosition,
                     activationLineRatio
@@ -1360,6 +1767,21 @@
 
                     return activeHeadingId;
                 },
+                /**
+                 * Update Visual Highlighting for Active and Previous TOC Sections
+                 *
+                 * Orchestrates seamless transitions between active section indicators by
+                 * managing CSS class applications and removals across navigation elements.
+                 * Ensures smooth visual feedback as users progress through content by
+                 * coordinating highlight removal from previously active sections and
+                 * application to newly active areas. Includes intelligent visibility
+                 * management to keep highlighted items within viewable TOC area.
+                 *
+                 * @since 1.0.0
+                 * @author CloudSync Theme
+                 * @param {string|null} previousActiveId ID of previously highlighted section
+                 * @param {string|null} newActiveId ID of section to highlight now
+                 */
                 updateActiveHighlight: function (
                     previousActiveId,
                     newActiveId
@@ -1405,6 +1827,20 @@
                         );
                     }
                 },
+                /**
+                 * Ensure Active Navigation Item Remains Visible Within TOC Scroll Area
+                 *
+                 * Implements intelligent auto-scrolling mechanism for the TOC navigation panel
+                 * when the currently highlighted section link moves outside the visible area.
+                 * Calculates precise positioning requirements using geometric analysis and
+                 * applies smooth scrolling transitions with optimal padding to maintain user
+                 * orientation. Prevents navigation confusion by keeping active items accessible
+                 * while preserving the overall TOC context and scroll position memory.
+                 *
+                 * @since 1.0.0
+                 * @author CloudSync Theme
+                 * @param {Element} activeLink DOM element of the currently active TOC link
+                 */
                 ensureActiveItemVisibility: function (activeLink) {
                     var utils = CloudSync.adaptivePages.utils;
 
@@ -1490,117 +1926,23 @@
                         );
                     }
                 },
-                setupProgressTracking: function () {
-                    var utils = CloudSync.adaptivePages.utils;
-                    var self = this;
-
-                    utils.log("Setting up reading progress tracking system");
-
-                    // Configuration for progress tracking behavior
-                    var progressConfig = {
-                        updateThreshold: 25, // Minimum scroll distance to update progress
-                        smoothingFactor: 0.1, // Controls smoothness of progress updates
-                        completionThreshold: 0.95, // Consider reading "complete" at 95% to account for footer
-                    };
-
-                    // State tracking for progress calculations
-                    var progressState = {
-                        lastCalculatedProgress: 0, // Previous progress value for comparison
-                        lastScrollPosition: 0, // Previous scroll position for threshold checking
-                        documentHeight: 0, // Cached document height for performance
-                        viewportHeight: 0, // Cached viewport height for performance
-                    };
-
-                    // Function to recalculate document dimensions when needed
-                    var updateDocumentDimensions = function () {
-                        progressState.documentHeight = Math.max(
-                            document.body.scrollHeight,
-                            document.body.offsetHeight,
-                            document.documentElement.clientHeight,
-                            document.documentElement.scrollHeight,
-                            document.documentElement.offsetHeight
-                        );
-                        progressState.viewportHeight = window.innerHeight;
-                        utils.log(
-                            "Updated document dimensions: height=" +
-                                progressState.documentHeight +
-                                "px, viewport=" +
-                                progressState.viewportHeight +
-                                "px"
-                        );
-                    };
-
-                    // Initial calculation of document dimensions
-                    updateDocumentDimensions();
-
-                    // Create optimized progress tracker with throttling for smooth performance
-                    var progressTracker = utils.throttle(
-                        function () {
-                            var currentScrollPosition =
-                                window.pageYOffset ||
-                                document.documentElement.scrollTop;
-                            var scrollDifference = Math.abs(
-                                currentScrollPosition -
-                                    progressState.lastScrollPosition
-                            );
-
-                            // Only update progress if significant scroll movement occurred
-                            if (
-                                scrollDifference >=
-                                progressConfig.updateThreshold
-                            ) {
-                                var newProgress = self.calculateReadingProgress(
-                                    currentScrollPosition,
-                                    progressState,
-                                    progressConfig
-                                );
-
-                                // Apply smoothing to prevent jarring progress jumps
-                                var smoothedProgress =
-                                    self.smoothProgressTransition(
-                                        progressState.lastCalculatedProgress,
-                                        newProgress,
-                                        progressConfig.smoothingFactor
-                                    );
-
-                                // Update visual progress bar with calculated value
-                                self.updateProgressBar(smoothedProgress);
-
-                                progressState.lastCalculatedProgress =
-                                    smoothedProgress;
-                                progressState.lastScrollPosition =
-                                    currentScrollPosition;
-                            }
-                        },
-                        50,
-                        "toc-progress-tracking"
-                    ); // 50ms throttling for smooth visual updates
-
-                    // Attach progress tracker to monitor user reading behavior
-                    utils.addEventListener(window, "scroll", progressTracker, {
-                        passive: true,
-                    });
-
-                    // Update dimensions when window is resized to maintain accuracy
-                    utils.addEventListener(
-                        window,
-                        "resize",
-                        utils.throttle(
-                            function () {
-                                updateDocumentDimensions();
-                                // Trigger immediate progress recalculation after resize
-                                progressTracker();
-                            },
-                            250,
-                            "toc-progress-resize"
-                        ),
-                        { passive: true }
-                    );
-
-                    utils.log(
-                        "Reading progress tracking system initialized successfully"
-                    );
-                },
+                /**
+                 * Calculate Precise Reading Progress Percentage from Scroll Position
+                 *
+                 * Performs sophisticated mathematical analysis to convert raw scroll coordinates
+                 * into meaningful reading completion percentage. Implements intelligent document
+                 * dimension analysis, handles edge cases for varying content heights, and
+                 * applies psychological progress enhancements to create engaging user feedback.
+                 * Accounts for viewport considerations and maximum scrollable distances to
+                 * ensure accurate progress representation across different content structures.
+                 *
+                 * @since 1.0.0
+                 * @author CloudSync Theme
+                 * @param {number} currentScrollPosition Current vertical scroll offset in pixels
+                 * @param {Object} progressState Cached state with document dimensions
+                 * @param {Object} progressConfig Configuration for progress calculation behavior
+                 * @return {number} Progress value between 0 and 1 representing completion percentage
+                 */
                 calculateReadingProgress: function (
                     currentScrollPosition,
                     progressState,
@@ -1668,6 +2010,23 @@
 
                     return clampedProgress;
                 },
+                /**
+                 * Apply Psychological Progress Enhancement and User Experience Refinements
+                 *
+                 * Implements sophisticated progress manipulation techniques based on user
+                 * experience research to create more engaging and motivating reading feedback.
+                 * Applies early progress boosting for initial engagement, smooth completion
+                 * transitions using easing functions, and intelligent threshold management
+                 * that accounts for user psychology. Transforms raw mathematical progress
+                 * into psychologically satisfying progress perception that encourages
+                 * continued content consumption and reduces abandonment rates.
+                 *
+                 * @since 1.0.0
+                 * @author CloudSync Theme
+                 * @param {number} rawProgress Unmodified progress value from 0 to 1
+                 * @param {Object} progressConfig Configuration object with adjustment thresholds
+                 * @return {number} Enhanced progress value optimized for user experience
+                 */
                 applyProgressAdjustments: function (
                     rawProgress,
                     progressConfig
@@ -1703,12 +2062,45 @@
                     // Ensure final result stays within valid bounds
                     return Math.min(1, Math.max(0, adjustedProgress));
                 },
+                /**
+                 * Quadratic Easing Function for Natural Animation Transitions
+                 *
+                 * Implements mathematical interpolation curve that creates smooth acceleration
+                 * and deceleration patterns mimicking natural motion physics. Provides organic
+                 * feeling transitions for progress animations by applying quadratic mathematical
+                 * functions that ease in during the first half of animation and ease out
+                 * during the second half. Essential for creating professional-quality user
+                 * interface animations that feel intuitive and visually pleasing rather
+                 * than mechanically linear or jarring in their movement patterns.
+                 *
+                 * @since 1.0.0
+                 * @author CloudSync Theme
+                 * @param {number} t Time parameter between 0 and 1 representing animation progress
+                 * @return {number} Eased value between 0 and 1 with smooth acceleration curve
+                 */
                 easeInOutQuad: function (t) {
                     // Quadratic easing function for smooth animation curves
                     // Creates natural acceleration and deceleration in progress changes
                     return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
                 },
-
+                /**
+                 * Apply Intelligent Progress Value Interpolation for Smooth Visual Transitions
+                 *
+                 * Implements adaptive mathematical interpolation between previous and current
+                 * progress values to eliminate jarring visual jumps during scroll events.
+                 * Uses contextual smoothing algorithms that adjust responsiveness based on
+                 * change magnitude and completion proximity. Creates fluid progress animations
+                 * that feel natural and responsive while maintaining accuracy, particularly
+                 * during rapid scrolling movements or document navigation jumps that would
+                 * otherwise create disorienting visual discontinuities.
+                 *
+                 * @since 1.0.0
+                 * @author CloudSync Theme
+                 * @param {number} previousProgress Last calculated progress value (0-1)
+                 * @param {number} newProgress Current raw progress calculation (0-1)
+                 * @param {number} smoothingFactor Base interpolation strength (0-1)
+                 * @return {number} Smoothed progress value optimized for visual continuity
+                 */
                 smoothProgressTransition: function (
                     previousProgress,
                     newProgress,
@@ -1743,7 +2135,20 @@
 
                     return previousProgress + smoothedChange;
                 },
-
+                /**
+                 * Update Visual Progress Bar Display with Accessibility Integration
+                 *
+                 * Synchronizes mathematical progress calculations with visual representation and
+                 * assistive technology communication. Transforms decimal progress values into
+                 * percentage-based CSS width properties while maintaining comprehensive ARIA
+                 * attribute updates for screen reader compatibility. Ensures progress
+                 * information reaches all users through both visual cues and semantic markup,
+                 * creating inclusive progress feedback that meets modern accessibility standards.
+                 *
+                 * @since 1.0.0
+                 * @author CloudSync Theme
+                 * @param {number} progressValue Calculated progress value between 0 and 1
+                 */
                 updateProgressBar: function (progressValue) {
                     var utils = CloudSync.adaptivePages.utils;
                     var progressBar = this.state.tocElements.progressBar;
@@ -1785,85 +2190,24 @@
                             ")"
                     );
                 },
-                createMobileTOC: function () {},
-                handleBreakpointChange: function () {},
-                setupSmartVisibility: function () {
-                    var utils = CloudSync.adaptivePages.utils;
-                    var self = this;
-
-                    utils.log(
-                        "Setting up intelligent TOC visibility management"
-                    );
-
-                    // Configuration for smart visibility behavior
-                    var visibilityConfig = {
-                        scrollThreshold: 0.1, // Show TOC after 15% of content scrolled
-                        timeThreshold: 5000, // Minimum time on page (10 seconds)
-                        hideOnTop: true, // Hide when user returns to top
-                        topThreshold: 0.05, // Consider "top" as first 5% of content
-                    };
-
-                    // State tracking for user behavior analysis
-                    var behaviorState = {
-                        pageLoadTime: Date.now(), // When user arrived on page
-                        isVisible: false, // Current TOC visibility state
-                        hasBeenVisible: false, // Whether TOC has ever been shown
-                        lastScrollPosition: 0, // Previous scroll position for direction detection
-                        scrollDirection: "down", // Current scroll direction
-                    };
-
-                    var scrollHandler = utils.throttle(
-                        function () {
-                            var currentTime = Date.now();
-                            var timeOnPage =
-                                currentTime - behaviorState.pageLoadTime;
-
-                            // Calculate scroll position as percentage of total content
-                            var scrollTop =
-                                window.pageYOffset ||
-                                document.documentElement.scrollTop;
-                            var documentHeight =
-                                document.documentElement.scrollHeight -
-                                window.innerHeight;
-                            var scrollPercent = scrollTop / documentHeight;
-
-                            // Detect scroll direction for behavior analysis
-                            var newDirection =
-                                scrollTop > behaviorState.lastScrollPosition
-                                    ? "down"
-                                    : "up";
-                            behaviorState.scrollDirection = newDirection;
-                            behaviorState.lastScrollPosition = scrollTop;
-
-                            // Log detailed behavior analysis for debugging
-                            utils.log(
-                                "Behavior analysis: " +
-                                    Math.round(scrollPercent * 100) +
-                                    "% scrolled, " +
-                                    Math.round(timeOnPage / 1000) +
-                                    "s on page, scrolling " +
-                                    newDirection
-                            );
-
-                            // Apply visibility logic based on analyzed behavior
-                            self.evaluateVisibilityConditions(
-                                scrollPercent,
-                                timeOnPage,
-                                behaviorState,
-                                visibilityConfig
-                            );
-                        },
-                        100,
-                        "toc-smart-visibility"
-                    ); // Throttle to 100ms for smooth performance
-
-                    // Attach the scroll handler to monitor user behavior
-                    utils.addEventListener(window, "scroll", scrollHandler, {
-                        passive: true,
-                    });
-
-                    utils.log("Smart visibility system initialized");
-                },
+                /**
+                 * Orchestrate Complex Decision Logic for Table of Contents Visibility
+                 *
+                 * Functions as the central decision-making engine that determines whether TOC
+                 * should appear or remain hidden based on sophisticated user behavior analysis.
+                 * Coordinates multiple data sources including scroll progress, time investment,
+                 * and behavioral patterns to make intelligent visibility decisions. Manages
+                 * state transitions smoothly while providing detailed reasoning for debugging
+                 * and optimization purposes, ensuring TOC appears precisely when users would
+                 * benefit most from navigation assistance.
+                 *
+                 * @since 1.0.0
+                 * @author CloudSync Theme
+                 * @param {number} scrollPercent Current scroll position as decimal (0-1)
+                 * @param {number} timeOnPage Milliseconds user has spent on current page
+                 * @param {Object} behaviorState Current user behavior tracking data
+                 * @param {Object} visibilityConfig Configuration thresholds for visibility logic
+                 */
                 evaluateVisibilityConditions: function (
                     scrollPercent,
                     timeOnPage,
@@ -1902,6 +2246,25 @@
                         );
                     }
                 },
+                /**
+                 * Calculate Optimal TOC Visibility Using Multi-Factor Behavioral Analysis
+                 *
+                 * Implements sophisticated decision tree algorithm that evaluates multiple user
+                 * engagement indicators to determine the mathematically optimal moment for TOC
+                 * presentation. Combines time-based commitment analysis with scroll-depth
+                 * assessment and applies intelligent override logic for edge cases like document
+                 * navigation patterns. Creates data-driven visibility decisions that maximize
+                 * user utility while minimizing interface intrusion through evidence-based
+                 * engagement threshold evaluation.
+                 *
+                 * @since 1.0.0
+                 * @author CloudSync Theme
+                 * @param {number} scrollPercent Current document scroll progress (0-1)
+                 * @param {number} timeOnPage User session duration in milliseconds
+                 * @param {Object} behaviorState Comprehensive user interaction tracking data
+                 * @param {Object} visibilityConfig Business rules and threshold configuration
+                 * @return {boolean} True if TOC should be visible based on current conditions
+                 */
                 calculateOptimalVisibility: function (
                     scrollPercent,
                     timeOnPage,
@@ -1935,6 +2298,22 @@
                     // Final decision combines primary logic with override scenarios
                     return primaryCondition && !overrideCondition;
                 },
+                /**
+                 * Execute Smooth Visual Transitions for Table of Contents Display State
+                 *
+                 * Manages the actual implementation of visibility decisions by orchestrating
+                 * CSS class manipulations and state synchronization between logical visibility
+                 * conditions and visual presentation. Applies elegant animation triggers through
+                 * class-based styling while maintaining comprehensive state tracking for future
+                 * decision-making cycles. Ensures visibility changes feel natural and responsive
+                 * by leveraging CSS transitions and providing detailed logging for behavioral
+                 * analysis and system optimization.
+                 *
+                 * @since 1.0.0
+                 * @author CloudSync Theme
+                 * @param {boolean} shouldBeVisible Target visibility state from decision logic
+                 * @param {Object} behaviorState User behavior tracking object to update
+                 */
                 updateTOCVisibility: function (shouldBeVisible, behaviorState) {
                     var utils = CloudSync.adaptivePages.utils;
 
@@ -1961,6 +2340,25 @@
                         utils.log("TOC deactivated with smooth animation");
                     }
                 },
+                /**
+                 * Generate Detailed Diagnostic Report for TOC Visibility State Changes
+                 *
+                 * Performs comprehensive forensic analysis of user behavior data to determine
+                 * and articulate the specific factors that triggered a visibility transition.
+                 * Creates human-readable explanations by examining threshold comparisons,
+                 * timing analysis, and behavioral pattern recognition. Provides essential
+                 * debugging intelligence and user experience insights by translating complex
+                 * algorithmic decisions into clear diagnostic messages that facilitate system
+                 * optimization and behavioral understanding.
+                 *
+                 * @since 1.0.0
+                 * @author CloudSync Theme
+                 * @param {number} scrollPercent Current scroll position as percentage
+                 * @param {number} timeOnPage Session duration in milliseconds
+                 * @param {Object} behaviorState Complete user interaction state data
+                 * @param {Object} visibilityConfig Threshold configuration for analysis
+                 * @return {string} Human-readable explanation of visibility change trigger
+                 */
                 getVisibilityChangeReason: function (
                     scrollPercent,
                     timeOnPage,
@@ -2012,75 +2410,22 @@
                         behaviorState.scrollDirection
                     );
                 },
-                setupNavigationHandlers: function () {
-                    var utils = CloudSync.adaptivePages.utils;
-                    var self = this;
-
-                    utils.log("Setting up intelligent navigation handlers");
-
-                    // Find all TOC navigation links for event binding
-                    var tocLinks =
-                        this.state.tocElements.tocList.querySelectorAll(
-                            ".toc-link"
-                        );
-
-                    // Attach smart navigation handler to each link
-                    for (var i = 0; i < tocLinks.length; i++) {
-                        var link = tocLinks[i];
-
-                        utils.addEventListener(
-                            link,
-                            "click",
-                            function (event) {
-                                // Prevent default browser anchor behavior
-                                event.preventDefault();
-
-                                // Extract target heading ID from the link
-                                var targetId =
-                                    this.getAttribute("href").substring(1); // Remove # symbol
-                                var targetElement =
-                                    document.getElementById(targetId);
-
-                                if (!targetElement) {
-                                    utils.log(
-                                        "Navigation target not found: " +
-                                            targetId,
-                                        "error"
-                                    );
-                                    return;
-                                }
-
-                                // Calculate optimal scroll position accounting for dynamic header
-                                var optimalPosition =
-                                    self.calculateOptimalScrollPosition(
-                                        targetElement
-                                    );
-
-                                // Perform smooth scroll to calculated position
-                                self.performSmoothScroll(
-                                    optimalPosition,
-                                    targetElement
-                                );
-
-                                // Update browser history for proper back/forward button behavior
-                                if (history.pushState) {
-                                    history.pushState(
-                                        null,
-                                        null,
-                                        "#" + targetId
-                                    );
-                                }
-                            },
-                            { passive: false }
-                        ); // passive: false allows preventDefault()
-                    }
-
-                    utils.log(
-                        "Navigation handlers attached to " +
-                            tocLinks.length +
-                            " TOC links"
-                    );
-                },
+                /**
+                 * Calculate Precise Scroll Target Position with Dynamic Header Compensation
+                 *
+                 * Performs intelligent geometric calculations to determine the optimal scroll
+                 * destination that accounts for fixed headers, viewport considerations, and
+                 * content positioning nuances. Implements dynamic offset computation that
+                 * adapts to varying header heights and ensures target content appears in the
+                 * most readable viewport position. Creates seamless navigation experience by
+                 * preventing content from being obscured by interface elements during smooth
+                 * scrolling operations.
+                 *
+                 * @since 1.0.0
+                 * @author CloudSync Theme
+                 * @param {Element} targetElement DOM element to scroll to
+                 * @return {number} Calculated scroll position in pixels for optimal content display
+                 */
                 calculateOptimalScrollPosition: function (targetElement) {
                     var utils = CloudSync.adaptivePages.utils;
 
@@ -2121,6 +2466,22 @@
 
                     return finalPosition;
                 },
+                /**
+                 * Execute Cross-Browser Compatible Smooth Scrolling with Fallback Support
+                 *
+                 * Implements progressive enhancement approach that prioritizes modern native
+                 * smooth scrolling API while providing custom animation fallbacks for older
+                 * browsers. Orchestrates scroll completion detection and user feedback systems
+                 * to ensure consistent navigation experience across all browser environments.
+                 * Manages performance optimization by leveraging browser-native implementations
+                 * when available and gracefully degrading to JavaScript-based alternatives
+                 * for comprehensive compatibility coverage.
+                 *
+                 * @since 1.0.0
+                 * @author CloudSync Theme
+                 * @param {number} targetPosition Calculated scroll destination in pixels
+                 * @param {Element} targetElement DOM element being scrolled to for completion detection
+                 */
                 performSmoothScroll: function (targetPosition, targetElement) {
                     var utils = CloudSync.adaptivePages.utils;
 
@@ -2157,6 +2518,22 @@
                         );
                     }
                 },
+                /**
+                 * Monitor and Detect Native Smooth Scroll Animation Completion
+                 *
+                 * Implements intelligent polling mechanism to determine when browser-native
+                 * smooth scrolling has reached its target destination. Uses precision timing
+                 * and position tolerance calculations to detect completion without interfering
+                 * with browser optimization. Provides essential feedback for user experience
+                 * enhancements like progress indicators or subsequent animations while
+                 * maintaining performance through configurable polling intervals and maximum
+                 * wait time constraints for reliable completion detection.
+                 *
+                 * @since 1.0.0
+                 * @author CloudSync Theme
+                 * @param {number} targetPosition Expected final scroll position in pixels
+                 * @param {Element} targetElement Target DOM element for additional completion verification
+                 */
                 detectScrollCompletion: function (
                     targetPosition,
                     targetElement
