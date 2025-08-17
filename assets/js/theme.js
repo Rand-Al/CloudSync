@@ -977,10 +977,932 @@
                     }
                 },
                 generateTOC: function () {},
-                bindEvents: function () {},
-                createDesktopTOC: function () {},
+
+                bindEvents: function () {
+                    var utils = CloudSync.adaptivePages.utils;
+                    var self = this; // Store reference for use in event handlers
+
+                    utils.log("Setting up TOC event handlers");
+
+                    // Verify that required elements exist
+                    if (!this.state.tocElements.desktopContainer) {
+                        utils.log(
+                            "Desktop TOC container not found, cannot bind events",
+                            "error"
+                        );
+                        return false;
+                    }
+
+                    // Setup intelligent visibility management instead of immediate activation
+                    this.setupSmartVisibility();
+
+                    // Setup navigation link handlers for smooth scrolling
+                    this.setupNavigationHandlers();
+
+                    // Setup collapse/expand functionality
+                    this.setupCollapseHandlers();
+
+                    // Setup scroll tracking for active section highlighting
+                    this.setupScrollTracking();
+
+                    // Setup reading progress bar updates
+                    this.setupProgressTracking();
+
+                    utils.log("TOC event handlers bound successfully");
+
+                    return true;
+                },
+
+                createDesktopTOC: function () {
+                    var utils = CloudSync.adaptivePages.utils;
+                    // Check for existing TOC to prevent duplicates
+                    var existingTOC = document.querySelector(".advanced-toc");
+                    if (existingTOC) {
+                        utils.log(
+                            "Removing existing desktop TOC to prevent duplicates"
+                        );
+                        existingTOC.parentNode.removeChild(existingTOC);
+                    }
+                    utils.log("Creating desktop TOC interface");
+
+                    // Find suitable container for TOC placement
+                    var targetContainer = utils.querySelector(
+                        this.config.containerSelector
+                    );
+                    if (!targetContainer) {
+                        utils.log(
+                            "Target container not found: " +
+                                this.config.containerSelector,
+                            "error"
+                        );
+                        return false;
+                    }
+
+                    // Create main TOC container with modern glassmorphism design
+                    var tocContainer = document.createElement("div");
+                    tocContainer.className = "advanced-toc";
+                    tocContainer.setAttribute(
+                        "aria-label",
+                        "Table of Contents Navigation"
+                    );
+
+                    // Create header section with title and controls
+                    var tocHeader = document.createElement("div");
+                    tocHeader.className = "toc-header";
+
+                    var tocTitle = document.createElement("div");
+                    tocTitle.className = "toc-title";
+                    tocTitle.innerHTML =
+                        '</span><span>Table of Contents</span><i class="fas fa-list-ul" aria-hidden="true"></i>';
+
+                    var tocControls = document.createElement("div");
+                    tocControls.className = "toc-controls";
+
+                    var collapseButton = document.createElement("button");
+                    collapseButton.className = "toc-collapse";
+                    collapseButton.setAttribute(
+                        "aria-label",
+                        "Collapse table of contents"
+                    );
+                    collapseButton.innerHTML =
+                        '<i class="fas fa-minus" aria-hidden="true"></i>';
+
+                    tocControls.appendChild(collapseButton);
+                    tocHeader.appendChild(tocControls);
+                    tocHeader.appendChild(tocTitle);
+
+                    // Create reading progress indicator
+                    var tocProgress = document.createElement("div");
+                    tocProgress.className = "toc-progress";
+
+                    var progressBar = document.createElement("div");
+                    progressBar.className = "toc-progress-bar";
+                    progressBar.setAttribute("role", "progressbar");
+                    progressBar.setAttribute("aria-valuemin", "0");
+                    progressBar.setAttribute("aria-valuemax", "100");
+                    progressBar.setAttribute("aria-valuenow", "0");
+                    progressBar.setAttribute("aria-label", "Reading progress");
+
+                    tocProgress.appendChild(progressBar);
+
+                    // Create navigation container for heading links
+                    var tocNavigation = document.createElement("div");
+                    tocNavigation.className = "toc-navigation";
+
+                    var tocList = document.createElement("ul");
+                    tocList.className = "toc-list";
+                    tocList.setAttribute("role", "navigation");
+                    tocList.setAttribute(
+                        "aria-label",
+                        "Document outline navigation"
+                    );
+
+                    // Generate navigation items from collected heading data
+                    for (var i = 0; i < this.state.headings.length; i++) {
+                        var heading = this.state.headings[i];
+
+                        var listItem = document.createElement("li");
+                        listItem.className = "toc-item toc-h" + heading.level;
+
+                        var link = document.createElement("a");
+                        link.className = "toc-link";
+                        link.href = "#" + heading.id;
+                        link.textContent = heading.text;
+                        link.setAttribute("data-heading-id", heading.id);
+                        link.setAttribute(
+                            "aria-describedby",
+                            "toc-description"
+                        );
+
+                        listItem.appendChild(link);
+                        tocList.appendChild(listItem);
+                    }
+
+                    tocNavigation.appendChild(tocList);
+
+                    // Assemble all components into complete TOC structure
+                    tocContainer.appendChild(tocHeader);
+                    tocContainer.appendChild(tocProgress);
+                    tocContainer.appendChild(tocNavigation);
+
+                    // Store references to key elements for future manipulation
+                    this.state.tocElements.desktopContainer = tocContainer;
+                    this.state.tocElements.progressBar = progressBar;
+                    this.state.tocElements.tocList = tocList;
+
+                    // Insert TOC into page at optimal position
+                    targetContainer.appendChild(tocContainer);
+
+                    utils.log(
+                        "Desktop TOC interface created successfully with " +
+                            this.state.headings.length +
+                            " navigation items"
+                    );
+
+                    return true;
+                },
+                setupCollapseHandlers: function () {
+                    var utils = CloudSync.adaptivePages.utils;
+                    var self = this;
+
+                    utils.log("Setting up TOC collapse/expand functionality");
+
+                    // Find the collapse button that was created in createDesktopTOC
+                    var collapseButton =
+                        this.state.tocElements.desktopContainer.querySelector(
+                            ".toc-collapse"
+                        );
+                    if (!collapseButton) {
+                        utils.log(
+                            "Collapse button not found, cannot setup collapse handlers",
+                            "error"
+                        );
+                        return false;
+                    }
+
+                    // Initialize collapse state tracking
+                    this.state.isCollapsed = false;
+
+                    // Set up click handler for toggle functionality
+                    utils.addEventListener(
+                        collapseButton,
+                        "click",
+                        function (event) {
+                            event.preventDefault();
+
+                            // Toggle the collapsed state
+                            self.state.isCollapsed = !self.state.isCollapsed;
+
+                            // Apply visual changes through CSS classes
+                            self.updateCollapseState();
+
+                            // Log state change for debugging and user behavior analysis
+                            utils.log(
+                                "TOC " +
+                                    (self.state.isCollapsed
+                                        ? "collapsed"
+                                        : "expanded") +
+                                    " by user interaction"
+                            );
+                        },
+                        { passive: false }
+                    );
+
+                    utils.log("Collapse functionality activated successfully");
+                    return true;
+                },
+                updateCollapseState: function () {
+                    var utils = CloudSync.adaptivePages.utils;
+                    var tocContainer = this.state.tocElements.desktopContainer;
+                    var collapseButton =
+                        tocContainer.querySelector(".toc-collapse");
+                    var buttonIcon = collapseButton.querySelector("i");
+
+                    if (this.state.isCollapsed) {
+                        // Apply collapsed visual state
+                        tocContainer.classList.add("collapsed");
+
+                        // Update button icon to indicate expand action
+                        buttonIcon.className = "fas fa-plus";
+
+                        // Update accessibility attributes for screen readers
+                        collapseButton.setAttribute(
+                            "aria-label",
+                            "Expand table of contents"
+                        );
+                        collapseButton.setAttribute("aria-expanded", "false");
+
+                        utils.log(
+                            "Applied collapsed state: TOC minimized to compact view"
+                        );
+                    } else {
+                        // Apply expanded visual state
+                        tocContainer.classList.remove("collapsed");
+
+                        // Update button icon to indicate collapse action
+                        buttonIcon.className = "fas fa-minus";
+
+                        // Update accessibility attributes for screen readers
+                        collapseButton.setAttribute(
+                            "aria-label",
+                            "Collapse table of contents"
+                        );
+                        collapseButton.setAttribute("aria-expanded", "true");
+
+                        utils.log(
+                            "Applied expanded state: TOC showing full navigation view"
+                        );
+                    }
+                },
+                setupScrollTracking: function () {
+                    var utils = CloudSync.adaptivePages.utils;
+                    var self = this;
+
+                    utils.log("Setting up intelligent active section tracking");
+
+                    // Configuration for scroll tracking behavior
+                    var trackingConfig = {
+                        activationLine: -0.5,
+                        updateThreshold: 50, // Minimum scroll distance to trigger updates
+                        debounceDelay: 100, // Delay to prevent excessive updates during rapid scrolling
+                    };
+
+                    // State for tracking scroll behavior and active sections
+                    var trackingState = {
+                        lastScrollPosition: 0, // Previous scroll position for comparison
+                        currentActiveId: null, // ID of currently highlighted section
+                        lastUpdateTime: 0, // Timestamp of last update to control frequency
+                    };
+
+                    // Create optimized scroll handler using throttling for performance
+                    var scrollTracker = utils.throttle(
+                        function () {
+                            var currentTime = Date.now();
+                            var currentScroll =
+                                window.pageYOffset ||
+                                document.documentElement.scrollTop;
+                            var scrollDifference = Math.abs(
+                                currentScroll - trackingState.lastScrollPosition
+                            );
+
+                            // Only process updates if significant scroll movement occurred
+                            if (
+                                scrollDifference >=
+                                trackingConfig.updateThreshold
+                            ) {
+                                var activeHeadingId =
+                                    self.determineActiveSection(
+                                        currentScroll,
+                                        trackingConfig.activationLine
+                                    );
+
+                                // Update highlighting only if active section actually changed
+                                if (
+                                    activeHeadingId !==
+                                    trackingState.currentActiveId
+                                ) {
+                                    self.updateActiveHighlight(
+                                        trackingState.currentActiveId,
+                                        activeHeadingId
+                                    );
+                                    trackingState.currentActiveId =
+                                        activeHeadingId;
+
+                                    utils.log(
+                                        "Active section changed to: " +
+                                            (activeHeadingId || "none")
+                                    );
+                                }
+
+                                trackingState.lastScrollPosition =
+                                    currentScroll;
+                                trackingState.lastUpdateTime = currentTime;
+                            }
+                        },
+                        trackingConfig.debounceDelay,
+                        "toc-scroll-tracking"
+                    );
+
+                    // Attach the scroll tracker to monitor user movement through document
+                    utils.addEventListener(window, "scroll", scrollTracker, {
+                        passive: true,
+                    });
+
+                    utils.log(
+                        "Active section tracking system initialized successfully"
+                    );
+                },
+                determineActiveSection: function (
+                    currentScrollPosition,
+                    activationLineRatio
+                ) {
+                    var utils = CloudSync.adaptivePages.utils;
+
+                    // Calculate the activation line position in viewport
+                    var viewportHeight = window.innerHeight;
+                    var activationLinePosition =
+                        currentScrollPosition +
+                        viewportHeight * activationLineRatio;
+
+                    var activeHeadingId = null;
+                    var smallestDistance = Infinity;
+
+                    // Analyze each heading to find the one closest to activation line
+                    for (var i = 0; i < this.state.headings.length; i++) {
+                        var heading = this.state.headings[i];
+                        var headingPosition = heading.offsetTop;
+
+                        // Calculate how far this heading is from our activation line
+                        var distanceFromLine = Math.abs(
+                            headingPosition - activationLinePosition
+                        );
+
+                        // Only consider headings that are above or at the activation line
+                        // This ensures we highlight the section the user is currently reading
+                        if (
+                            headingPosition <= activationLinePosition &&
+                            distanceFromLine < smallestDistance
+                        ) {
+                            smallestDistance = distanceFromLine;
+                            activeHeadingId = heading.id;
+                        }
+                    }
+
+                    // Log detailed analysis for debugging and optimization
+                    utils.log(
+                        "Active section analysis: scroll=" +
+                            Math.round(currentScrollPosition) +
+                            "px, activation=" +
+                            Math.round(activationLinePosition) +
+                            "px, result=" +
+                            (activeHeadingId || "none")
+                    );
+
+                    return activeHeadingId;
+                },
+                updateActiveHighlight: function (
+                    previousActiveId,
+                    newActiveId
+                ) {
+                    var utils = CloudSync.adaptivePages.utils;
+
+                    // Remove highlight from previously active section if it exists
+                    if (previousActiveId) {
+                        var previousLink =
+                            this.state.tocElements.tocList.querySelector(
+                                '[data-heading-id="' + previousActiveId + '"]'
+                            );
+                        if (previousLink) {
+                            previousLink.classList.remove("active");
+                            utils.log(
+                                "Removed active highlight from: " +
+                                    previousActiveId
+                            );
+                        }
+                    }
+
+                    // Apply highlight to newly active section if one is determined
+                    if (newActiveId) {
+                        var newActiveLink =
+                            this.state.tocElements.tocList.querySelector(
+                                '[data-heading-id="' + newActiveId + '"]'
+                            );
+                        if (newActiveLink) {
+                            newActiveLink.classList.add("active");
+                            utils.log(
+                                "Applied active highlight to: " + newActiveId
+                            );
+
+                            // Ensure highlighted item is visible in TOC if content is long
+                            this.ensureActiveItemVisibility(newActiveLink);
+                        }
+                    }
+
+                    // Handle case where no section is active (e.g., at very top of document)
+                    if (!newActiveId && previousActiveId) {
+                        utils.log(
+                            "No active section determined - user may be at document beginning"
+                        );
+                    }
+                },
+                ensureActiveItemVisibility: function (activeLink) {
+                    var utils = CloudSync.adaptivePages.utils;
+
+                    // Find the correct scrollable container - should be .toc-navigation
+                    var tocNavigation =
+                        this.state.tocElements.desktopContainer.querySelector(
+                            ".toc-navigation"
+                        );
+                    if (!tocNavigation) {
+                        utils.log(
+                            "TOC navigation container not found for auto-scroll",
+                            "warn"
+                        );
+                        return;
+                    }
+
+                    // Check if the TOC navigation area actually needs scrolling
+                    var hasVerticalScroll =
+                        tocNavigation.scrollHeight > tocNavigation.clientHeight;
+                    if (!hasVerticalScroll) {
+                        utils.log(
+                            "TOC content fits in visible area, no scrolling needed"
+                        );
+                        return; // No scrolling needed if all content is visible
+                    }
+
+                    // Calculate positions more precisely using getBoundingClientRect for accuracy
+                    var containerRect = tocNavigation.getBoundingClientRect();
+                    var linkRect = activeLink.getBoundingClientRect();
+
+                    // Calculate relative positions within the scrollable container
+                    var containerTop = 0;
+                    var containerBottom = containerRect.height;
+                    var linkTop =
+                        linkRect.top -
+                        containerRect.top +
+                        tocNavigation.scrollTop;
+                    var linkBottom = linkTop + linkRect.height;
+                    var currentScrollTop = tocNavigation.scrollTop;
+
+                    // Determine if active link is outside visible area and calculate target position
+                    var needsScrolling = false;
+                    var targetScrollPosition = currentScrollTop;
+                    var padding = 40; // Generous padding for better visual separation
+
+                    if (linkTop < currentScrollTop + padding) {
+                        // Active link is above visible area - scroll up to show it with padding
+                        needsScrolling = true;
+                        targetScrollPosition = Math.max(0, linkTop - padding);
+                        utils.log(
+                            "Scrolling TOC up to show active item: " +
+                                activeLink.textContent.substring(0, 30) +
+                                "..."
+                        );
+                    } else if (
+                        linkBottom >
+                        currentScrollTop + containerRect.height - padding
+                    ) {
+                        // Active link is below visible area - scroll down to show it with padding
+                        needsScrolling = true;
+                        targetScrollPosition =
+                            linkBottom - containerRect.height + padding;
+                        utils.log(
+                            "Scrolling TOC down to show active item: " +
+                                activeLink.textContent.substring(0, 30) +
+                                "..."
+                        );
+                    }
+
+                    // Perform smooth scrolling within the TOC if needed
+                    if (needsScrolling) {
+                        tocNavigation.scrollTo({
+                            top: Math.max(0, targetScrollPosition),
+                            behavior: "smooth",
+                        });
+                        utils.log(
+                            "TOC auto-scroll executed to position: " +
+                                targetScrollPosition
+                        );
+                    } else {
+                        utils.log(
+                            "Active item already visible in TOC, no scrolling needed"
+                        );
+                    }
+                },
                 createMobileTOC: function () {},
                 handleBreakpointChange: function () {},
+                setupSmartVisibility: function () {
+                    var utils = CloudSync.adaptivePages.utils;
+                    var self = this;
+
+                    utils.log(
+                        "Setting up intelligent TOC visibility management"
+                    );
+
+                    // Configuration for smart visibility behavior
+                    var visibilityConfig = {
+                        scrollThreshold: 0.1, // Show TOC after 15% of content scrolled
+                        timeThreshold: 5000, // Minimum time on page (10 seconds)
+                        hideOnTop: true, // Hide when user returns to top
+                        topThreshold: 0.05, // Consider "top" as first 5% of content
+                    };
+
+                    // State tracking for user behavior analysis
+                    var behaviorState = {
+                        pageLoadTime: Date.now(), // When user arrived on page
+                        isVisible: false, // Current TOC visibility state
+                        hasBeenVisible: false, // Whether TOC has ever been shown
+                        lastScrollPosition: 0, // Previous scroll position for direction detection
+                        scrollDirection: "down", // Current scroll direction
+                    };
+
+                    var scrollHandler = utils.throttle(
+                        function () {
+                            var currentTime = Date.now();
+                            var timeOnPage =
+                                currentTime - behaviorState.pageLoadTime;
+
+                            // Calculate scroll position as percentage of total content
+                            var scrollTop =
+                                window.pageYOffset ||
+                                document.documentElement.scrollTop;
+                            var documentHeight =
+                                document.documentElement.scrollHeight -
+                                window.innerHeight;
+                            var scrollPercent = scrollTop / documentHeight;
+
+                            // Detect scroll direction for behavior analysis
+                            var newDirection =
+                                scrollTop > behaviorState.lastScrollPosition
+                                    ? "down"
+                                    : "up";
+                            behaviorState.scrollDirection = newDirection;
+                            behaviorState.lastScrollPosition = scrollTop;
+
+                            // Log detailed behavior analysis for debugging
+                            utils.log(
+                                "Behavior analysis: " +
+                                    Math.round(scrollPercent * 100) +
+                                    "% scrolled, " +
+                                    Math.round(timeOnPage / 1000) +
+                                    "s on page, scrolling " +
+                                    newDirection
+                            );
+
+                            // Apply visibility logic based on analyzed behavior
+                            self.evaluateVisibilityConditions(
+                                scrollPercent,
+                                timeOnPage,
+                                behaviorState,
+                                visibilityConfig
+                            );
+                        },
+                        100,
+                        "toc-smart-visibility"
+                    ); // Throttle to 100ms for smooth performance
+
+                    // Attach the scroll handler to monitor user behavior
+                    utils.addEventListener(window, "scroll", scrollHandler, {
+                        passive: true,
+                    });
+
+                    utils.log("Smart visibility system initialized");
+                },
+                evaluateVisibilityConditions: function (
+                    scrollPercent,
+                    timeOnPage,
+                    behaviorState,
+                    visibilityConfig
+                ) {
+                    var utils = CloudSync.adaptivePages.utils;
+
+                    // Determine if TOC should be visible based on current conditions
+                    var shouldBeVisible = this.calculateOptimalVisibility(
+                        scrollPercent,
+                        timeOnPage,
+                        behaviorState,
+                        visibilityConfig
+                    );
+
+                    // Apply visibility changes only when state actually changes
+                    if (shouldBeVisible !== behaviorState.isVisible) {
+                        this.updateTOCVisibility(
+                            shouldBeVisible,
+                            behaviorState
+                        );
+
+                        // Log visibility state changes for debugging and optimization
+                        var reason = this.getVisibilityChangeReason(
+                            scrollPercent,
+                            timeOnPage,
+                            behaviorState,
+                            visibilityConfig
+                        );
+                        utils.log(
+                            "TOC visibility changed to " +
+                                (shouldBeVisible ? "visible" : "hidden") +
+                                ": " +
+                                reason
+                        );
+                    }
+                },
+                calculateOptimalVisibility: function (
+                    scrollPercent,
+                    timeOnPage,
+                    behaviorState,
+                    visibilityConfig
+                ) {
+                    // Check if user has spent enough time on page to warrant TOC assistance
+                    var hasMinimumTimeInvestment =
+                        timeOnPage >= visibilityConfig.timeThreshold;
+
+                    // Check if user has scrolled enough to indicate serious reading intent
+                    var hasScrolledSufficientDistance =
+                        scrollPercent >= visibilityConfig.scrollThreshold;
+
+                    // Special logic for hiding TOC when user returns to top of document
+                    var isAtTopOfDocument =
+                        scrollPercent <= visibilityConfig.topThreshold;
+                    var shouldHideAtTop =
+                        visibilityConfig.hideOnTop &&
+                        isAtTopOfDocument &&
+                        behaviorState.hasBeenVisible;
+
+                    // Primary visibility condition: show TOC when user demonstrates reading engagement
+                    var primaryCondition =
+                        hasMinimumTimeInvestment &&
+                        hasScrolledSufficientDistance;
+
+                    // Override condition: hide when user returns to top after having seen TOC
+                    var overrideCondition = shouldHideAtTop;
+
+                    // Final decision combines primary logic with override scenarios
+                    return primaryCondition && !overrideCondition;
+                },
+                updateTOCVisibility: function (shouldBeVisible, behaviorState) {
+                    var utils = CloudSync.adaptivePages.utils;
+
+                    // Get reference to the TOC container for state manipulation
+                    var tocContainer = this.state.tocElements.desktopContainer;
+                    if (!tocContainer) {
+                        utils.log(
+                            "Cannot update TOC visibility: container not found",
+                            "error"
+                        );
+                        return;
+                    }
+
+                    if (shouldBeVisible && !behaviorState.isVisible) {
+                        // Show TOC with elegant CSS animation by adding visible class
+                        tocContainer.classList.add("visible");
+                        behaviorState.isVisible = true;
+                        behaviorState.hasBeenVisible = true; // Track that TOC has been shown at least once
+                        utils.log("TOC activated with smooth animation");
+                    } else if (!shouldBeVisible && behaviorState.isVisible) {
+                        // Hide TOC by removing visible class, leveraging CSS transitions
+                        tocContainer.classList.remove("visible");
+                        behaviorState.isVisible = false;
+                        utils.log("TOC deactivated with smooth animation");
+                    }
+                },
+                getVisibilityChangeReason: function (
+                    scrollPercent,
+                    timeOnPage,
+                    behaviorState,
+                    visibilityConfig
+                ) {
+                    var timeInSeconds = Math.round(timeOnPage / 1000);
+                    var scrollPercentage = Math.round(scrollPercent * 100);
+
+                    // Analyze specific conditions that triggered the visibility change
+                    if (
+                        scrollPercent <= visibilityConfig.topThreshold &&
+                        behaviorState.hasBeenVisible
+                    ) {
+                        return (
+                            "User returned to top of document (" +
+                            scrollPercentage +
+                            "% position)"
+                        );
+                    }
+
+                    if (timeOnPage < visibilityConfig.timeThreshold) {
+                        return (
+                            "Insufficient time investment: " +
+                            timeInSeconds +
+                            "s (minimum: " +
+                            Math.round(visibilityConfig.timeThreshold / 1000) +
+                            "s)"
+                        );
+                    }
+
+                    if (scrollPercent < visibilityConfig.scrollThreshold) {
+                        return (
+                            "Insufficient scroll depth: " +
+                            scrollPercentage +
+                            "% (minimum: " +
+                            Math.round(visibilityConfig.scrollThreshold * 100) +
+                            "%)"
+                        );
+                    }
+
+                    // Default reason for showing TOC when all conditions are met
+                    return (
+                        "Reading engagement detected: " +
+                        timeInSeconds +
+                        "s on page, " +
+                        scrollPercentage +
+                        "% scrolled, direction: " +
+                        behaviorState.scrollDirection
+                    );
+                },
+                setupNavigationHandlers: function () {
+                    var utils = CloudSync.adaptivePages.utils;
+                    var self = this;
+
+                    utils.log("Setting up intelligent navigation handlers");
+
+                    // Find all TOC navigation links for event binding
+                    var tocLinks =
+                        this.state.tocElements.tocList.querySelectorAll(
+                            ".toc-link"
+                        );
+
+                    // Attach smart navigation handler to each link
+                    for (var i = 0; i < tocLinks.length; i++) {
+                        var link = tocLinks[i];
+
+                        utils.addEventListener(
+                            link,
+                            "click",
+                            function (event) {
+                                // Prevent default browser anchor behavior
+                                event.preventDefault();
+
+                                // Extract target heading ID from the link
+                                var targetId =
+                                    this.getAttribute("href").substring(1); // Remove # symbol
+                                var targetElement =
+                                    document.getElementById(targetId);
+
+                                if (!targetElement) {
+                                    utils.log(
+                                        "Navigation target not found: " +
+                                            targetId,
+                                        "error"
+                                    );
+                                    return;
+                                }
+
+                                // Calculate optimal scroll position accounting for dynamic header
+                                var optimalPosition =
+                                    self.calculateOptimalScrollPosition(
+                                        targetElement
+                                    );
+
+                                // Perform smooth scroll to calculated position
+                                self.performSmoothScroll(
+                                    optimalPosition,
+                                    targetElement
+                                );
+
+                                // Update browser history for proper back/forward button behavior
+                                if (history.pushState) {
+                                    history.pushState(
+                                        null,
+                                        null,
+                                        "#" + targetId
+                                    );
+                                }
+                            },
+                            { passive: false }
+                        ); // passive: false allows preventDefault()
+                    }
+
+                    utils.log(
+                        "Navigation handlers attached to " +
+                            tocLinks.length +
+                            " TOC links"
+                    );
+                },
+                calculateOptimalScrollPosition: function (targetElement) {
+                    var utils = CloudSync.adaptivePages.utils;
+
+                    // Calculate absolute position of element relative to document
+                    // This method accumulates offsets from the element up to the document root
+                    var elementTop = 0;
+                    var currentElement = targetElement;
+
+                    // Walk up the DOM tree to calculate true absolute position
+                    while (currentElement) {
+                        elementTop += currentElement.offsetTop;
+                        currentElement = currentElement.offsetParent;
+                    }
+
+                    // Calculate dynamic header height including admin bar if present
+                    var headerHeight = utils.getHeaderHeight();
+
+                    // Add breathing room for better visual separation
+                    var breathingRoom = 20;
+
+                    // Calculate final scroll position with all offsets
+                    var finalPosition = Math.max(
+                        0,
+                        elementTop - headerHeight - breathingRoom
+                    );
+
+                    utils.log(
+                        'Improved position calculation for "' +
+                            targetElement.textContent.trim() +
+                            '": ' +
+                            finalPosition +
+                            "px (absolute element position: " +
+                            elementTop +
+                            "px, header: " +
+                            headerHeight +
+                            "px)"
+                    );
+
+                    return finalPosition;
+                },
+                performSmoothScroll: function (targetPosition, targetElement) {
+                    var utils = CloudSync.adaptivePages.utils;
+
+                    utils.log(
+                        "Initiating smooth scroll to position: " +
+                            targetPosition +
+                            "px"
+                    );
+
+                    // Try modern smooth scroll API first (best performance and browser optimization)
+                    if ("scrollBehavior" in document.documentElement.style) {
+                        window.scrollTo({
+                            top: targetPosition,
+                            behavior: "smooth",
+                        });
+
+                        utils.log(
+                            "Using native smooth scroll API for optimal performance"
+                        );
+
+                        // Set up completion detection for native smooth scroll
+                        this.detectScrollCompletion(
+                            targetPosition,
+                            targetElement
+                        );
+                    } else {
+                        // Fallback to custom animation for older browsers
+                        utils.log(
+                            "Native smooth scroll not supported, using custom animation fallback"
+                        );
+                        this.performCustomSmoothScroll(
+                            targetPosition,
+                            targetElement
+                        );
+                    }
+                },
+                detectScrollCompletion: function (
+                    targetPosition,
+                    targetElement
+                ) {
+                    var utils = CloudSync.adaptivePages.utils;
+                    var checkInterval = 50; // Check every 50ms for smooth detection
+                    var tolerance = 5; // Allow 5px tolerance for position matching
+                    var maxWaitTime = 2000; // Maximum wait time of 2 seconds
+                    var startTime = Date.now();
+
+                    var completionChecker = setInterval(function () {
+                        var currentPosition =
+                            window.pageYOffset ||
+                            document.documentElement.scrollTop;
+                        var timePassed = Date.now() - startTime;
+
+                        // Check if we've reached the target position (within tolerance)
+                        var positionReached =
+                            Math.abs(currentPosition - targetPosition) <=
+                            tolerance;
+
+                        // Check if maximum wait time exceeded (animation might be interrupted)
+                        var timeoutReached = timePassed >= maxWaitTime;
+
+                        if (positionReached || timeoutReached) {
+                            clearInterval(completionChecker);
+
+                            if (positionReached) {
+                                utils.log(
+                                    'Smooth scroll completed successfully to "' +
+                                        targetElement.textContent.trim() +
+                                        '"'
+                                );
+                            } else {
+                                utils.log(
+                                    "Smooth scroll timeout reached, assuming completion"
+                                );
+                            }
+                        }
+                    }, checkInterval);
+                },
             },
         },
 
@@ -1752,6 +2674,52 @@
                     error
                 );
             }
+        },
+        // Temporary testing function for TOC module development
+        testTOCModule: function () {
+            var utils = this.utils;
+            utils.log("=== STARTING TOC MODULE TEST ===");
+
+            // Test module existence
+            if (!this.modules.tableOfContents) {
+                utils.log("ERROR: tableOfContents module not found", "error");
+                return false;
+            }
+
+            // Test initialization
+            var initResult = this.modules.tableOfContents.init();
+            utils.log("Initialization result: " + initResult);
+
+            // Test heading scanning specifically
+            if (initResult) {
+                utils.log("Testing scanHeadings method directly...");
+                var scanResult = this.modules.tableOfContents.scanHeadings();
+                utils.log("Scan result: " + scanResult);
+
+                // Display collected data
+                var headings = this.modules.tableOfContents.state.headings;
+                utils.log("Headings found: " + headings.length);
+
+                for (var i = 0; i < headings.length; i++) {
+                    var h = headings[i];
+                    utils.log(
+                        "Heading " +
+                            (i + 1) +
+                            ': "' +
+                            h.text +
+                            '" (H' +
+                            h.level +
+                            ", ID: " +
+                            h.id +
+                            ", pos: " +
+                            h.offsetTop +
+                            "px)"
+                    );
+                }
+            }
+
+            utils.log("=== TOC MODULE TEST COMPLETED ===");
+            return initResult;
         },
     };
 

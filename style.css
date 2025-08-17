@@ -2422,7 +2422,9 @@ select:focus {
     width: 60px;
     transform: translateY(-50%) translateX(0);
 }
-
+.advanced-toc.collapsed .toc-header {
+    padding-left: 5px;
+}
 .advanced-toc.collapsed .toc-title span,
 .advanced-toc.collapsed .toc-navigation,
 .advanced-toc.collapsed .toc-progress {
@@ -2445,7 +2447,6 @@ select:focus {
     border-radius: 20px 20px 0 0;
     position: relative;
 }
-
 .toc-header::before {
     content: "";
     position: absolute;
@@ -2470,8 +2471,8 @@ select:focus {
 
 .toc-title i {
     color: #667eea;
-    font-size: 1rem;
-    width: 18px;
+    font-size: 1.5rem;
+    width: 50px;
     text-align: center;
 }
 
