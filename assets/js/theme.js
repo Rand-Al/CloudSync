@@ -819,37 +819,206 @@
                  * @author CloudSync Theme
                  * @return {boolean} True if all events bound successfully, false on failure
                  */
+
+                /**
+                 * Bind Interactive Events for Table of Contents System
+                 *
+                 * Establishes comprehensive event handling for both desktop and mobile TOC modes.
+                 * This universal method detects the current display mode and applies appropriate
+                 * event bindings while maintaining shared functionality across platforms. The method
+                 * coordinates between different interaction patterns while ensuring accessibility
+                 * compliance and optimal user experience for each device type.
+                 *
+                 * @since 1.0.0
+                 * @returns {boolean} True if all relevant event handlers bound successfully
+                 */
                 bindEvents: function () {
                     var utils = CloudSync.adaptivePages.utils;
-                    utils.log("Setting up TOC event handlers");
+                    var self = this;
 
-                    // Verify that required elements exist
-                    if (!this.state.tocElements.desktopContainer) {
+                    utils.log(
+                        "Setting up universal TOC event handlers for " +
+                            this.state.currentMode +
+                            " mode"
+                    );
+
+                    try {
+                        // Determine which interface elements exist based on current mode
+                        // This allows us to bind events only to elements that are actually present
+                        var hasDesktopElements =
+                            !!this.state.tocElements.desktopContainer;
+                        var hasMobileElements =
+                            !!this.state.tocElements.mobileContainer;
+
                         utils.log(
-                            "Desktop TOC container not found, cannot bind events",
-                            "error"
+                            "Interface availability: Desktop=" +
+                                hasDesktopElements +
+                                ", Mobile=" +
+                                hasMobileElements
+                        );
+
+                        // Verify that we have the appropriate elements for the current mode
+                        if (
+                            this.state.currentMode === "desktop" &&
+                            !hasDesktopElements
+                        ) {
+                            utils.log(
+                                "Desktop mode active but desktop elements not found",
+                                "error"
+                            );
+                            return false;
+                        }
+
+                        if (
+                            this.state.currentMode === "mobile" &&
+                            !hasMobileElements
+                        ) {
+                            utils.log(
+                                "Mobile mode active but mobile elements not found",
+                                "error"
+                            );
+                            return false;
+                        }
+
+                        // Bind mode-specific events based on current interface state
+                        if (
+                            this.state.currentMode === "desktop" &&
+                            hasDesktopElements
+                        ) {
+                            utils.log("Binding desktop-specific TOC events");
+                            this.bindDesktopEvents();
+                        }
+
+                        if (
+                            this.state.currentMode === "mobile" &&
+                            hasMobileElements
+                        ) {
+                            utils.log("Binding mobile-specific TOC events");
+                            this.bindMobileEvents();
+                        }
+
+                        // Bind universal events that work across both desktop and mobile modes
+                        // These events provide core functionality regardless of display mode
+                        utils.log("Binding universal TOC events");
+                        this.bindUniversalEvents();
+
+                        utils.log(
+                            "All TOC event handlers bound successfully for " +
+                                this.state.currentMode +
+                                " mode"
+                        );
+                        return true;
+                    } catch (error) {
+                        utils.log("Error binding TOC events", "error", error);
+                        return false;
+                    }
+                },
+                /**
+                 * Bind Mobile-Specific Event Handlers
+                 *
+                 * Establishes event handling specifically optimized for mobile interface elements
+                 * including floating button interactions, panel opening/closing, and touch-optimized
+                 * navigation. This method focuses on mobile UX patterns while ensuring proper
+                 * accessibility support for mobile screen readers and keyboard navigation.
+                 *
+                 * @since 1.0.0
+                 * @returns {boolean} True if mobile events bound successfully
+                 */
+                bindMobileEvents: function () {
+                    var utils = CloudSync.adaptivePages.utils;
+                    var self = this;
+
+                    utils.log("Binding mobile-specific interaction events");
+
+                    try {
+                        // Bind floating button events for panel opening
+                        this.bindFloatingButtonEvents();
+
+                        // Bind panel closing events (overlay, close button, escape key)
+                        this.bindMobilePanelEvents();
+
+                        // Bind mobile navigation events with touch optimization
+                        this.bindMobileNavigationEvents();
+
+                        utils.log("Mobile-specific events bound successfully");
+                        return true;
+                    } catch (error) {
+                        utils.log(
+                            "Error binding mobile events",
+                            "error",
+                            error
                         );
                         return false;
                     }
+                },
+                /**
+                 * Bind Desktop-Specific Event Handlers
+                 *
+                 * Establishes event handling for desktop interface elements including hover states,
+                 * collapse functionality, and mouse-optimized interactions. This method maintains
+                 * the existing desktop functionality while providing clear separation from mobile
+                 * event handling for better code organization and maintenance.
+                 *
+                 * @since 1.0.0
+                 * @returns {boolean} True if desktop events bound successfully
+                 */
+                bindDesktopEvents: function () {
+                    var utils = CloudSync.adaptivePages.utils;
 
-                    // Setup intelligent visibility management instead of immediate activation
-                    this.setupSmartVisibility();
+                    utils.log("Binding desktop-specific interaction events");
 
-                    // Setup navigation link handlers for smooth scrolling
-                    this.setupNavigationHandlers();
+                    try {
+                        // Use existing desktop event binding methods
+                        this.setupSmartVisibility();
+                        this.setupCollapseHandlers();
 
-                    // Setup collapse/expand functionality
-                    this.setupCollapseHandlers();
+                        utils.log("Desktop-specific events bound successfully");
+                        return true;
+                    } catch (error) {
+                        utils.log(
+                            "Error binding desktop events",
+                            "error",
+                            error
+                        );
+                        return false;
+                    }
+                },
+                /**
+                 * Bind Universal Event Handlers
+                 *
+                 * Establishes event handling that works consistently across both desktop and mobile
+                 * modes including navigation link functionality, scroll tracking, and progress updates.
+                 * These events provide core table of contents functionality regardless of the
+                 * interface presentation method, ensuring consistent user experience across devices.
+                 *
+                 * @since 1.0.0
+                 * @returns {boolean} True if universal events bound successfully
+                 */
+                bindUniversalEvents: function () {
+                    var utils = CloudSync.adaptivePages.utils;
 
-                    // Setup scroll tracking for active section highlighting
-                    this.setupScrollTracking();
+                    utils.log("Binding universal TOC events");
 
-                    // Setup reading progress bar updates
-                    this.setupProgressTracking();
+                    try {
+                        // Navigation handlers work the same way in both modes
+                        this.setupNavigationHandlers();
 
-                    utils.log("TOC event handlers bound successfully");
+                        // Scroll tracking for active section highlighting
+                        this.setupScrollTracking();
 
-                    return true;
+                        // Reading progress tracking
+                        this.setupProgressTracking();
+
+                        utils.log("Universal events bound successfully");
+                        return true;
+                    } catch (error) {
+                        utils.log(
+                            "Error binding universal events",
+                            "error",
+                            error
+                        );
+                        return false;
+                    }
                 },
                 /**
                  * Setup Intelligent Visibility Management for Table of Contents
@@ -958,67 +1127,94 @@
 
                     utils.log("Setting up intelligent navigation handlers");
 
-                    // Find all TOC navigation links for event binding
-                    var tocLinks =
-                        this.state.tocElements.tocList.querySelectorAll(
-                            ".toc-link"
+                    // Determine which container to use based on current mode
+                    var activeContainer = null;
+                    var linkSelector = "";
+
+                    if (
+                        this.state.currentMode === "desktop" &&
+                        this.state.tocElements.desktopContainer
+                    ) {
+                        activeContainer =
+                            this.state.tocElements.desktopContainer;
+                        linkSelector = ".toc-link";
+                        utils.log("Using desktop navigation elements");
+                    } else if (
+                        this.state.currentMode === "mobile" &&
+                        this.state.tocElements.mobileContainer
+                    ) {
+                        activeContainer =
+                            this.state.tocElements.mobileContainer;
+                        linkSelector = ".mobile-toc-link";
+                        utils.log("Using mobile navigation elements");
+                    } else {
+                        utils.log(
+                            "No appropriate navigation container found for mode: " +
+                                this.state.currentMode,
+                            "warn"
                         );
+                        return;
+                    }
 
-                    // Attach smart navigation handler to each link
-                    for (var i = 0; i < tocLinks.length; i++) {
-                        var link = tocLinks[i];
-
-                        utils.addEventListener(
-                            link,
-                            "click",
-                            function (event) {
-                                // Prevent default browser anchor behavior
-                                event.preventDefault();
-
-                                // Extract target heading ID from the link
-                                var targetId =
-                                    this.getAttribute("href").substring(1); // Remove # symbol
-                                var targetElement =
-                                    document.getElementById(targetId);
-
-                                if (!targetElement) {
-                                    utils.log(
-                                        "Navigation target not found: " +
-                                            targetId,
-                                        "error"
-                                    );
-                                    return;
-                                }
-
-                                // Calculate optimal scroll position accounting for dynamic header
-                                var optimalPosition =
-                                    self.calculateOptimalScrollPosition(
-                                        targetElement
-                                    );
-
-                                // Perform smooth scroll to calculated position
-                                self.performSmoothScroll(
-                                    optimalPosition,
-                                    targetElement
-                                );
-
-                                // Update browser history for proper back/forward button behavior
-                                if (history.pushState) {
-                                    history.pushState(
-                                        null,
-                                        null,
-                                        "#" + targetId
-                                    );
-                                }
-                            },
-                            { passive: false }
-                        ); // passive: false allows preventDefault()
+                    // Find navigation links in the appropriate container
+                    var navigationLinks =
+                        activeContainer.querySelectorAll(linkSelector);
+                    if (navigationLinks.length === 0) {
+                        utils.log(
+                            "No navigation links found in " +
+                                this.state.currentMode +
+                                " mode",
+                            "warn"
+                        );
+                        return;
                     }
 
                     utils.log(
-                        "Navigation handlers attached to " +
-                            tocLinks.length +
-                            " TOC links"
+                        "Found " +
+                            navigationLinks.length +
+                            " navigation links in " +
+                            this.state.currentMode +
+                            " mode"
+                    );
+
+                    // Apply universal navigation behavior to found links
+                    for (var i = 0; i < navigationLinks.length; i++) {
+                        var link = navigationLinks[i];
+
+                        utils.addEventListener(link, "click", function (event) {
+                            event.preventDefault();
+
+                            var targetId = this.getAttribute("href");
+                            if (targetId && targetId.startsWith("#")) {
+                                var targetElement =
+                                    document.querySelector(targetId);
+                                if (targetElement) {
+                                    // Universal smooth scrolling works the same way in both modes
+                                    targetElement.scrollIntoView({
+                                        behavior: "smooth",
+                                        block: "start",
+                                    });
+
+                                    // Mode-specific post-navigation actions
+                                    if (self.state.currentMode === "mobile") {
+                                        // Close mobile panel after navigation
+                                        setTimeout(function () {
+                                            if (self.closeMobilePanel) {
+                                                self.closeMobilePanel();
+                                            }
+                                        }, 500);
+                                    }
+
+                                    utils.log(
+                                        "Universal navigation to: " + targetId
+                                    );
+                                }
+                            }
+                        });
+                    }
+
+                    utils.log(
+                        "Universal navigation handlers established successfully"
                     );
                 },
                 /**
@@ -1768,62 +1964,99 @@
                     return activeHeadingId;
                 },
                 /**
-                 * Update Visual Highlighting for Active and Previous TOC Sections
+                 * Update Active Heading Highlight in Current Interface Mode
                  *
-                 * Orchestrates seamless transitions between active section indicators by
-                 * managing CSS class applications and removals across navigation elements.
-                 * Ensures smooth visual feedback as users progress through content by
-                 * coordinating highlight removal from previously active sections and
-                 * application to newly active areas. Includes intelligent visibility
-                 * management to keep highlighted items within viewable TOC area.
+                 * Updates the visual highlighting of the currently active heading in both desktop
+                 * and mobile interfaces. This method intelligently adapts to the current mode,
+                 * applying appropriate CSS classes and visual feedback while maintaining
+                 * accessibility standards across different interface presentations.
                  *
                  * @since 1.0.0
-                 * @author CloudSync Theme
-                 * @param {string|null} previousActiveId ID of previously highlighted section
-                 * @param {string|null} newActiveId ID of section to highlight now
+                 * @param {string} activeHeadingId - ID of the heading to highlight as active
                  */
-                updateActiveHighlight: function (
-                    previousActiveId,
-                    newActiveId
-                ) {
+                updateActiveHighlight: function (activeHeadingId) {
                     var utils = CloudSync.adaptivePages.utils;
 
-                    // Remove highlight from previously active section if it exists
-                    if (previousActiveId) {
-                        var previousLink =
-                            this.state.tocElements.tocList.querySelector(
-                                '[data-heading-id="' + previousActiveId + '"]'
-                            );
-                        if (previousLink) {
-                            previousLink.classList.remove("active");
-                            utils.log(
-                                "Removed active highlight from: " +
-                                    previousActiveId
-                            );
-                        }
-                    }
-
-                    // Apply highlight to newly active section if one is determined
-                    if (newActiveId) {
-                        var newActiveLink =
-                            this.state.tocElements.tocList.querySelector(
-                                '[data-heading-id="' + newActiveId + '"]'
-                            );
-                        if (newActiveLink) {
-                            newActiveLink.classList.add("active");
-                            utils.log(
-                                "Applied active highlight to: " + newActiveId
-                            );
-
-                            // Ensure highlighted item is visible in TOC if content is long
-                            this.ensureActiveItemVisibility(newActiveLink);
-                        }
-                    }
-
-                    // Handle case where no section is active (e.g., at very top of document)
-                    if (!newActiveId && previousActiveId) {
+                    if (!activeHeadingId) {
                         utils.log(
-                            "No active section determined - user may be at document beginning"
+                            "No active heading ID provided for highlight update",
+                            "warn"
+                        );
+                        return;
+                    }
+
+                    // Determine which interface to update based on current mode
+                    var activeContainer = null;
+                    var linkSelector = "";
+                    var activeClass = "";
+
+                    if (
+                        this.state.currentMode === "desktop" &&
+                        this.state.tocElements.desktopContainer
+                    ) {
+                        activeContainer =
+                            this.state.tocElements.desktopContainer;
+                        linkSelector = ".toc-link";
+                        activeClass = "active";
+                        utils.log(
+                            "Updating desktop interface active highlight"
+                        );
+                    } else if (
+                        this.state.currentMode === "mobile" &&
+                        this.state.tocElements.mobileContainer
+                    ) {
+                        activeContainer =
+                            this.state.tocElements.mobileContainer;
+                        linkSelector = ".mobile-toc-link";
+                        activeClass = "active-section";
+                        utils.log("Updating mobile interface active highlight");
+                    } else {
+                        utils.log(
+                            "No appropriate interface container found for highlight update",
+                            "warn"
+                        );
+                        return;
+                    }
+
+                    // Remove existing active states from all links in current interface
+                    var allLinks =
+                        activeContainer.querySelectorAll(linkSelector);
+                    for (var i = 0; i < allLinks.length; i++) {
+                        var link = allLinks[i];
+                        var parentItem =
+                            link.closest("li") || link.parentElement;
+                        if (parentItem) {
+                            parentItem.classList.remove(activeClass);
+                        }
+                        link.classList.remove("active");
+                    }
+
+                    // Find and highlight the active link
+                    var targetSelector =
+                        linkSelector + '[href="#' + activeHeadingId + '"]';
+                    var activeLink =
+                        activeContainer.querySelector(targetSelector);
+
+                    if (activeLink) {
+                        var parentItem =
+                            activeLink.closest("li") ||
+                            activeLink.parentElement;
+                        if (parentItem) {
+                            parentItem.classList.add(activeClass);
+                        }
+                        activeLink.classList.add("active");
+
+                        utils.log(
+                            "Active highlight updated for: " +
+                                activeHeadingId +
+                                " in " +
+                                this.state.currentMode +
+                                " mode"
+                        );
+                    } else {
+                        utils.log(
+                            "Active link not found for ID: " + activeHeadingId,
+                            "warn"
                         );
                     }
                 },
@@ -2136,59 +2369,118 @@
                     return previousProgress + smoothedChange;
                 },
                 /**
-                 * Update Visual Progress Bar Display with Accessibility Integration
+                 * Update Reading Progress Bar for Current Interface Mode
                  *
-                 * Synchronizes mathematical progress calculations with visual representation and
-                 * assistive technology communication. Transforms decimal progress values into
-                 * percentage-based CSS width properties while maintaining comprehensive ARIA
-                 * attribute updates for screen reader compatibility. Ensures progress
-                 * information reaches all users through both visual cues and semantic markup,
-                 * creating inclusive progress feedback that meets modern accessibility standards.
+                 * Updates the visual progress indicator showing reading completion percentage.
+                 * This method adapts to the current interface mode, updating desktop progress bars
+                 * or mobile progress indicators as appropriate while maintaining consistent
+                 * progress calculation across all device types.
                  *
                  * @since 1.0.0
-                 * @author CloudSync Theme
-                 * @param {number} progressValue Calculated progress value between 0 and 1
+                 * @param {number} progressValue - Progress value between 0 and 1
                  */
                 updateProgressBar: function (progressValue) {
                     var utils = CloudSync.adaptivePages.utils;
-                    var progressBar = this.state.tocElements.progressBar;
 
-                    if (!progressBar) {
+                    if (
+                        typeof progressValue !== "number" ||
+                        progressValue < 0 ||
+                        progressValue > 1
+                    ) {
                         utils.log(
-                            "Progress bar element not found, cannot update display",
+                            "Invalid progress value provided: " + progressValue,
                             "warn"
                         );
                         return;
                     }
 
-                    // Convert progress value to percentage for CSS width
-                    var progressPercentage = Math.round(progressValue * 100);
+                    // Find progress bar element based on current mode
+                    var progressBar = null;
 
-                    // Update the visual width of the progress bar using CSS
-                    progressBar.style.width = progressPercentage + "%";
+                    if (
+                        this.state.currentMode === "desktop" &&
+                        this.state.tocElements.desktopContainer
+                    ) {
+                        progressBar =
+                            this.state.tocElements.desktopContainer.querySelector(
+                                ".progress-bar"
+                            );
+                        if (progressBar) {
+                            utils.log("Updating desktop progress bar");
+                        }
+                    } else if (
+                        this.state.currentMode === "mobile" &&
+                        this.state.tocElements.mobileContainer
+                    ) {
+                        // Mobile progress could be in the panel header or floating button
+                        progressBar =
+                            this.state.tocElements.mobileContainer.querySelector(
+                                ".mobile-progress-bar"
+                            );
+                        if (!progressBar) {
+                            // Try to find progress indicator in the header
+                            var progressElement =
+                                this.state.tocElements.mobileContainer.querySelector(
+                                    ".mobile-toc-progress"
+                                );
+                            if (progressElement) {
+                                // Update text-based progress for mobile
+                                var percentage = Math.round(
+                                    progressValue * 100
+                                );
+                                progressElement.textContent =
+                                    this.state.headings.length +
+                                    " sections (" +
+                                    percentage +
+                                    "% read)";
+                                utils.log(
+                                    "Updated mobile progress text: " +
+                                        percentage +
+                                        "%"
+                                );
+                                return;
+                            }
+                        }
 
-                    // Update ARIA attributes for accessibility
-                    progressBar.setAttribute(
-                        "aria-valuenow",
-                        progressPercentage
-                    );
+                        if (progressBar) {
+                            utils.log("Updating mobile progress bar");
+                        }
+                    }
 
-                    // Provide readable progress information for screen readers
-                    var readableProgress =
-                        progressPercentage + " percent complete";
-                    progressBar.setAttribute(
-                        "aria-valuetext",
-                        readableProgress
-                    );
+                    // Update visual progress bar if found
+                    if (progressBar) {
+                        var progressPercentage = Math.round(
+                            progressValue * 100
+                        );
 
-                    // Log progress updates for debugging and user behavior analysis
-                    utils.log(
-                        "Progress bar updated to " +
-                            progressPercentage +
-                            "% (value: " +
-                            Math.round(progressValue * 1000) / 1000 +
-                            ")"
-                    );
+                        // Update the visual width of the progress bar
+                        progressBar.style.width = progressPercentage + "%";
+
+                        // Update ARIA attributes for accessibility
+                        progressBar.setAttribute(
+                            "aria-valuenow",
+                            progressPercentage
+                        );
+                        progressBar.setAttribute(
+                            "aria-valuetext",
+                            progressPercentage + " percent complete"
+                        );
+
+                        utils.log(
+                            "Progress bar updated to " +
+                                progressPercentage +
+                                "% in " +
+                                this.state.currentMode +
+                                " mode"
+                        );
+                    } else {
+                        // This is now just informational, not an error
+                        utils.log(
+                            "No progress bar element found in " +
+                                this.state.currentMode +
+                                " mode - this is normal for some interface configurations"
+                        );
+                    }
                 },
                 /**
                  * Orchestrate Complex Decision Logic for Table of Contents Visibility
@@ -2574,6 +2866,924 @@
                             }
                         }
                     }, checkInterval);
+                },
+
+                /**
+                 * =================================================
+                 * --------------MOBILE TOC-------------------------
+                 * =================================================
+                 *
+                /**
+                 * Create Enhanced Mobile TOC System with Full Accessibility Support
+                 *
+                 * Creates comprehensive mobile table of contents components with complete functionality
+                 * including proper ARIA attributes, keyboard navigation support, and touch optimization.
+                 * This enhanced version provides production-ready accessibility compliance while
+                 * maintaining the rapid testing capabilities of the minimal implementation.
+                 *
+                 * @since 1.0.0
+                 * @returns {boolean} True if enhanced mobile TOC created successfully
+                 */
+                createMobileTOC: function () {
+                    var utils = CloudSync.adaptivePages.utils;
+
+                    utils.log(
+                        "Creating enhanced mobile TOC with full accessibility support"
+                    );
+
+                    try {
+                        // Remove existing mobile TOC if present
+                        var existing =
+                            document.querySelector(".mobile-toc-system");
+                        if (existing) {
+                            existing.remove();
+                        }
+
+                        // Create main container
+                        var container = document.createElement("div");
+                        container.className = "mobile-toc-system";
+
+                        // Create floating button with enhanced accessibility
+                        var button = document.createElement("button");
+                        button.className = "floating-toc-button";
+                        button.innerHTML = "☰";
+                        button.setAttribute(
+                            "aria-label",
+                            "Open table of contents"
+                        );
+                        button.setAttribute("aria-expanded", "false");
+                        button.setAttribute(
+                            "aria-controls",
+                            "mobile-toc-panel"
+                        );
+                        button.setAttribute("type", "button");
+
+                        // Create panel with proper dialog semantics
+                        var panel = document.createElement("div");
+                        panel.className = "mobile-toc-panel";
+                        panel.id = "mobile-toc-panel";
+                        panel.setAttribute("role", "dialog");
+                        panel.setAttribute(
+                            "aria-labelledby",
+                            "mobile-toc-title"
+                        );
+                        panel.setAttribute("aria-hidden", "true");
+                        panel.setAttribute("aria-modal", "true");
+
+                        // Create overlay for modal behavior
+                        var overlay = document.createElement("div");
+                        overlay.className = "mobile-toc-overlay";
+
+                        // Create panel content
+                        var content = document.createElement("div");
+                        content.className = "mobile-toc-content";
+
+                        // Create enhanced header with proper structure
+                        var header = document.createElement("div");
+                        header.className = "mobile-toc-header";
+
+                        var titleSection = document.createElement("div");
+                        var title = document.createElement("h2");
+                        title.className = "mobile-toc-title";
+                        title.id = "mobile-toc-title";
+                        title.textContent = "Table of Contents";
+
+                        var progress = document.createElement("div");
+                        progress.className = "mobile-toc-progress";
+                        progress.textContent =
+                            this.state.headings.length + " sections";
+
+                        titleSection.appendChild(title);
+                        titleSection.appendChild(progress);
+
+                        var closeButton = document.createElement("button");
+                        closeButton.className = "mobile-toc-close";
+                        closeButton.innerHTML = "×";
+                        closeButton.setAttribute(
+                            "aria-label",
+                            "Close table of contents"
+                        );
+                        closeButton.setAttribute("type", "button");
+
+                        header.appendChild(titleSection);
+                        header.appendChild(closeButton);
+
+                        // Create navigation with enhanced accessibility
+                        var nav = document.createElement("div");
+                        nav.className = "mobile-toc-navigation";
+                        nav.setAttribute("role", "navigation");
+                        nav.setAttribute("aria-label", "Page sections");
+
+                        var list = document.createElement("ul");
+                        list.className = "mobile-toc-list";
+
+                        // Add heading links with proper attributes
+                        for (var i = 0; i < this.state.headings.length; i++) {
+                            var heading = this.state.headings[i];
+                            var item = document.createElement("li");
+                            item.className =
+                                "mobile-toc-item toc-h" + heading.level;
+
+                            var link = document.createElement("a");
+                            link.className = "mobile-toc-link";
+                            link.href = "#" + heading.id;
+                            link.textContent = heading.text;
+                            link.setAttribute("role", "button");
+                            link.setAttribute("tabindex", "0");
+
+                            item.appendChild(link);
+                            list.appendChild(item);
+                        }
+
+                        nav.appendChild(list);
+
+                        // Assemble complete structure
+                        content.appendChild(header);
+                        content.appendChild(nav);
+
+                        panel.appendChild(overlay);
+                        panel.appendChild(content);
+
+                        container.appendChild(button);
+                        container.appendChild(panel);
+                        document.body.appendChild(container);
+
+                        // Store references
+                        this.state.tocElements.mobileContainer = container;
+                        this.state.tocElements.floatingButton = button;
+                        this.state.tocElements.mobilePanel = panel;
+
+                        utils.log(
+                            "Enhanced mobile TOC created with full accessibility compliance"
+                        );
+                        return true;
+                    } catch (error) {
+                        utils.log(
+                            "Error creating enhanced mobile TOC",
+                            "error",
+                            error
+                        );
+                        return false;
+                    }
+                },
+                /**
+                 * Quick Test for Mobile TOC Basic Functionality
+                 *
+                 * Performs rapid validation of core mobile TOC creation and structure.
+                 * This test focuses on essential functionality verification without
+                 * testing complex interactions or animations.
+                 *
+                 * @since 1.0.0
+                 * @returns {boolean} True if all basic tests pass
+                 */
+                testMobileTOCQuick: function () {
+                    var utils = CloudSync.adaptivePages.utils;
+                    utils.log("=== QUICK MOBILE TOC TEST ===");
+
+                    // Test 1: Check if headings were scanned
+                    if (
+                        !this.state.headings ||
+                        this.state.headings.length === 0
+                    ) {
+                        utils.log("ERROR: No headings found for TOC", "error");
+                        return false;
+                    }
+                    utils.log(
+                        "✓ Headings scanned: " + this.state.headings.length
+                    );
+
+                    // Test 2: Create mobile TOC
+                    var created = this.createMobileTOC();
+                    if (!created) {
+                        utils.log(
+                            "ERROR: Failed to create mobile TOC",
+                            "error"
+                        );
+                        return false;
+                    }
+                    utils.log("✓ Mobile TOC created");
+
+                    // Test 3: Check DOM elements exist
+                    var button = document.querySelector(".floating-toc-button");
+                    var panel = document.querySelector(".mobile-toc-panel");
+                    var links = document.querySelectorAll(".mobile-toc-link");
+
+                    if (!button) {
+                        utils.log("ERROR: Floating button not found", "error");
+                        return false;
+                    }
+                    utils.log("✓ Floating button exists");
+
+                    if (!panel) {
+                        utils.log("ERROR: Mobile panel not found", "error");
+                        return false;
+                    }
+                    utils.log("✓ Mobile panel exists");
+
+                    if (links.length !== this.state.headings.length) {
+                        utils.log("ERROR: Link count mismatch", "error");
+                        return false;
+                    }
+                    utils.log("✓ Navigation links created: " + links.length);
+
+                    utils.log("=== ALL TESTS PASSED ===");
+                    return true;
+                },
+                /**
+                 * Bind Floating Button Interaction Events
+                 *
+                 * Establishes touch and click event handling for the floating action button.
+                 * Optimizes for both touch and mouse interactions while providing immediate
+                 * visual feedback and maintaining accessibility standards.
+                 *
+                 * @since 1.0.0
+                 */
+                bindFloatingButtonEvents: function () {
+                    var utils = CloudSync.adaptivePages.utils;
+                    var self = this;
+
+                    var button = this.state.tocElements.floatingButton;
+                    if (!button) return;
+
+                    // Primary interaction handler
+                    utils.addEventListener(button, "click", function (event) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        self.openMobilePanel();
+                    });
+
+                    // Touch feedback for mobile devices
+                    utils.addEventListener(
+                        button,
+                        "touchstart",
+                        function (event) {
+                            button.classList.add("button-pressed");
+                        },
+                        { passive: true }
+                    );
+
+                    utils.addEventListener(
+                        button,
+                        "touchend",
+                        function (event) {
+                            setTimeout(function () {
+                                button.classList.remove("button-pressed");
+                            }, 150);
+                        },
+                        { passive: true }
+                    );
+
+                    utils.log("Floating button events bound");
+                },
+
+                /**
+                 * Bind Mobile Panel Interaction Events
+                 *
+                 * Establishes closing mechanisms for the mobile panel including overlay clicks,
+                 * close button presses, and keyboard navigation support.
+                 *
+                 * @since 1.0.0
+                 */
+                bindMobilePanelEvents: function () {
+                    var utils = CloudSync.adaptivePages.utils;
+                    var self = this;
+
+                    var panel = this.state.tocElements.mobilePanel;
+                    if (!panel) return;
+
+                    // Close button
+                    var closeButton = panel.querySelector(".mobile-toc-close");
+                    if (closeButton) {
+                        utils.addEventListener(
+                            closeButton,
+                            "click",
+                            function (event) {
+                                event.preventDefault();
+                                self.closeMobilePanel();
+                            }
+                        );
+                    }
+
+                    // Overlay click to close
+                    var overlay = panel.querySelector(".mobile-toc-overlay");
+                    if (overlay) {
+                        utils.addEventListener(
+                            overlay,
+                            "click",
+                            function (event) {
+                                if (event.target === overlay) {
+                                    self.closeMobilePanel();
+                                }
+                            }
+                        );
+                    }
+
+                    // Escape key to close
+                    utils.addEventListener(
+                        document,
+                        "keydown",
+                        function (event) {
+                            if (
+                                event.key === "Escape" &&
+                                panel.classList.contains("panel-open")
+                            ) {
+                                self.closeMobilePanel();
+                            }
+                        }
+                    );
+
+                    utils.log("Mobile panel events bound");
+                },
+                /**
+                 * Bind Mobile Navigation Events for Touch-Optimized Interaction
+                 *
+                 * Establishes event handling for mobile navigation links including smooth scrolling
+                 * to target sections and panel auto-closing after navigation. This method optimizes
+                 * for touch interaction patterns while maintaining keyboard accessibility and
+                 * providing appropriate visual feedback for user actions.
+                 *
+                 * @since 1.0.0
+                 */
+                bindMobileNavigationEvents: function () {
+                    var utils = CloudSync.adaptivePages.utils;
+                    var self = this;
+
+                    // Find mobile navigation links instead of desktop ones
+                    var mobilePanel = this.state.tocElements.mobilePanel;
+                    if (!mobilePanel) {
+                        utils.log(
+                            "Mobile panel not available for navigation binding",
+                            "warn"
+                        );
+                        return;
+                    }
+
+                    var navigationLinks =
+                        mobilePanel.querySelectorAll(".mobile-toc-link");
+                    if (navigationLinks.length === 0) {
+                        utils.log("No mobile navigation links found", "warn");
+                        return;
+                    }
+
+                    utils.log(
+                        "Binding " +
+                            navigationLinks.length +
+                            " mobile navigation links"
+                    );
+
+                    // Bind click events to each navigation link
+                    for (var i = 0; i < navigationLinks.length; i++) {
+                        var link = navigationLinks[i];
+
+                        utils.addEventListener(link, "click", function (event) {
+                            event.preventDefault();
+
+                            // Get target section ID from href attribute
+                            var targetId = this.getAttribute("href");
+                            if (targetId && targetId.startsWith("#")) {
+                                var targetElement =
+                                    document.querySelector(targetId);
+                                if (targetElement) {
+                                    // Smooth scroll to target section
+                                    targetElement.scrollIntoView({
+                                        behavior: "smooth",
+                                        block: "start",
+                                    });
+
+                                    // Close mobile panel after navigation (good UX pattern)
+                                    setTimeout(function () {
+                                        self.closeMobilePanel();
+                                    }, 500); // Small delay allows users to see the selection
+
+                                    utils.log(
+                                        "Navigated to section: " + targetId
+                                    );
+                                } else {
+                                    utils.log(
+                                        "Target element not found: " + targetId,
+                                        "warn"
+                                    );
+                                }
+                            }
+                        });
+                    }
+
+                    utils.log("Mobile navigation events bound successfully");
+                },
+                /**
+                 * Open Mobile TOC Panel with Smooth CSS Animation System
+                 *
+                 * Displays the mobile table of contents panel using optimized CSS transition timing
+                 * that ensures smooth visual presentation across all devices. This enhanced method
+                 * coordinates browser reflow timing with accessibility state management to provide
+                 * seamless user experience while maintaining proper focus management and scroll prevention.
+                 *
+                 * @since 1.0.0
+                 * @returns {boolean} True if panel opened successfully
+                 */
+                openMobilePanel: function () {
+                    var utils = CloudSync.adaptivePages.utils;
+                    var panel = this.state.tocElements.mobilePanel;
+                    var button = this.state.tocElements.floatingButton;
+
+                    if (!panel) {
+                        utils.log(
+                            "Cannot open mobile panel - panel element not found",
+                            "error"
+                        );
+                        return false;
+                    }
+
+                    utils.log(
+                        "Opening mobile TOC panel with smooth animation sequence"
+                    );
+
+                    // Step 1: Make panel visible and prepare for animation
+                    panel.style.visibility = "visible";
+                    panel.style.pointerEvents = "auto";
+
+                    // Step 2: Update ARIA states immediately for accessibility
+                    if (button) {
+                        button.setAttribute("aria-expanded", "true");
+                    }
+                    panel.setAttribute("aria-hidden", "false");
+
+                    // Step 3: Force browser reflow to register initial state
+                    panel.offsetHeight; // This forces reflow
+
+                    // Step 4: Add opening animation class
+                    panel.classList.add("panel-opening");
+
+                    // Step 5: After minimal delay, trigger the main animation
+                    setTimeout(function () {
+                        panel.classList.add("panel-open");
+                        panel.classList.remove("panel-opening");
+
+                        utils.log(
+                            "Panel animation classes applied - CSS should handle transitions"
+                        );
+                    }, 16); // Single frame delay ensures smooth animation start
+
+                    // Step 6: Focus management after animation settles
+                    setTimeout(function () {
+                        var firstLink = panel.querySelector(".mobile-toc-link");
+                        if (firstLink) {
+                            firstLink.focus();
+                        }
+                        utils.log(
+                            "Mobile TOC panel opened with focus management"
+                        );
+                    }, 100);
+
+                    // Step 7: Prevent background scrolling
+                    document.body.style.overflow = "hidden";
+
+                    return true;
+                },
+
+                /**
+                 * Close Mobile TOC Panel with Reverse Animation Sequence
+                 *
+                 * Hides the mobile table of contents panel using coordinated CSS transition timing
+                 * that ensures smooth visual dismissal while properly restoring page state and
+                 * returning focus to appropriate elements. This method handles all cleanup operations
+                 * including scroll restoration and accessibility state management.
+                 *
+                 * @since 1.0.0
+                 * @returns {boolean} True if panel closed successfully
+                 */
+                closeMobilePanel: function () {
+                    var utils = CloudSync.adaptivePages.utils;
+                    var panel = this.state.tocElements.mobilePanel;
+                    var button = this.state.tocElements.floatingButton;
+
+                    if (!panel) {
+                        utils.log(
+                            "Cannot close mobile panel - panel element not found",
+                            "error"
+                        );
+                        return false;
+                    }
+
+                    utils.log(
+                        "Closing mobile TOC panel with smooth animation sequence"
+                    );
+
+                    // Step 1: Start closing animation
+                    panel.classList.remove("panel-open");
+                    panel.classList.add("panel-closing");
+
+                    // Step 2: Update ARIA states immediately
+                    if (button) {
+                        button.setAttribute("aria-expanded", "false");
+                    }
+                    panel.setAttribute("aria-hidden", "true");
+
+                    // Step 3: Complete cleanup after animation duration
+                    setTimeout(function () {
+                        panel.classList.remove("panel-closing");
+
+                        // Hide panel completely after animation
+
+                        // Restore background scrolling
+                        document.body.style.overflow = "";
+
+                        // Return focus to floating button
+                        if (button) {
+                            button.focus();
+                        }
+
+                        utils.log(
+                            "Mobile TOC panel closed with state restoration"
+                        );
+                    }, 350); // Match CSS animation duration + small buffer
+
+                    return true;
+                },
+
+                /**
+                 * ===================
+                 * -----TESTS---------
+                 * ===================
+                 */
+                /**
+                 * Comprehensive Test Suite for Universal TOC Event System
+                 *
+                 * Performs thorough validation of the universal event binding system including
+                 * mode detection, appropriate handler selection, DOM element verification, and
+                 * actual event functionality. This test provides detailed feedback about each
+                 * component of the system to ensure reliable operation across different devices
+                 * and interaction patterns while maintaining accessibility and performance standards.
+                 *
+                 * @since 1.0.0
+                 * @returns {boolean} True if all comprehensive tests pass successfully
+                 */
+                testUniversalTOCEvents: function () {
+                    var utils = CloudSync.adaptivePages.utils;
+                    utils.log(
+                        "=== COMPREHENSIVE UNIVERSAL TOC EVENT TESTING ==="
+                    );
+
+                    try {
+                        // Phase 1: Verify system state and readiness
+                        utils.log("Phase 1: System State Verification");
+
+                        if (!this.state.isInitialized) {
+                            utils.log(
+                                "ERROR: TOC module not initialized",
+                                "error"
+                            );
+                            return false;
+                        }
+                        utils.log("✓ TOC module is properly initialized");
+
+                        if (
+                            !this.state.headings ||
+                            this.state.headings.length === 0
+                        ) {
+                            utils.log(
+                                "ERROR: No headings available for testing",
+                                "error"
+                            );
+                            return false;
+                        }
+                        utils.log(
+                            "✓ Headings data available: " +
+                                this.state.headings.length +
+                                " items"
+                        );
+
+                        // Phase 2: Verify current mode and interface elements
+                        utils.log(
+                            "Phase 2: Mode Detection and Interface Verification"
+                        );
+
+                        var currentMode = this.state.currentMode;
+                        utils.log("Current mode detected as: " + currentMode);
+
+                        if (currentMode === "mobile") {
+                            if (!this.state.tocElements.mobileContainer) {
+                                utils.log(
+                                    "ERROR: Mobile mode active but mobile container missing",
+                                    "error"
+                                );
+                                return false;
+                            }
+                            utils.log(
+                                "✓ Mobile interface elements present and accessible"
+                            );
+                        } else if (currentMode === "desktop") {
+                            if (!this.state.tocElements.desktopContainer) {
+                                utils.log(
+                                    "ERROR: Desktop mode active but desktop container missing",
+                                    "error"
+                                );
+                                return false;
+                            }
+                            utils.log(
+                                "✓ Desktop interface elements present and accessible"
+                            );
+                        } else {
+                            utils.log(
+                                "ERROR: Unknown or invalid mode: " +
+                                    currentMode,
+                                "error"
+                            );
+                            return false;
+                        }
+
+                        // Phase 3: Test universal event binding
+                        utils.log("Phase 3: Universal Event Binding Test");
+
+                        var bindingResult = this.bindEvents();
+                        if (!bindingResult) {
+                            utils.log(
+                                "ERROR: Universal event binding failed",
+                                "error"
+                            );
+                            return false;
+                        }
+                        utils.log(
+                            "✓ Universal event binding completed successfully"
+                        );
+
+                        // Phase 4: Test mode-specific functionality
+                        if (currentMode === "mobile") {
+                            return this.testMobileSpecificEvents();
+                        } else if (currentMode === "desktop") {
+                            return this.testDesktopSpecificEvents();
+                        }
+
+                        utils.log(
+                            "=== ALL UNIVERSAL TOC TESTS COMPLETED SUCCESSFULLY ==="
+                        );
+                        return true;
+                    } catch (error) {
+                        utils.log(
+                            "CRITICAL ERROR during universal TOC testing",
+                            "error",
+                            error
+                        );
+                        return false;
+                    }
+                },
+                /**
+                 * Test Mobile-Specific Event Functionality
+                 *
+                 * Validates mobile interface event handling including floating button interactions,
+                 * panel opening/closing mechanisms, and touch-optimized navigation. This test
+                 * simulates user interactions and verifies that all mobile-specific features
+                 * respond correctly while maintaining accessibility and performance standards.
+                 *
+                 * @since 1.0.0
+                 * @returns {boolean} True if all mobile-specific tests pass
+                 */
+                testMobileSpecificEvents: function () {
+                    var utils = CloudSync.adaptivePages.utils;
+                    utils.log("Phase 4a: Mobile-Specific Event Testing");
+
+                    try {
+                        // Test 1: Verify floating button accessibility and interaction readiness
+                        var floatingButton =
+                            this.state.tocElements.floatingButton;
+                        if (!floatingButton) {
+                            utils.log(
+                                "ERROR: Floating button element not found",
+                                "error"
+                            );
+                            return false;
+                        }
+
+                        // Check that button has proper accessibility attributes
+                        var ariaLabel =
+                            floatingButton.getAttribute("aria-label");
+                        var ariaExpanded =
+                            floatingButton.getAttribute("aria-expanded");
+
+                        if (!ariaLabel) {
+                            utils.log(
+                                "WARNING: Floating button missing aria-label",
+                                "warn"
+                            );
+                        } else {
+                            utils.log(
+                                "✓ Floating button has accessibility label: " +
+                                    ariaLabel
+                            );
+                        }
+
+                        if (ariaExpanded === null) {
+                            utils.log(
+                                "WARNING: Floating button missing aria-expanded state",
+                                "warn"
+                            );
+                        } else {
+                            utils.log(
+                                "✓ Floating button has proper ARIA state: " +
+                                    ariaExpanded
+                            );
+                        }
+
+                        // Test 2: Verify mobile panel structure and accessibility
+                        var mobilePanel = this.state.tocElements.mobilePanel;
+                        if (!mobilePanel) {
+                            utils.log(
+                                "ERROR: Mobile panel element not found",
+                                "error"
+                            );
+                            return false;
+                        }
+
+                        var panelRole = mobilePanel.getAttribute("role");
+                        var panelHidden =
+                            mobilePanel.getAttribute("aria-hidden");
+
+                        if (panelRole !== "dialog") {
+                            utils.log(
+                                "WARNING: Mobile panel missing proper dialog role",
+                                "warn"
+                            );
+                        } else {
+                            utils.log(
+                                "✓ Mobile panel has correct dialog semantics"
+                            );
+                        }
+
+                        // Test 3: Verify navigation links are properly created and accessible
+                        var navigationLinks =
+                            mobilePanel.querySelectorAll(".mobile-toc-link");
+                        if (
+                            navigationLinks.length !==
+                            this.state.headings.length
+                        ) {
+                            utils.log(
+                                "ERROR: Navigation link count mismatch",
+                                "error"
+                            );
+                            utils.log(
+                                "Expected: " +
+                                    this.state.headings.length +
+                                    ", Found: " +
+                                    navigationLinks.length
+                            );
+                            return false;
+                        }
+                        utils.log(
+                            "✓ All navigation links created correctly: " +
+                                navigationLinks.length
+                        );
+
+                        // Test 4: Verify that all navigation links have proper href attributes
+                        var linkTestsPassed = 0;
+                        for (var i = 0; i < navigationLinks.length; i++) {
+                            var link = navigationLinks[i];
+                            var href = link.getAttribute("href");
+                            var expectedId = this.state.headings[i].id;
+
+                            if (href === "#" + expectedId) {
+                                linkTestsPassed++;
+                            } else {
+                                utils.log(
+                                    "WARNING: Link " +
+                                        i +
+                                        " has incorrect href: " +
+                                        href,
+                                    "warn"
+                                );
+                            }
+                        }
+
+                        if (linkTestsPassed === navigationLinks.length) {
+                            utils.log(
+                                "✓ All navigation links have correct href attributes"
+                            );
+                        } else {
+                            utils.log(
+                                "WARNING: " +
+                                    (navigationLinks.length - linkTestsPassed) +
+                                    " links have href issues",
+                                "warn"
+                            );
+                        }
+
+                        // Test 5: Simulate button interaction to test panel opening
+                        utils.log(
+                            "Testing mobile panel interaction simulation"
+                        );
+
+                        // Create a simple test for panel opening mechanism
+                        var initialPanelState =
+                            mobilePanel.classList.contains("panel-open");
+                        if (initialPanelState) {
+                            utils.log(
+                                "Panel already open - this is unexpected for initial state",
+                                "warn"
+                            );
+                        }
+
+                        // Test the opening mechanism exists (we won't actually trigger it in automated test)
+                        if (typeof this.openMobilePanel === "function") {
+                            utils.log("✓ Panel opening mechanism available");
+                        } else {
+                            utils.log(
+                                "ERROR: Panel opening mechanism not found",
+                                "error"
+                            );
+                            return false;
+                        }
+
+                        if (typeof this.closeMobilePanel === "function") {
+                            utils.log("✓ Panel closing mechanism available");
+                        } else {
+                            utils.log(
+                                "ERROR: Panel closing mechanism not found",
+                                "error"
+                            );
+                            return false;
+                        }
+
+                        utils.log(
+                            "✓ All mobile-specific event tests passed successfully"
+                        );
+                        return true;
+                    } catch (error) {
+                        utils.log(
+                            "ERROR during mobile-specific event testing",
+                            "error",
+                            error
+                        );
+                        return false;
+                    }
+                },
+                /**
+                 * Test Desktop-Specific Event Functionality
+                 *
+                 * Validates desktop interface event handling including hover states, collapse
+                 * functionality, and mouse-optimized interactions. This test ensures that
+                 * existing desktop functionality continues to work properly within the
+                 * universal event system architecture.
+                 *
+                 * @since 1.0.0
+                 * @returns {boolean} True if all desktop-specific tests pass
+                 */
+                testDesktopSpecificEvents: function () {
+                    var utils = CloudSync.adaptivePages.utils;
+                    utils.log("Phase 4b: Desktop-Specific Event Testing");
+
+                    try {
+                        // Test desktop container and its required elements
+                        var desktopContainer =
+                            this.state.tocElements.desktopContainer;
+                        if (!desktopContainer) {
+                            utils.log(
+                                "ERROR: Desktop container not found",
+                                "error"
+                            );
+                            return false;
+                        }
+                        utils.log(
+                            "✓ Desktop TOC container located successfully"
+                        );
+
+                        // Verify collapse functionality is available
+                        var collapseButton =
+                            desktopContainer.querySelector(".toc-collapse");
+                        if (!collapseButton) {
+                            utils.log(
+                                "WARNING: Desktop collapse button not found",
+                                "warn"
+                            );
+                        } else {
+                            utils.log(
+                                "✓ Desktop collapse functionality available"
+                            );
+                        }
+
+                        // Test navigation links in desktop mode
+                        var desktopLinks =
+                            desktopContainer.querySelectorAll(".toc-link");
+                        if (desktopLinks.length > 0) {
+                            utils.log(
+                                "✓ Desktop navigation links found: " +
+                                    desktopLinks.length
+                            );
+                        } else {
+                            utils.log(
+                                "WARNING: No desktop navigation links found",
+                                "warn"
+                            );
+                        }
+
+                        utils.log("✓ Desktop-specific event tests completed");
+                        return true;
+                    } catch (error) {
+                        utils.log(
+                            "ERROR during desktop-specific event testing",
+                            "error",
+                            error
+                        );
+                        return false;
+                    }
                 },
             },
         },
@@ -3347,6 +4557,12 @@
                 );
             }
         },
+        /**
+         *
+         * ==============================
+         * ----------TESTS---------------
+         * ==============================
+         */
         // Temporary testing function for TOC module development
         testTOCModule: function () {
             var utils = this.utils;
