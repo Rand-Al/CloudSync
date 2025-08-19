@@ -1811,6 +1811,10 @@
                     floatingButton.setAttribute("aria-label", "Open table of contents");
                     floatingButton.setAttribute("tabindex", "0");
                     
+                    // Create progress ring container
+                    var progressRing = document.createElement("div");
+                    progressRing.className = "progress-ring";
+                    
                     // Create progress circle SVG
                     var progressSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
                     progressSvg.setAttribute("class", "progress-circle");
@@ -1818,6 +1822,17 @@
                     progressSvg.setAttribute("height", "64");
                     progressSvg.setAttribute("viewBox", "0 0 64 64");
                     
+                    // Background circle (full ring)
+                    var backgroundCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                    backgroundCircle.setAttribute("class", "progress-background");
+                    backgroundCircle.setAttribute("cx", "32");
+                    backgroundCircle.setAttribute("cy", "32");
+                    backgroundCircle.setAttribute("r", "28");
+                    backgroundCircle.setAttribute("fill", "none");
+                    backgroundCircle.setAttribute("stroke", "rgba(255, 255, 255, 0.1)");
+                    backgroundCircle.setAttribute("stroke-width", "3");
+                    
+                    // Progress circle (animated progress)
                     var progressCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
                     progressCircle.setAttribute("cx", "32");
                     progressCircle.setAttribute("cy", "32");
@@ -1830,7 +1845,11 @@
                     progressCircle.setAttribute("stroke-dashoffset", "175.93");
                     progressCircle.setAttribute("transform", "rotate(-90 32 32)");
                     
+                    progressSvg.appendChild(backgroundCircle);
                     progressSvg.appendChild(progressCircle);
+                    progressRing.appendChild(progressSvg);
+                    
+                    utils.log("Created progress circle SVG with circumference: 175.93");
                     
                     // Create button icon
                     var buttonIcon = document.createElement("i");
@@ -1842,7 +1861,7 @@
                     buttonPulse.className = "button-pulse";
                     
                     // Assemble floating button
-                    floatingButton.appendChild(progressSvg);
+                    floatingButton.appendChild(progressRing);
                     floatingButton.appendChild(buttonIcon);
                     floatingButton.appendChild(buttonPulse);
                     
@@ -1950,6 +1969,12 @@
                     // Bind event handlers
                     this.bindMobileEvents();
                     
+                    // Initialize progress to current scroll position
+                    var initialScrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                    var initialDocumentHeight = document.documentElement.scrollHeight - window.innerHeight;
+                    var initialScrollProgress = initialDocumentHeight > 0 ? initialScrollTop / initialDocumentHeight : 0;
+                    this.updateMobileProgress(Math.min(Math.max(initialScrollProgress, 0), 1));
+                    
                     utils.log("Mobile TOC interface created successfully");
                     return true;
                 },
@@ -1957,6 +1982,7 @@
                     var utils = CloudSync.adaptivePages.utils;
                     
                     if (!this.state.tocElements.mobileProgressCircle || !this.state.tocElements.mobilePanelProgress) {
+                        utils.log("Mobile progress elements not found", "error");
                         return;
                     }
                     
@@ -2213,34 +2239,26 @@
                         globalKey: globalKeyHandler
                     };
                     
-                    // Integrate with scroll progress updates
-                    var existingScrollHandler = this.updateProgress;
-                    if (existingScrollHandler) {
-                        var enhancedScrollHandler = function() {
-                            // Call existing desktop progress update
-                            existingScrollHandler.call(self);
-                            
-                            // Update mobile progress
-                            var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-                            var documentHeight = document.documentElement.scrollHeight - window.innerHeight;
-                            var scrollProgress = documentHeight > 0 ? scrollTop / documentHeight : 0;
-                            
-                            self.updateMobileProgress(Math.min(Math.max(scrollProgress, 0), 1));
-                        };
+                    // Create mobile progress scroll handler
+                    var mobileProgressHandler = function() {
+                        // Calculate scroll progress
+                        var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                        var documentHeight = document.documentElement.scrollHeight - window.innerHeight;
+                        var scrollProgress = documentHeight > 0 ? scrollTop / documentHeight : 0;
                         
-                        // Replace existing scroll handler with enhanced version
-                        if (this.state.eventHandlers && this.state.eventHandlers.scroll) {
-                            window.removeEventListener("scroll", this.state.eventHandlers.scroll);
-                        }
-                        
-                        var throttledScrollHandler = utils.throttle(enhancedScrollHandler, 16);
-                        window.addEventListener("scroll", throttledScrollHandler, { passive: true });
-                        
-                        if (!this.state.eventHandlers) {
-                            this.state.eventHandlers = {};
-                        }
-                        this.state.eventHandlers.scroll = throttledScrollHandler;
+                        // Update mobile progress
+                        self.updateMobileProgress(Math.min(Math.max(scrollProgress, 0), 1));
+                    };
+                    
+                    // Set up scroll handler for mobile progress
+                    var throttledMobileScrollHandler = utils.throttle(mobileProgressHandler, 16);
+                    window.addEventListener("scroll", throttledMobileScrollHandler, { passive: true });
+                    
+                    // Store handler for cleanup
+                    if (!this.state.eventHandlers) {
+                        this.state.eventHandlers = {};
                     }
+                    this.state.mobileScrollHandler = throttledMobileScrollHandler;
                     
                     utils.log("Mobile TOC event handlers bound successfully");
                     return true;
