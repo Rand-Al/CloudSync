@@ -895,6 +895,8 @@
                         ) {
                             utils.log("Binding mobile-specific TOC events");
                             this.bindMobileEvents();
+                            this.initializeProgressRing();
+                            this.initializeReadingTimeUpdates();
                         }
 
                         // Bind universal events that work across both desktop and mobile modes
@@ -907,6 +909,7 @@
                                 this.state.currentMode +
                                 " mode"
                         );
+
                         return true;
                     } catch (error) {
                         utils.log("Error binding TOC events", "error", error);
@@ -2867,6 +2870,606 @@
                         }
                     }, checkInterval);
                 },
+                /**
+                 * Calculate Reading Time Using Existing PHP Data and Real-Time Progress
+                 *
+                 * Leverages existing PHP calculations from cloudsync_analyze_page_context()
+                 * and reading time estimates while adding real-time scroll progress tracking.
+                 * This approach maintains consistency with server-side analysis while providing
+                 * dynamic user feedback based on actual reading progress.
+                 *
+                 * @since 1.0.0
+                 * @returns {Object} Reading time data with remaining estimates
+                 */
+                calculateReadingTime: function () {
+                    var utils = CloudSync.adaptivePages.utils;
+
+                    try {
+                        // Get data from PHP analysis
+                        var phpData = this.extractPHPPageData();
+
+                        // Calculate current scroll progress
+                        var scrollProgress = this.getCurrentScrollProgress();
+
+                        // Calculate remaining time based on PHP total and current progress
+                        var totalMinutes = phpData.totalMinutes;
+                        var remainingMinutes = Math.ceil(
+                            totalMinutes * (1 - scrollProgress)
+                        );
+
+                        var result = {
+                            totalMinutes: totalMinutes,
+                            remainingMinutes: Math.max(0, remainingMinutes),
+                            scrollProgress: Math.round(scrollProgress * 100),
+                            contentType: phpData.contentType,
+                            contentLength: phpData.contentLength,
+                            isComplete: scrollProgress >= 0.95,
+                        };
+
+                        utils.log(
+                            "Reading time calculated using PHP data:",
+                            result
+                        );
+                        return result;
+                    } catch (error) {
+                        utils.log(
+                            "Error calculating reading time",
+                            "error",
+                            error
+                        );
+                        return {
+                            totalMinutes: 5,
+                            remainingMinutes: 5,
+                            scrollProgress: 0,
+                            contentType: "standard",
+                            contentLength: "medium",
+                            isComplete: false,
+                        };
+                    }
+                },
+                /**
+                 * Extract Page Data with Intelligent Fallback System
+                 *
+                 * Attempts to use existing PHP calculations when available (for posts),
+                 * falls back to JavaScript calculations for pages. This hybrid approach
+                 * ensures consistency with server-side analysis while providing universal
+                 * coverage across all content types without requiring template modifications.
+                 *
+                 * @since 1.0.0
+                 * @returns {Object} Complete page data with reading time estimates
+                 */
+                extractPHPPageData: function () {
+                    var utils = CloudSync.adaptivePages.utils;
+                    var data = {
+                        totalMinutes: 5,
+                        contentType: "standard",
+                        contentLength: "medium",
+                        dataSource: "fallback",
+                    };
+
+                    // Try to find PHP reading time element (available in posts)
+                    var readingTimeElement = document.querySelector(
+                        ".reading-time, .post-meta-item.reading-time, .page-meta-item.reading-time"
+                    );
+                    if (readingTimeElement) {
+                        var timeText =
+                            readingTimeElement.textContent ||
+                            readingTimeElement.innerText ||
+                            "";
+                        var timeMatch = timeText.match(/(\d+)\s*min/i);
+                        if (timeMatch) {
+                            data.totalMinutes = parseInt(timeMatch[1]);
+                            data.dataSource = "php";
+                            utils.log(
+                                "Using PHP reading time: " +
+                                    data.totalMinutes +
+                                    " minutes"
+                            );
+                        }
+                    } else {
+                        // No PHP reading time found - calculate using JavaScript for pages
+                        data.totalMinutes =
+                            this.calculateJavaScriptReadingTime();
+                        data.dataSource = "javascript";
+                        utils.log(
+                            "Using JavaScript reading time: " +
+                                data.totalMinutes +
+                                " minutes"
+                        );
+                    }
+
+                    // Extract content classification from PHP analysis (this works for both posts and pages)
+                    var mainElement = document.querySelector("main");
+                    if (mainElement && mainElement.className) {
+                        var classes = mainElement.className;
+
+                        // Content length classification from cloudsync_analyze_page_context
+                        if (classes.indexOf("short-content") !== -1) {
+                            data.contentLength = "short";
+                        } else if (classes.indexOf("long-content") !== -1) {
+                            data.contentLength = "long";
+                        } else {
+                            data.contentLength = "medium";
+                        }
+
+                        // Content type classification
+                        if (classes.indexOf("page-type-legal") !== -1) {
+                            data.contentType = "legal";
+                        } else if (classes.indexOf("page-type-about") !== -1) {
+                            data.contentType = "about";
+                        } else if (classes.indexOf("page-type-docs") !== -1) {
+                            data.contentType = "docs";
+                        } else if (
+                            classes.indexOf("page-type-product") !== -1
+                        ) {
+                            data.contentType = "product";
+                        } else {
+                            data.contentType = "standard";
+                        }
+
+                        utils.log(
+                            "Content analysis: " +
+                                data.contentLength +
+                                " " +
+                                data.contentType +
+                                " content"
+                        );
+                    }
+
+                    return data;
+                },
+                /**
+                 * Calculate Reading Time Using JavaScript Analysis
+                 *
+                 * Provides intelligent reading time calculation when PHP data is not available.
+                 * Uses content analysis, reading speed adjustments, and smart filtering to
+                 * provide accurate estimates that complement the existing PHP analysis system.
+                 *
+                 * @since 1.0.0
+                 * @returns {number} Reading time in minutes
+                 */
+                calculateJavaScriptReadingTime: function () {
+                    var utils = CloudSync.adaptivePages.utils;
+
+                    try {
+                        // Find main content area using multiple selectors
+                        var contentArea = this.findContentArea();
+                        if (!contentArea) {
+                            utils.log(
+                                "No content area found for JS reading time calculation",
+                                "warn"
+                            );
+                            return 5;
+                        }
+
+                        // Extract clean text content
+                        var cleanText = this.extractCleanText(contentArea);
+                        if (!cleanText || cleanText.trim().length < 50) {
+                            utils.log(
+                                "Insufficient content for reading time calculation",
+                                "warn"
+                            );
+                            return 1;
+                        }
+
+                        // Count words intelligently
+                        var wordCount = this.countMeaningfulWords(cleanText);
+
+                        // Determine reading speed based on content type and complexity
+                        var readingSpeed =
+                            this.determineReadingSpeed(cleanText);
+
+                        // Calculate time with minimum threshold
+                        var minutes = Math.max(
+                            1,
+                            Math.ceil(wordCount / readingSpeed)
+                        );
+
+                        utils.log(
+                            "JS Reading time calculated: " +
+                                wordCount +
+                                " words at " +
+                                readingSpeed +
+                                " WPM = " +
+                                minutes +
+                                " minutes"
+                        );
+
+                        return minutes;
+                    } catch (error) {
+                        utils.log(
+                            "Error in JavaScript reading time calculation",
+                            "error",
+                            error
+                        );
+                        return 5; // Safe fallback
+                    }
+                },
+
+                /**
+                 * Find Main Content Area Using Intelligent Selector Strategy
+                 *
+                 * Uses a prioritized list of selectors to locate the primary readable content
+                 * while avoiding navigation, sidebar, and UI elements. Works across different
+                 * WordPress themes and content structures.
+                 *
+                 * @since 1.0.0
+                 * @returns {HTMLElement|null} Main content element
+                 */
+                findContentArea: function () {
+                    // Priority-ordered selectors for finding main content
+                    var selectors = [
+                        ".entry-content", // WordPress standard (both posts and pages)
+                        ".post-content", // Alternative post content
+                        ".page-content .entry-content", // Page-specific content
+                        "article .content", // Semantic article content
+                        "main article", // Main article element
+                        ".content-area .content", // Theme-specific content area
+                        "main .container", // Main container content
+                        ".site-main .entry-content", // Site main content
+                        "main", // HTML5 main element
+                        ".content", // Generic content class
+                        "article", // Article element
+                        "#content", // Content ID fallback
+                    ];
+
+                    for (var i = 0; i < selectors.length; i++) {
+                        var element = document.querySelector(selectors[i]);
+                        if (element) {
+                            var textLength = (element.textContent || "").trim()
+                                .length;
+                            if (textLength > 100) {
+                                // Ensure it has substantial content
+                                return element;
+                            }
+                        }
+                    }
+
+                    return null;
+                },
+
+                /**
+                 * Extract Clean Text Content for Word Counting
+                 *
+                 * Removes non-readable elements and content to ensure accurate word counting.
+                 * Filters out navigation, code blocks, UI elements, and our own TOC components.
+                 *
+                 * @since 1.0.0
+                 * @param {HTMLElement} element - Element to extract text from
+                 * @returns {string} Cleaned text content
+                 */
+                extractCleanText: function (element) {
+                    // Clone to avoid modifying the original element
+                    var clone = element.cloneNode(true);
+
+                    // Remove elements that shouldn't count toward reading time
+                    var excludeSelectors = [
+                        // Navigation and structural elements
+                        "nav",
+                        "header",
+                        "footer",
+                        ".menu",
+                        ".nav",
+                        ".navigation",
+                        ".breadcrumbs",
+                        ".pagination",
+                        ".post-meta",
+                        ".page-meta",
+
+                        // Technical and interactive elements
+                        "script",
+                        "style",
+                        "noscript",
+                        "code",
+                        "pre",
+                        ".code-block",
+
+                        // Our own TOC elements
+                        ".advanced-toc",
+                        ".mobile-toc-system",
+                        ".floating-toc-button",
+                        ".page-toc",
+                        "#page-toc-content",
+
+                        // UI and sidebar elements
+                        ".sidebar",
+                        ".widget",
+                        ".widget-area",
+                        ".comments",
+                        ".comment-form",
+                        ".social-share",
+                        ".share-buttons",
+                        ".related-posts",
+
+                        // Hidden and decorative content
+                        '[aria-hidden="true"]',
+                        '[style*="display: none"]',
+                        '[style*="display:none"]',
+                        ".screen-reader-text",
+                        ".sr-only",
+                    ];
+
+                    // Remove excluded elements
+                    excludeSelectors.forEach(function (selector) {
+                        var elements = clone.querySelectorAll(selector);
+                        for (var i = 0; i < elements.length; i++) {
+                            elements[i].remove();
+                        }
+                    });
+
+                    // Get text and clean it up
+                    var text = clone.textContent || clone.innerText || "";
+
+                    // Normalize whitespace and clean up
+                    text = text.replace(/\s+/g, " ").trim();
+
+                    return text;
+                },
+
+                /**
+                 * Count Meaningful Words in Text Content
+                 *
+                 * Implements intelligent word counting that excludes numbers, single characters,
+                 * and other non-meaningful content while accurately counting readable words.
+                 *
+                 * @since 1.0.0
+                 * @param {string} text - Text to analyze
+                 * @returns {number} Count of meaningful words
+                 */
+                countMeaningfulWords: function (text) {
+                    if (!text || text.trim().length === 0) {
+                        return 0;
+                    }
+
+                    // Split into potential words
+                    var potentialWords = text.trim().split(/\s+/);
+
+                    // Filter to count only meaningful words
+                    var meaningfulWords = potentialWords.filter(function (
+                        word
+                    ) {
+                        // Clean word boundaries
+                        var cleanWord = word.replace(/^[^\w]+|[^\w]+$/g, "");
+
+                        // Skip empty words
+                        if (!cleanWord || cleanWord.length === 0) {
+                            return false;
+                        }
+
+                        // Skip pure numbers (but allow words with numbers like "2024")
+                        if (/^\d+$/.test(cleanWord)) {
+                            return false;
+                        }
+
+                        // Skip single characters unless they're meaningful words
+                        if (cleanWord.length === 1) {
+                            return /^[aeiouAEIOU]$/i.test(cleanWord); // Only count vowels as single-letter words
+                        }
+
+                        // Count everything else as a meaningful word
+                        return true;
+                    });
+
+                    return meaningfulWords.length;
+                },
+
+                /**
+                 * Determine Reading Speed Based on Content Analysis
+                 *
+                 * Analyzes content characteristics to adjust reading speed for more accurate
+                 * time estimates. Technical content and complex writing require slower reading
+                 * speeds for proper comprehension.
+                 *
+                 * @since 1.0.0
+                 * @param {string} text - Text content to analyze
+                 * @returns {number} Adjusted reading speed in words per minute
+                 */
+                determineReadingSpeed: function (text) {
+                    var baseSpeed = 225; // Conservative average for web content
+                    var adjustmentFactor = 1.0;
+
+                    // Get content type from PHP analysis if available
+                    var mainElement = document.querySelector("main");
+                    var contentType = "standard";
+
+                    if (mainElement && mainElement.className) {
+                        var classes = mainElement.className;
+                        if (classes.indexOf("page-type-legal") !== -1) {
+                            contentType = "legal";
+                        } else if (classes.indexOf("page-type-docs") !== -1) {
+                            contentType = "docs";
+                        }
+                    }
+
+                    // Adjust speed based on content type
+                    switch (contentType) {
+                        case "legal":
+                            adjustmentFactor = 0.8; // 20% slower for legal documents
+                            break;
+                        case "docs":
+                            adjustmentFactor = 0.85; // 15% slower for documentation
+                            break;
+                        default:
+                            // Analyze text complexity for other content types
+                            adjustmentFactor = this.analyzeTextComplexity(text);
+                    }
+
+                    return Math.round(baseSpeed * adjustmentFactor);
+                },
+
+                /**
+                 * Analyze Text Complexity for Reading Speed Adjustment
+                 *
+                 * Examines sentence length, technical terminology, and other complexity
+                 * indicators to determine appropriate reading speed adjustments.
+                 *
+                 * @since 1.0.0
+                 * @param {string} text - Text to analyze
+                 * @returns {number} Adjustment factor (0.7 to 1.2)
+                 */
+                analyzeTextComplexity: function (text) {
+                    var adjustmentFactor = 1.0;
+
+                    // Analyze average sentence length
+                    var sentences = text.split(/[.!?]+/).filter(function (s) {
+                        return s.trim().length > 10;
+                    });
+
+                    if (sentences.length > 0) {
+                        var totalWords = 0;
+                        sentences.forEach(function (sentence) {
+                            totalWords += sentence.split(/\s+/).length;
+                        });
+                        var avgSentenceLength = totalWords / sentences.length;
+
+                        // Adjust based on sentence complexity
+                        if (avgSentenceLength > 30) {
+                            adjustmentFactor *= 0.9; // 10% slower for complex sentences
+                        } else if (avgSentenceLength < 15) {
+                            adjustmentFactor *= 1.1; // 10% faster for simple sentences
+                        }
+                    }
+
+                    // Check for technical indicators
+                    var technicalTerms = (
+                        text.match(
+                            /\b(function|method|class|object|array|variable|parameter|algorithm|implementation|configuration|deployment|authentication|encryption|framework|library|database|server|API|HTML|CSS|JavaScript)\b/gi
+                        ) || []
+                    ).length;
+                    var wordCount = text.split(/\s+/).length;
+                    var technicalDensity = technicalTerms / wordCount;
+
+                    if (technicalDensity > 0.02) {
+                        // More than 2% technical terms
+                        adjustmentFactor *= 0.85; // 15% slower for technical content
+                    }
+
+                    // Ensure factor stays within reasonable bounds
+                    return Math.max(0.7, Math.min(1.2, adjustmentFactor));
+                },
+                /**
+                 * Get Current Scroll Progress
+                 *
+                 * Simple, reliable scroll progress calculation that works consistently
+                 * across different browsers and content types.
+                 *
+                 * @since 1.0.0
+                 * @returns {number} Progress value between 0 and 1
+                 */
+                getCurrentScrollProgress: function () {
+                    var scrollTop =
+                        window.pageYOffset ||
+                        document.documentElement.scrollTop;
+                    var documentHeight = Math.max(
+                        document.body.scrollHeight,
+                        document.documentElement.scrollHeight
+                    );
+                    var windowHeight = window.innerHeight;
+
+                    var scrollableDistance = documentHeight - windowHeight;
+
+                    if (scrollableDistance <= 0) {
+                        return 0;
+                    }
+
+                    var progress = scrollTop / scrollableDistance;
+                    return Math.min(Math.max(progress, 0), 1);
+                },
+                /**
+                 * Update Mobile Progress Display Using PHP Data
+                 *
+                 * Updates the mobile TOC header with reading progress information derived
+                 * from existing PHP calculations. Provides contextual messages based on
+                 * content type and reading progress while maintaining consistency with
+                 * server-side analysis.
+                 *
+                 * @since 1.0.0
+                 */
+                updateMobileProgressDisplay: function () {
+                    var utils = CloudSync.adaptivePages.utils;
+
+                    if (
+                        this.state.currentMode !== "mobile" ||
+                        !this.state.tocElements.mobileContainer
+                    ) {
+                        return;
+                    }
+
+                    var progressElement =
+                        this.state.tocElements.mobileContainer.querySelector(
+                            ".mobile-toc-progress"
+                        );
+                    if (!progressElement) {
+                        return;
+                    }
+
+                    try {
+                        var readingData = this.calculateReadingTime();
+
+                        // Build contextual progress message
+                        var progressText =
+                            this.state.headings.length + " sections";
+
+                        if (readingData.totalMinutes > 0) {
+                            if (readingData.isComplete) {
+                                progressText += " • Reading complete! ✅";
+                            } else if (readingData.remainingMinutes === 0) {
+                                progressText += " • Almost done!";
+                            } else if (readingData.remainingMinutes === 1) {
+                                progressText += " • ~1 min left";
+                            } else {
+                                progressText +=
+                                    " • ~" +
+                                    readingData.remainingMinutes +
+                                    " min left";
+                            }
+                        }
+
+                        progressText +=
+                            " (" + readingData.scrollProgress + "%)";
+
+                        progressElement.textContent = progressText;
+                    } catch (error) {
+                        // Fallback to basic display
+                        progressElement.textContent =
+                            this.state.headings.length + " sections";
+                    }
+                },
+                /**
+                 * Initialize Reading Progress Updates for Mobile
+                 *
+                 * Sets up scroll event handling to update reading time display in real-time.
+                 * Uses throttling for performance while providing responsive feedback.
+                 *
+                 * @since 1.0.0
+                 */
+                initializeReadingTimeUpdates: function () {
+                    var utils = CloudSync.adaptivePages.utils;
+                    var self = this;
+
+                    if (this.state.currentMode !== "mobile") {
+                        return;
+                    }
+
+                    // Throttled scroll handler
+                    var updateProgress = utils.throttle(function () {
+                        self.updateMobileProgressDisplay();
+                    }, 150); // Update every 150ms for smooth feedback
+
+                    // Bind scroll event
+                    utils.addEventListener(window, "scroll", updateProgress, {
+                        passive: true,
+                    });
+
+                    // Initial update
+                    setTimeout(function () {
+                        self.updateMobileProgressDisplay();
+                    }, 500);
+
+                    utils.log(
+                        "Reading time progress updates initialized using PHP data"
+                    );
+                },
 
                 /**
                  * =================================================
@@ -2996,11 +3599,45 @@
                         }
 
                         nav.appendChild(list);
+                        // Create footer with quick action buttons
+                        var footer = document.createElement("div");
+                        footer.className = "mobile-toc-footer";
+
+                        var quickActions = document.createElement("div");
+                        quickActions.className = "mobile-toc-quick-actions";
+
+                        // Quick action: Go to top
+                        var topButton = document.createElement("button");
+                        topButton.className =
+                            "quick-action-btn quick-action-top";
+                        topButton.setAttribute("type", "button");
+                        topButton.setAttribute(
+                            "aria-label",
+                            "Scroll to top of page"
+                        );
+                        topButton.innerHTML =
+                            '<span aria-hidden="true">↑</span> Top';
+
+                        // Quick action: Go to bottom
+                        var bottomButton = document.createElement("button");
+                        bottomButton.className =
+                            "quick-action-btn quick-action-bottom";
+                        bottomButton.setAttribute("type", "button");
+                        bottomButton.setAttribute(
+                            "aria-label",
+                            "Scroll to bottom of page"
+                        );
+                        bottomButton.innerHTML =
+                            '<span aria-hidden="true">↓</span> Bottom';
+
+                        quickActions.appendChild(topButton);
+                        quickActions.appendChild(bottomButton);
+                        footer.appendChild(quickActions);
 
                         // Assemble complete structure
                         content.appendChild(header);
                         content.appendChild(nav);
-
+                        content.appendChild(footer);
                         panel.appendChild(overlay);
                         panel.appendChild(content);
 
@@ -3165,18 +3802,7 @@
                     }
 
                     // Overlay click to close
-                    var overlay = panel.querySelector(".mobile-toc-overlay");
-                    if (overlay) {
-                        utils.addEventListener(
-                            overlay,
-                            "click",
-                            function (event) {
-                                if (event.target === overlay) {
-                                    self.closeMobilePanel();
-                                }
-                            }
-                        );
-                    }
+                    this.bindSimpleOverlayClose();
 
                     // Escape key to close
                     utils.addEventListener(
@@ -3191,6 +3817,63 @@
                             }
                         }
                     );
+                    // Quick action buttons
+                    var topButton = panel.querySelector(".quick-action-top");
+                    var bottomButton = panel.querySelector(
+                        ".quick-action-bottom"
+                    );
+
+                    if (topButton) {
+                        utils.addEventListener(
+                            topButton,
+                            "click",
+                            function (event) {
+                                event.preventDefault();
+                                event.stopPropagation();
+
+                                utils.log("Quick action: scrolling to top");
+
+                                // Smooth scroll to top
+                                window.scrollTo({
+                                    top: 0,
+                                    behavior: "smooth",
+                                });
+
+                                // Close panel after short delay to show the action
+                                setTimeout(function () {
+                                    self.closeMobilePanel();
+                                }, 300);
+                            }
+                        );
+
+                        utils.log("Top button events bound");
+                    }
+
+                    if (bottomButton) {
+                        utils.addEventListener(
+                            bottomButton,
+                            "click",
+                            function (event) {
+                                event.preventDefault();
+                                event.stopPropagation();
+
+                                utils.log("Quick action: scrolling to bottom");
+
+                                // Smooth scroll to bottom
+                                window.scrollTo({
+                                    top: document.documentElement.scrollHeight,
+                                    behavior: "smooth",
+                                });
+
+                                // Close panel after short delay to show the action
+                                setTimeout(function () {
+                                    self.closeMobilePanel();
+                                }, 300);
+                            }
+                        );
+
+                        utils.log("Bottom button events bound");
+                    }
 
                     utils.log("Mobile panel events bound");
                 },
@@ -3271,12 +3954,12 @@
                     utils.log("Mobile navigation events bound successfully");
                 },
                 /**
-                 * Open Mobile TOC Panel with Smooth CSS Animation System
+                 * Open Mobile TOC Panel with Pure CSS Animation
                  *
-                 * Displays the mobile table of contents panel using optimized CSS transition timing
-                 * that ensures smooth visual presentation across all devices. This enhanced method
-                 * coordinates browser reflow timing with accessibility state management to provide
-                 * seamless user experience while maintaining proper focus management and scroll prevention.
+                 * Opens the mobile TOC panel using CSS class-based animations without
+                 * conflicting inline styles. This approach ensures smooth animations
+                 * by leveraging optimized CSS transitions while maintaining proper
+                 * accessibility and focus management.
                  *
                  * @since 1.0.0
                  * @returns {boolean} True if panel opened successfully
@@ -3294,60 +3977,40 @@
                         return false;
                     }
 
-                    utils.log(
-                        "Opening mobile TOC panel with smooth animation sequence"
-                    );
+                    utils.log("Opening mobile TOC panel with CSS animations");
 
-                    // Step 1: Make panel visible and prepare for animation
-                    panel.style.visibility = "visible";
-                    panel.style.pointerEvents = "auto";
+                    // Remove any existing animation classes
+                    panel.classList.remove("panel-closing");
 
-                    // Step 2: Update ARIA states immediately for accessibility
+                    // Update accessibility states
                     if (button) {
                         button.setAttribute("aria-expanded", "true");
                     }
                     panel.setAttribute("aria-hidden", "false");
 
-                    // Step 3: Force browser reflow to register initial state
-                    panel.offsetHeight; // This forces reflow
+                    // Add opening class - CSS handles the animation
+                    panel.classList.add("panel-open");
 
-                    // Step 4: Add opening animation class
-                    panel.classList.add("panel-opening");
-
-                    // Step 5: After minimal delay, trigger the main animation
-                    setTimeout(function () {
-                        panel.classList.add("panel-open");
-                        panel.classList.remove("panel-opening");
-
-                        utils.log(
-                            "Panel animation classes applied - CSS should handle transitions"
-                        );
-                    }, 16); // Single frame delay ensures smooth animation start
-
-                    // Step 6: Focus management after animation settles
+                    // Focus management after animation
                     setTimeout(function () {
                         var firstLink = panel.querySelector(".mobile-toc-link");
                         if (firstLink) {
                             firstLink.focus();
                         }
-                        utils.log(
-                            "Mobile TOC panel opened with focus management"
-                        );
-                    }, 100);
-
-                    // Step 7: Prevent background scrolling
-                    document.body.style.overflow = "hidden";
+                        document.body.style.overflow = "hidden";
+                        utils.log("Mobile TOC panel opened successfully");
+                    }, 400); // Wait for CSS animation to complete
 
                     return true;
                 },
 
                 /**
-                 * Close Mobile TOC Panel with Reverse Animation Sequence
+                 * Close Mobile TOC Panel with Pure CSS Animation
                  *
-                 * Hides the mobile table of contents panel using coordinated CSS transition timing
-                 * that ensures smooth visual dismissal while properly restoring page state and
-                 * returning focus to appropriate elements. This method handles all cleanup operations
-                 * including scroll restoration and accessibility state management.
+                 * Closes the mobile TOC panel using CSS class-based reverse animations
+                 * while properly restoring page state and focus. This method coordinates
+                 * with CSS transitions to provide smooth closing experience without
+                 * JavaScript-CSS conflicts.
                  *
                  * @since 1.0.0
                  * @returns {boolean} True if panel closed successfully
@@ -3365,42 +4028,326 @@
                         return false;
                     }
 
-                    utils.log(
-                        "Closing mobile TOC panel with smooth animation sequence"
-                    );
-
-                    // Step 1: Start closing animation
+                    utils.log("Closing mobile TOC panel with CSS animations");
                     panel.classList.remove("panel-open");
-                    panel.classList.add("panel-closing");
 
-                    // Step 2: Update ARIA states immediately
+                    // Update accessibility states immediately
                     if (button) {
                         button.setAttribute("aria-expanded", "false");
                     }
                     panel.setAttribute("aria-hidden", "true");
 
-                    // Step 3: Complete cleanup after animation duration
+                    // Cleanup after animation completes
                     setTimeout(function () {
                         panel.classList.remove("panel-closing");
 
-                        // Hide panel completely after animation
-
-                        // Restore background scrolling
+                        // Restore page state
                         document.body.style.overflow = "";
 
-                        // Return focus to floating button
                         if (button) {
                             button.focus();
                         }
 
-                        utils.log(
-                            "Mobile TOC panel closed with state restoration"
-                        );
-                    }, 350); // Match CSS animation duration + small buffer
+                        utils.log("Mobile TOC panel closed successfully");
+                    }, 350); // Wait for CSS animation to complete
 
                     return true;
                 },
+                /**
+                 * Create SVG Progress Ring Using Existing CSS System
+                 *
+                 * Creates an SVG-based circular progress indicator that integrates with
+                 * the existing CSS styling system. Uses stroke-dasharray and stroke-dashoffset
+                 * for smooth, hardware-accelerated animations that provide precise progress
+                 * visualization around the floating TOC button.
+                 *
+                 * @since 1.0.0
+                 * @returns {boolean} True if progress ring created successfully
+                 */
+                createProgressRing: function () {
+                    var utils = CloudSync.adaptivePages.utils;
+                    var button = this.state.tocElements.floatingButton;
 
+                    if (!button) {
+                        utils.log(
+                            "Cannot create progress ring - floating button not found",
+                            "error"
+                        );
+                        return false;
+                    }
+
+                    // Check if progress ring already exists
+                    var existingRing = button.querySelector(".progress-ring");
+                    if (existingRing) {
+                        utils.log("Progress ring already exists");
+                        return true;
+                    }
+
+                    utils.log(
+                        "Creating SVG progress ring using existing CSS system"
+                    );
+
+                    // Create progress ring container
+                    var progressRing = document.createElement("div");
+                    progressRing.className = "progress-ring";
+
+                    // Create SVG element
+                    var svg = document.createElementNS(
+                        "http://www.w3.org/2000/svg",
+                        "svg"
+                    );
+                    svg.setAttribute("class", "progress-svg");
+                    svg.setAttribute("viewBox", "0 0 56 56");
+
+                    // Calculate circle properties for stroke-dash animation
+                    var radius = 26; // Slightly smaller than container to avoid clipping
+                    var circumference = 2 * Math.PI * radius;
+
+                    // Create background circle (subtle reference)
+                    var backgroundCircle = document.createElementNS(
+                        "http://www.w3.org/2000/svg",
+                        "circle"
+                    );
+                    backgroundCircle.setAttribute(
+                        "class",
+                        "progress-background"
+                    );
+                    backgroundCircle.setAttribute("cx", "28");
+                    backgroundCircle.setAttribute("cy", "28");
+                    backgroundCircle.setAttribute("r", radius);
+                    backgroundCircle.setAttribute("fill", "none");
+                    backgroundCircle.setAttribute(
+                        "stroke",
+                        "rgba(102, 126, 234, 0.2)"
+                    );
+                    backgroundCircle.setAttribute("stroke-width", "2");
+
+                    // Create progress circle (animated indicator)
+                    var progressCircle = document.createElementNS(
+                        "http://www.w3.org/2000/svg",
+                        "circle"
+                    );
+                    progressCircle.setAttribute("class", "progress-circle");
+                    progressCircle.setAttribute("cx", "28");
+                    progressCircle.setAttribute("cy", "28");
+                    progressCircle.setAttribute("r", radius);
+                    progressCircle.setAttribute("fill", "none");
+                    progressCircle.setAttribute("stroke", "#667eea");
+                    progressCircle.setAttribute("stroke-width", "2.5");
+                    progressCircle.setAttribute("stroke-linecap", "round");
+
+                    // Set up stroke-dash properties for animation
+                    progressCircle.setAttribute(
+                        "stroke-dasharray",
+                        circumference
+                    );
+                    progressCircle.setAttribute(
+                        "stroke-dashoffset",
+                        circumference
+                    ); // Start fully hidden
+
+                    // Assemble SVG structure
+                    svg.appendChild(backgroundCircle);
+                    svg.appendChild(progressCircle);
+                    progressRing.appendChild(svg);
+
+                    // Add ring to button
+                    button.appendChild(progressRing);
+
+                    // Store references for future updates
+                    this.state.tocElements.progressRing = progressRing;
+                    this.state.tocElements.progressCircle = progressCircle;
+                    this.state.progressCircumference = circumference;
+
+                    utils.log(
+                        "SVG progress ring created successfully with circumference: " +
+                            circumference
+                    );
+                    return true;
+                },
+
+                /**
+                 * Update SVG Progress Ring with Smooth Animation
+                 *
+                 * Updates the stroke-dashoffset property of the SVG progress circle to
+                 * represent current reading progress. Uses the existing CSS transition
+                 * system for smooth animations and includes special states for completion
+                 * and initialization phases.
+                 *
+                 * @since 1.0.0
+                 * @param {number} progressValue - Progress value between 0 and 1
+                 */
+                updateProgressRing: function (progressValue) {
+                    var utils = CloudSync.adaptivePages.utils;
+
+                    if (this.state.currentMode !== "mobile") {
+                        return; // Only show on mobile devices
+                    }
+
+                    var progressCircle = this.state.tocElements.progressCircle;
+                    var progressRing = this.state.tocElements.progressRing;
+                    var circumference = this.state.progressCircumference;
+
+                    // Create ring if it doesn't exist yet
+                    if (!progressCircle || !circumference) {
+                        this.createProgressRing();
+                        progressCircle = this.state.tocElements.progressCircle;
+                        circumference = this.state.progressCircumference;
+                    }
+
+                    if (!progressCircle || !circumference) {
+                        return; // Still couldn't create ring
+                    }
+
+                    try {
+                        // Clamp progress value and convert to percentage
+                        var clampedProgress = Math.max(
+                            0,
+                            Math.min(1, progressValue)
+                        );
+                        var progressPercentage = clampedProgress * 100;
+
+                        // Calculate stroke-dashoffset for SVG circle animation
+                        // When progress is 0, offset equals circumference (fully hidden)
+                        // When progress is 1, offset equals 0 (fully visible)
+                        var strokeOffset =
+                            circumference - clampedProgress * circumference;
+
+                        // Determine visibility threshold (show ring after 2% progress)
+                        var shouldShowRing = progressPercentage > 2;
+
+                        // Update stroke-dashoffset for progress animation
+                        progressCircle.setAttribute(
+                            "stroke-dashoffset",
+                            strokeOffset
+                        );
+
+                        // Update ring visibility and color based on progress state
+                        if (progressPercentage >= 100) {
+                            // Completion state - green color and special effects
+                            progressCircle.setAttribute("stroke", "#4ade80");
+                            progressRing.style.opacity = "1";
+                            progressRing.classList.add("progress-complete");
+                        } else {
+                            // Normal progress state - blue color
+                            progressCircle.setAttribute("stroke", "#667eea");
+                            progressRing.style.opacity = shouldShowRing
+                                ? "0.8"
+                                : "0";
+                            progressRing.classList.remove("progress-complete");
+                        }
+
+                        // Debug logging for development (remove in production)
+                        if (
+                            utils.state &&
+                            utils.state.debug &&
+                            Math.random() < 0.1
+                        ) {
+                            // Log only 10% of updates
+                            utils.log(
+                                "Progress ring updated: " +
+                                    progressPercentage.toFixed(1) +
+                                    "% (offset: " +
+                                    strokeOffset.toFixed(1) +
+                                    ")"
+                            );
+                        }
+                    } catch (error) {
+                        utils.log(
+                            "Error updating SVG progress ring",
+                            "error",
+                            error
+                        );
+                    }
+                },
+
+                /**
+                 * Initialize SVG Progress Ring System
+                 *
+                 * Sets up the complete SVG progress ring system including creation, scroll
+                 * event binding, and automatic updates. Integrates seamlessly with existing
+                 * scroll tracking and provides smooth visual feedback for reading progress.
+                 *
+                 * @since 1.0.0
+                 */
+                initializeProgressRing: function () {
+                    var utils = CloudSync.adaptivePages.utils;
+                    var self = this;
+
+                    if (this.state.currentMode !== "mobile") {
+                        return; // Only initialize on mobile devices
+                    }
+
+                    utils.log("Initializing SVG progress ring system");
+
+                    // Create the initial SVG progress ring
+                    this.createProgressRing();
+
+                    // Set up throttled scroll handler for smooth performance
+                    var updateRing = utils.throttle(function () {
+                        var scrollProgress = self.getCurrentScrollProgress();
+                        self.updateProgressRing(scrollProgress);
+                    }, 50); // Update every 50ms for smooth visual feedback
+
+                    // Bind scroll event with passive listening for performance
+                    utils.addEventListener(window, "scroll", updateRing, {
+                        passive: true,
+                    });
+
+                    // Initial update after system stabilization
+                    setTimeout(function () {
+                        var initialProgress = self.getCurrentScrollProgress();
+                        self.updateProgressRing(initialProgress);
+                    }, 800); // Longer delay to ensure all systems are ready
+
+                    utils.log(
+                        "SVG progress ring system initialized successfully"
+                    );
+                },
+                /**
+                 * Simple Overlay Close Handler
+                 *
+                 * This straightforward approach listens for clicks anywhere on the document
+                 * and checks if the click happened outside the panel content area. If so,
+                 * it removes the panel-open class to close the panel. This method is clean,
+                 * reliable, and works regardless of the panel's internal structure.
+                 *
+                 * @since 1.0.0
+                 */
+                bindSimpleOverlayClose: function () {
+                    var utils = CloudSync.adaptivePages.utils;
+                    var self = this;
+
+                    // Listen for clicks anywhere on the document
+                    utils.addEventListener(document, "click", function (event) {
+                        var panel = self.state.tocElements.mobilePanel;
+
+                        // Only proceed if panel exists and is currently open
+                        if (!panel || !panel.classList.contains("panel-open")) {
+                            return;
+                        }
+
+                        var content = panel.querySelector(
+                            ".mobile-toc-content"
+                        );
+                        var button = self.state.tocElements.floatingButton;
+
+                        // Check if click was outside the panel content and not on the button
+                        var clickedOutside =
+                            content && !content.contains(event.target);
+                        var clickedButton =
+                            button && button.contains(event.target);
+
+                        if (clickedOutside && !clickedButton) {
+                            utils.log(
+                                "Clicked outside panel - removing panel-open class"
+                            );
+                            panel.classList.remove("panel-open");
+                        }
+                    });
+
+                    utils.log("Simple overlay close handler bound to document");
+                },
                 /**
                  * ===================
                  * -----TESTS---------

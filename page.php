@@ -47,7 +47,6 @@ $page_context = cloudsync_analyze_page_context();
                     <!-- Adaptive Page Header -->
                     <div class="page-header">
                         <h1 class="page-title"><?php the_title(); ?></h1>
-
                         <?php if (get_the_excerpt()) : ?>
                             <div class="page-subtitle">
                                 <?php echo esc_html(truncateWords(get_the_excerpt(), 6)); ?>

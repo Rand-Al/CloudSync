@@ -510,6 +510,9 @@ select:focus {
     margin: 0;
     padding: 0;
 }
+.primary-menu.show {
+    height: 100vh;
+}
 
 .main-navigation .menu-item a {
     color: #ffffff;
@@ -2982,8 +2985,8 @@ select:focus {
 
     /* Initially hidden from view and screen readers */
     visibility: hidden;
-    display: none;
-
+    transform: translate(0px, 600px);
+    transition: all 0.3s ease 0s;
     /* Prevent interaction when closed */
     pointer-events: none;
 }
@@ -3006,7 +3009,7 @@ select:focus {
     /* Initially hidden for animation */
     opacity: 0;
     visibility: hidden;
-
+    transition: all 0.3s ease 0s;
     /* Enable touch interaction for closing */
     pointer-events: auto;
     cursor: pointer;
@@ -3018,7 +3021,7 @@ select:focus {
 
     /* Modern rounded top corners for mobile sheet design */
     border-radius: 1.5rem 1.5rem 0 0;
-
+    transition: all 0.3s ease-in-out;
     /* Modern glassmorphism background */
     background: rgba(15, 15, 35, 0.95);
     backdrop-filter: blur(20px) saturate(1.2);
@@ -3051,6 +3054,7 @@ select:focus {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    min-height: 50px;
     padding: 1.5rem 1.5rem 1rem 1.5rem;
 
     /* Subtle bottom border for visual separation */
@@ -3079,7 +3083,7 @@ select:focus {
     border-radius: 50%;
     width: 36px;
     height: 36px;
-
+    padding: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -3212,9 +3216,9 @@ select:focus {
 /* Animation state classes */
 .mobile-toc-panel.panel-opening,
 .mobile-toc-panel.panel-open {
-    visibility: visible !important;
-    display: block !important;
-    pointer-events: auto !important;
+    visibility: visible;
+    transform: translate(0px, 0px);
+    pointer-events: auto;
 }
 
 .mobile-toc-panel.panel-open .mobile-toc-content {
