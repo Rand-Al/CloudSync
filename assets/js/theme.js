@@ -29,7 +29,7 @@
             this.scrollAnimations();
             this.parallaxCards();
             this.interactiveCards();
-            this.initCopyLinkButton(); //TODO What is this!!???
+            this.initCopyLinkButton();
             this.adaptivePages.init();
             this.smartHeader.init();
         },
@@ -1785,7 +1785,466 @@
                             ")"
                     );
                 },
-                createMobileTOC: function () {},
+                createMobileTOC: function () {
+                    var utils = CloudSync.adaptivePages.utils;
+                    
+                    utils.log("Creating mobile TOC interface");
+                    
+                    // Check for existing mobile TOC to prevent duplicates
+                    var existingFloatingButton = document.querySelector(".floating-toc-button");
+                    var existingMobilePanel = document.querySelector(".mobile-toc-panel");
+                    
+                    if (existingFloatingButton) {
+                        existingFloatingButton.remove();
+                        utils.log("Removed existing floating TOC button");
+                    }
+                    
+                    if (existingMobilePanel) {
+                        existingMobilePanel.remove();
+                        utils.log("Removed existing mobile TOC panel");
+                    }
+                    
+                    // Create floating button with progress indicator
+                    var floatingButton = document.createElement("div");
+                    floatingButton.className = "floating-toc-button";
+                    floatingButton.setAttribute("role", "button");
+                    floatingButton.setAttribute("aria-label", "Open table of contents");
+                    floatingButton.setAttribute("tabindex", "0");
+                    
+                    // Create progress circle SVG
+                    var progressSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                    progressSvg.setAttribute("class", "progress-circle");
+                    progressSvg.setAttribute("width", "64");
+                    progressSvg.setAttribute("height", "64");
+                    progressSvg.setAttribute("viewBox", "0 0 64 64");
+                    
+                    var progressCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                    progressCircle.setAttribute("cx", "32");
+                    progressCircle.setAttribute("cy", "32");
+                    progressCircle.setAttribute("r", "28");
+                    progressCircle.setAttribute("fill", "none");
+                    progressCircle.setAttribute("stroke", "rgba(102, 126, 234, 0.8)");
+                    progressCircle.setAttribute("stroke-width", "3");
+                    progressCircle.setAttribute("stroke-linecap", "round");
+                    progressCircle.setAttribute("stroke-dasharray", "175.93"); // 2 * π * r
+                    progressCircle.setAttribute("stroke-dashoffset", "175.93");
+                    progressCircle.setAttribute("transform", "rotate(-90 32 32)");
+                    
+                    progressSvg.appendChild(progressCircle);
+                    
+                    // Create button icon
+                    var buttonIcon = document.createElement("i");
+                    buttonIcon.className = "toc-button-icon fas fa-list-ul";
+                    buttonIcon.setAttribute("aria-hidden", "true");
+                    
+                    // Create pulse effect element
+                    var buttonPulse = document.createElement("div");
+                    buttonPulse.className = "button-pulse";
+                    
+                    // Assemble floating button
+                    floatingButton.appendChild(progressSvg);
+                    floatingButton.appendChild(buttonIcon);
+                    floatingButton.appendChild(buttonPulse);
+                    
+                    // Create mobile TOC panel
+                    var mobilePanel = document.createElement("div");
+                    mobilePanel.className = "mobile-toc-panel";
+                    mobilePanel.setAttribute("role", "dialog");
+                    mobilePanel.setAttribute("aria-modal", "true");
+                    mobilePanel.setAttribute("aria-labelledby", "mobile-toc-title");
+                    
+                    // Panel overlay for backdrop
+                    var panelOverlay = document.createElement("div");
+                    panelOverlay.className = "mobile-toc-overlay";
+                    
+                    // Panel content container
+                    var panelContent = document.createElement("div");
+                    panelContent.className = "mobile-toc-content";
+                    
+                    // Panel header
+                    var panelHeader = document.createElement("div");
+                    panelHeader.className = "mobile-toc-header";
+                    
+                    var panelTitle = document.createElement("h3");
+                    panelTitle.id = "mobile-toc-title";
+                    panelTitle.className = "mobile-toc-title";
+                    panelTitle.textContent = "Table of Contents";
+                    
+                    var panelProgress = document.createElement("div");
+                    panelProgress.className = "mobile-toc-progress";
+                    panelProgress.textContent = "0% Complete";
+                    
+                    var closeButton = document.createElement("button");
+                    closeButton.className = "mobile-toc-close";
+                    closeButton.setAttribute("aria-label", "Close table of contents");
+                    closeButton.innerHTML = '<i class="fas fa-times" aria-hidden="true"></i>';
+                    
+                    panelHeader.appendChild(panelTitle);
+                    panelHeader.appendChild(panelProgress);
+                    panelHeader.appendChild(closeButton);
+                    
+                    // Panel navigation area
+                    var panelNavigation = document.createElement("div");
+                    panelNavigation.className = "mobile-toc-navigation";
+                    
+                    var tocList = document.createElement("ul");
+                    tocList.className = "mobile-toc-list";
+                    
+                    // Generate navigation items from headings
+                    this.state.headings.forEach(function(heading, index) {
+                        var listItem = document.createElement("li");
+                        listItem.className = "mobile-toc-item toc-h" + heading.level;
+                        
+                        var link = document.createElement("a");
+                        link.className = "mobile-toc-link";
+                        link.href = "#" + heading.id;
+                        link.textContent = heading.text;
+                        link.setAttribute("data-heading-index", index);
+                        
+                        listItem.appendChild(link);
+                        tocList.appendChild(listItem);
+                    });
+                    
+                    panelNavigation.appendChild(tocList);
+                    
+                    // Panel footer with quick actions
+                    var panelFooter = document.createElement("div");
+                    panelFooter.className = "mobile-toc-footer";
+                    
+                    var quickActions = document.createElement("div");
+                    quickActions.className = "mobile-toc-quick-actions";
+                    
+                    var topButton = document.createElement("button");
+                    topButton.className = "quick-action-btn";
+                    topButton.innerHTML = '<i class="fas fa-arrow-up"></i> Top';
+                    topButton.setAttribute("aria-label", "Go to top of page");
+                    
+                    var bottomButton = document.createElement("button");
+                    bottomButton.className = "quick-action-btn";
+                    bottomButton.innerHTML = '<i class="fas fa-arrow-down"></i> Bottom';
+                    bottomButton.setAttribute("aria-label", "Go to bottom of page");
+                    
+                    quickActions.appendChild(topButton);
+                    quickActions.appendChild(bottomButton);
+                    panelFooter.appendChild(quickActions);
+                    
+                    // Assemble panel
+                    panelContent.appendChild(panelHeader);
+                    panelContent.appendChild(panelNavigation);
+                    panelContent.appendChild(panelFooter);
+                    
+                    mobilePanel.appendChild(panelOverlay);
+                    mobilePanel.appendChild(panelContent);
+                    
+                    // Add elements to DOM
+                    document.body.appendChild(floatingButton);
+                    document.body.appendChild(mobilePanel);
+                    
+                    // Store references for later use
+                    this.state.tocElements.mobileButton = floatingButton;
+                    this.state.tocElements.mobilePanel = mobilePanel;
+                    this.state.tocElements.mobileProgressCircle = progressCircle;
+                    this.state.tocElements.mobilePanelProgress = panelProgress;
+                    this.state.tocElements.mobileList = tocList;
+                    
+                    // Bind event handlers
+                    this.bindMobileEvents();
+                    
+                    utils.log("Mobile TOC interface created successfully");
+                    return true;
+                },
+                updateMobileProgress: function(progressValue) {
+                    var utils = CloudSync.adaptivePages.utils;
+                    
+                    if (!this.state.tocElements.mobileProgressCircle || !this.state.tocElements.mobilePanelProgress) {
+                        return;
+                    }
+                    
+                    // Update circular progress indicator
+                    var circumference = 175.93; // 2 * π * r (r=28)
+                    var offset = circumference - (progressValue * circumference);
+                    
+                    this.state.tocElements.mobileProgressCircle.setAttribute("stroke-dashoffset", offset);
+                    
+                    // Update panel progress text
+                    var progressPercentage = Math.round(progressValue * 100);
+                    this.state.tocElements.mobilePanelProgress.textContent = progressPercentage + "% Complete";
+                    
+                    // Add visual feedback for completion milestones
+                    var button = this.state.tocElements.mobileButton;
+                    if (progressPercentage >= 100) {
+                        button.classList.add("progress-complete");
+                    } else {
+                        button.classList.remove("progress-complete");
+                    }
+                    
+                    utils.log("Mobile progress updated to " + progressPercentage + "%");
+                },
+                toggleMobilePanel: function(forceState) {
+                    var utils = CloudSync.adaptivePages.utils;
+                    
+                    if (!this.state.tocElements.mobilePanel) {
+                        utils.log("Mobile panel not found, cannot toggle", "error");
+                        return false;
+                    }
+                    
+                    var panel = this.state.tocElements.mobilePanel;
+                    var isCurrentlyOpen = panel.classList.contains("panel-open");
+                    var shouldOpen = forceState !== undefined ? forceState : !isCurrentlyOpen;
+                    
+                    if (shouldOpen && !isCurrentlyOpen) {
+                        // Opening panel
+                        utils.log("Opening mobile TOC panel");
+                        
+                        // Add opening animation class
+                        panel.classList.add("panel-opening");
+                        panel.style.display = "block";
+                        
+                        // Trigger reflow for animation
+                        panel.offsetHeight;
+                        
+                        // Add open class for final state
+                        panel.classList.add("panel-open");
+                        
+                        // Clean up opening class after animation
+                        setTimeout(function() {
+                            panel.classList.remove("panel-opening");
+                        }, 300);
+                        
+                        // Prevent body scrolling when panel is open
+                        document.body.style.overflow = "hidden";
+                        
+                        // Focus management for accessibility
+                        var closeButton = panel.querySelector(".mobile-toc-close");
+                        if (closeButton) {
+                            closeButton.focus();
+                        }
+                        
+                        // Track state
+                        this.state.mobilePanel = { isOpen: true };
+                        
+                        // Dispatch custom event for other modules
+                        var openEvent = new CustomEvent("mobileTOCOpened", {
+                            detail: { panel: panel }
+                        });
+                        document.dispatchEvent(openEvent);
+                        
+                    } else if (!shouldOpen && isCurrentlyOpen) {
+                        // Closing panel
+                        utils.log("Closing mobile TOC panel");
+                        
+                        // Remove open class to start closing animation
+                        panel.classList.remove("panel-open");
+                        
+                        // Restore body scrolling
+                        document.body.style.overflow = "";
+                        
+                        // Wait for animation to complete before hiding
+                        setTimeout(function() {
+                            panel.style.display = "none";
+                        }, 300);
+                        
+                        // Focus management - return to button
+                        if (this.state.tocElements.mobileButton) {
+                            this.state.tocElements.mobileButton.focus();
+                        }
+                        
+                        // Track state
+                        this.state.mobilePanel = { isOpen: false };
+                        
+                        // Dispatch custom event for other modules
+                        var closeEvent = new CustomEvent("mobileTOCClosed", {
+                            detail: { panel: panel }
+                        });
+                        document.dispatchEvent(closeEvent);
+                    }
+                    
+                    return shouldOpen;
+                },
+                bindMobileEvents: function() {
+                    var utils = CloudSync.adaptivePages.utils;
+                    var self = this;
+                    
+                    utils.log("Binding mobile TOC event handlers");
+                    
+                    if (!this.state.tocElements.mobileButton || !this.state.tocElements.mobilePanel) {
+                        utils.log("Mobile TOC elements not found, cannot bind events", "error");
+                        return false;
+                    }
+                    
+                    var button = this.state.tocElements.mobileButton;
+                    var panel = this.state.tocElements.mobilePanel;
+                    
+                    // Floating button click/tap handler
+                    var buttonClickHandler = function(event) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        self.toggleMobilePanel();
+                        utils.log("Mobile TOC button clicked");
+                    };
+                    
+                    // Keyboard support for floating button
+                    var buttonKeyHandler = function(event) {
+                        if (event.key === "Enter" || event.key === " ") {
+                            event.preventDefault();
+                            self.toggleMobilePanel();
+                            utils.log("Mobile TOC button activated via keyboard");
+                        } else if (event.key === "Escape") {
+                            self.toggleMobilePanel(false);
+                        }
+                    };
+                    
+                    // Panel close button handler
+                    var closeButtonHandler = function(event) {
+                        event.preventDefault();
+                        self.toggleMobilePanel(false);
+                        utils.log("Mobile TOC panel closed via close button");
+                    };
+                    
+                    // Panel overlay click handler (close on backdrop click)
+                    var overlayClickHandler = function(event) {
+                        if (event.target.classList.contains("mobile-toc-overlay")) {
+                            self.toggleMobilePanel(false);
+                            utils.log("Mobile TOC panel closed via overlay click");
+                        }
+                    };
+                    
+                    // Navigation link click handlers
+                    var linkClickHandler = function(event) {
+                        event.preventDefault();
+                        
+                        var targetId = this.getAttribute("href");
+                        
+                        // Update active state
+                        var allLinks = panel.querySelectorAll(".mobile-toc-link");
+                        allLinks.forEach(function(link) {
+                            link.parentElement.classList.remove("active-section");
+                        });
+                        this.parentElement.classList.add("active-section");
+                        
+                        // Smooth scroll to target
+                        var targetElement = document.querySelector(targetId);
+                        if (targetElement) {
+                            var headerOffset = 100;
+                            var targetPosition = targetElement.offsetTop - headerOffset;
+                            
+                            window.scrollTo({
+                                top: targetPosition,
+                                behavior: "smooth"
+                            });
+                            
+                            // Close panel after navigation
+                            setTimeout(function() {
+                                self.toggleMobilePanel(false);
+                            }, 300);
+                            
+                            utils.log("Navigated to section: " + targetId);
+                        }
+                    };
+                    
+                    // Quick action handlers
+                    var topButtonHandler = function(event) {
+                        event.preventDefault();
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                        self.toggleMobilePanel(false);
+                        utils.log("Navigated to top of page");
+                    };
+                    
+                    var bottomButtonHandler = function(event) {
+                        event.preventDefault();
+                        var documentHeight = Math.max(
+                            document.body.scrollHeight,
+                            document.body.offsetHeight,
+                            document.documentElement.clientHeight,
+                            document.documentElement.scrollHeight,
+                            document.documentElement.offsetHeight
+                        );
+                        window.scrollTo({ top: documentHeight, behavior: "smooth" });
+                        self.toggleMobilePanel(false);
+                        utils.log("Navigated to bottom of page");
+                    };
+                    
+                    // Global keyboard handler for escape key
+                    var globalKeyHandler = function(event) {
+                        if (event.key === "Escape" && panel.classList.contains("panel-open")) {
+                            self.toggleMobilePanel(false);
+                        }
+                    };
+                    
+                    // Bind all events
+                    button.addEventListener("click", buttonClickHandler);
+                    button.addEventListener("keydown", buttonKeyHandler);
+                    
+                    var closeButton = panel.querySelector(".mobile-toc-close");
+                    if (closeButton) {
+                        closeButton.addEventListener("click", closeButtonHandler);
+                    }
+                    
+                    var overlay = panel.querySelector(".mobile-toc-overlay");
+                    if (overlay) {
+                        overlay.addEventListener("click", overlayClickHandler);
+                    }
+                    
+                    var navigationLinks = panel.querySelectorAll(".mobile-toc-link");
+                    navigationLinks.forEach(function(link) {
+                        link.addEventListener("click", linkClickHandler);
+                    });
+                    
+                    var topButton = panel.querySelector(".quick-action-btn");
+                    var bottomButton = panel.querySelectorAll(".quick-action-btn")[1];
+                    if (topButton) {
+                        topButton.addEventListener("click", topButtonHandler);
+                    }
+                    if (bottomButton) {
+                        bottomButton.addEventListener("click", bottomButtonHandler);
+                    }
+                    
+                    document.addEventListener("keydown", globalKeyHandler);
+                    
+                    // Store event handlers for cleanup
+                    this.state.mobileEventHandlers = {
+                        buttonClick: buttonClickHandler,
+                        buttonKey: buttonKeyHandler,
+                        closeButton: closeButtonHandler,
+                        overlayClick: overlayClickHandler,
+                        linkClick: linkClickHandler,
+                        topButton: topButtonHandler,
+                        bottomButton: bottomButtonHandler,
+                        globalKey: globalKeyHandler
+                    };
+                    
+                    // Integrate with scroll progress updates
+                    var existingScrollHandler = this.updateProgress;
+                    if (existingScrollHandler) {
+                        var enhancedScrollHandler = function() {
+                            // Call existing desktop progress update
+                            existingScrollHandler.call(self);
+                            
+                            // Update mobile progress
+                            var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                            var documentHeight = document.documentElement.scrollHeight - window.innerHeight;
+                            var scrollProgress = documentHeight > 0 ? scrollTop / documentHeight : 0;
+                            
+                            self.updateMobileProgress(Math.min(Math.max(scrollProgress, 0), 1));
+                        };
+                        
+                        // Replace existing scroll handler with enhanced version
+                        if (this.state.eventHandlers && this.state.eventHandlers.scroll) {
+                            window.removeEventListener("scroll", this.state.eventHandlers.scroll);
+                        }
+                        
+                        var throttledScrollHandler = utils.throttle(enhancedScrollHandler, 16);
+                        window.addEventListener("scroll", throttledScrollHandler, { passive: true });
+                        
+                        if (!this.state.eventHandlers) {
+                            this.state.eventHandlers = {};
+                        }
+                        this.state.eventHandlers.scroll = throttledScrollHandler;
+                    }
+                    
+                    utils.log("Mobile TOC event handlers bound successfully");
+                    return true;
+                },
                 handleBreakpointChange: function () {},
                 setupSmartVisibility: function () {
                     var utils = CloudSync.adaptivePages.utils;
