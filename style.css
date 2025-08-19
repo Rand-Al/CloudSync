@@ -2798,6 +2798,13 @@ select:focus {
     pointer-events: none;
 }
 
+.progress-ring svg {
+    /* Fill the container completely */
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
 /* Progress SVG - Vector graphics for crisp rendering at any scale */
 .progress-svg {
     /* Fill entire container while maintaining aspect ratio */

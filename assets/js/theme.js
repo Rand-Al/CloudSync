@@ -1818,38 +1818,38 @@
                     // Create progress circle SVG
                     var progressSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
                     progressSvg.setAttribute("class", "progress-circle");
-                    progressSvg.setAttribute("width", "64");
-                    progressSvg.setAttribute("height", "64");
-                    progressSvg.setAttribute("viewBox", "0 0 64 64");
+                    progressSvg.setAttribute("width", "56");
+                    progressSvg.setAttribute("height", "56");
+                    progressSvg.setAttribute("viewBox", "0 0 56 56");
                     
-                    // Background circle (full ring)
+                    // Background circle (full ring) 
                     var backgroundCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
                     backgroundCircle.setAttribute("class", "progress-background");
-                    backgroundCircle.setAttribute("cx", "32");
-                    backgroundCircle.setAttribute("cy", "32");
-                    backgroundCircle.setAttribute("r", "28");
+                    backgroundCircle.setAttribute("cx", "28");
+                    backgroundCircle.setAttribute("cy", "28");
+                    backgroundCircle.setAttribute("r", "24");
                     backgroundCircle.setAttribute("fill", "none");
                     backgroundCircle.setAttribute("stroke", "rgba(255, 255, 255, 0.1)");
-                    backgroundCircle.setAttribute("stroke-width", "3");
+                    backgroundCircle.setAttribute("stroke-width", "2.5");
                     
                     // Progress circle (animated progress)
                     var progressCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-                    progressCircle.setAttribute("cx", "32");
-                    progressCircle.setAttribute("cy", "32");
-                    progressCircle.setAttribute("r", "28");
+                    progressCircle.setAttribute("cx", "28");
+                    progressCircle.setAttribute("cy", "28");
+                    progressCircle.setAttribute("r", "24");
                     progressCircle.setAttribute("fill", "none");
                     progressCircle.setAttribute("stroke", "rgba(102, 126, 234, 0.8)");
-                    progressCircle.setAttribute("stroke-width", "3");
+                    progressCircle.setAttribute("stroke-width", "2.5");
                     progressCircle.setAttribute("stroke-linecap", "round");
-                    progressCircle.setAttribute("stroke-dasharray", "175.93"); // 2 * π * r
-                    progressCircle.setAttribute("stroke-dashoffset", "175.93");
-                    progressCircle.setAttribute("transform", "rotate(-90 32 32)");
+                    progressCircle.setAttribute("stroke-dasharray", "150.80"); // 2 * π * 24
+                    progressCircle.setAttribute("stroke-dashoffset", "150.80");
+                    progressCircle.setAttribute("transform", "rotate(-90 28 28)");
                     
                     progressSvg.appendChild(backgroundCircle);
                     progressSvg.appendChild(progressCircle);
                     progressRing.appendChild(progressSvg);
                     
-                    utils.log("Created progress circle SVG with circumference: 175.93");
+                    utils.log("Created progress circle SVG with circumference: 150.80");
                     
                     // Create button icon
                     var buttonIcon = document.createElement("i");
@@ -1987,7 +1987,7 @@
                     }
                     
                     // Update circular progress indicator
-                    var circumference = 175.93; // 2 * π * r (r=28)
+                    var circumference = 150.80; // 2 * π * r (r=24)
                     var offset = circumference - (progressValue * circumference);
                     
                     this.state.tocElements.mobileProgressCircle.setAttribute("stroke-dashoffset", offset);
