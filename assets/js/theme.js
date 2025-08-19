@@ -1996,20 +1996,16 @@
                         // Opening panel
                         utils.log("Opening mobile TOC panel");
                         
-                        // Add opening animation class
-                        panel.classList.add("panel-opening");
+                        // Show panel immediately for CSS transitions
                         panel.style.display = "block";
+                        panel.style.visibility = "visible";
+                        panel.style.opacity = "1";
                         
-                        // Trigger reflow for animation
+                        // Trigger reflow to ensure display change is applied
                         panel.offsetHeight;
                         
-                        // Add open class for final state
-                        panel.classList.add("panel-open");
-                        
-                        // Clean up opening class after animation
-                        setTimeout(function() {
-                            panel.classList.remove("panel-opening");
-                        }, 300);
+                        // Add opening state classes
+                        panel.classList.add("panel-opening", "panel-open");
                         
                         // Prevent body scrolling when panel is open
                         document.body.style.overflow = "hidden";
@@ -2034,7 +2030,11 @@
                         utils.log("Closing mobile TOC panel");
                         
                         // Remove open class to start closing animation
-                        panel.classList.remove("panel-open");
+                        panel.classList.remove("panel-open", "panel-opening");
+                        
+                        // Reset inline styles to let CSS transitions work
+                        panel.style.opacity = "";
+                        panel.style.visibility = "";
                         
                         // Restore body scrolling
                         document.body.style.overflow = "";

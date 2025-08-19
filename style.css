@@ -2983,9 +2983,13 @@ select:focus {
     /* Initially hidden from view and screen readers */
     visibility: hidden;
     display: none;
+    opacity: 0;
 
     /* Prevent interaction when closed */
     pointer-events: none;
+    
+    /* Smooth transition for panel visibility */
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
 }
 
 /* Panel overlay - provides modal backdrop and touch target for closing */
@@ -3010,6 +3014,9 @@ select:focus {
     /* Enable touch interaction for closing */
     pointer-events: auto;
     cursor: pointer;
+    
+    /* Smooth transition for overlay appearance */
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
 }
 
 /* Main panel content container - houses all navigation elements */
@@ -3041,6 +3048,10 @@ select:focus {
     /* Initially positioned below viewport for slide-up animation */
     transform: translateY(100%);
     visibility: hidden;
+    
+    /* Smooth slide-up animation */
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                visibility 0.3s ease-in-out;
 
     /* Enable interaction with panel content */
     pointer-events: auto;
@@ -3214,6 +3225,7 @@ select:focus {
 .mobile-toc-panel.panel-open {
     visibility: visible !important;
     display: block !important;
+    opacity: 1 !important;
     pointer-events: auto !important;
 }
 
