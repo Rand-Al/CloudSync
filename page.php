@@ -151,28 +151,22 @@ $page_context = cloudsync_analyze_page_context();
                         </div>
 
                     </article>
-
+                    <!-- Comments Section (if enabled for pages) -->
+                    <?php if (comments_open() || get_comments_number()) : ?>
+                        <section class="page-comments-section">
+                            <div class="container">
+                                <div class="comments-wrapper">
+                                    <?php comments_template(); ?>
+                                </div>
+                            </div>
+                        </section>
+                    <?php endif; ?>
                 </div>
             </div>
         </section>
 
-        <!-- Reading Progress Bar for long content -->
-        <?php if (strpos($page_context, 'long-content') !== false) : ?>
-            <div class="reading-progress">
-                <div class="progress-bar" id="reading-progress-bar"></div>
-            </div>
-        <?php endif; ?>
 
-        <!-- Comments Section (if enabled for pages) -->
-        <?php if (comments_open() || get_comments_number()) : ?>
-            <section class="page-comments-section">
-                <div class="container">
-                    <div class="comments-wrapper">
-                        <?php comments_template(); ?>
-                    </div>
-                </div>
-            </section>
-        <?php endif; ?>
+
 
     <?php endwhile; ?>
 
