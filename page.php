@@ -69,31 +69,27 @@ $page_context = cloudsync_analyze_page_context();
             </div>
         </section>
 
-        <!-- Featured Image (context-dependent display) -->
-        <?php if (has_post_thumbnail()) : ?>
-            <section class="page-featured-image">
-                <div class="container">
-                    <div class="featured-image-wrapper">
-                        <?php the_post_thumbnail('large', array(
-                            'class' => 'page-thumbnail',
-                            'alt'   => get_the_title()
-                        )); ?>
-                    </div>
-                </div>
-            </section>
-        <?php endif; ?>
+
 
         <!-- Main Content Section with Adaptive Components -->
         <section class="page-content-section">
             <div class="container">
                 <div class="page-content-wrapper">
-
-                    <!-- Table of Contents for long content -->
-
-
+                    <!-- Featured Image (context-dependent display) -->
+                    <?php if (has_post_thumbnail()) : ?>
+                        <section class="page-featured-image">
+                            <div class="container">
+                                <div class="featured-image-wrapper">
+                                    <?php the_post_thumbnail('large', array(
+                                        'class' => 'page-thumbnail',
+                                        'alt'   => get_the_title()
+                                    )); ?>
+                                </div>
+                            </div>
+                        </section>
+                    <?php endif; ?>
                     <!-- Main Content -->
                     <article class="page-content" id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
-
                         <div class="entry-content">
                             <?php
                             the_content();

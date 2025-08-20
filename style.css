@@ -308,6 +308,7 @@ a:focus {
     margin-bottom: 0.5rem;
 }
 
+
 /* 4. Layout & Grid System
    ========================================================================== */
 
@@ -998,6 +999,164 @@ select:focus {
 
 .widget ul li a:hover {
     color: #667eea;
+}
+
+/* Footer Customizer Content Styles */
+.footer-customizer-content {
+    background: rgba(0, 0, 0, 0.2);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 2rem 0;
+    margin-top: 2rem;
+}
+
+.footer-customizer-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 2rem;
+    align-items: flex-start;
+}
+
+.footer-customizer-grid > div {
+    flex: 1;
+    min-width: 280px;
+}
+
+/* Company Information Styles */
+.footer-company-info {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.footer-tagline {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #ffffff;
+    margin-bottom: 1.5rem;
+    line-height: 1.4;
+}
+
+.footer-contact-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.footer-contact-item i {
+    color: #667eea;
+    width: 16px;
+    flex-shrink: 0;
+    margin-top: 0.2rem;
+}
+
+.footer-contact-item a {
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer-contact-item a:hover {
+    color: #667eea;
+}
+
+/* Social Media Styles */
+.footer-social-media h4 {
+    color: #ffffff;
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.social-links {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.social-links a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.8);
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-size: 1.2rem;
+}
+
+.social-links a:hover {
+    background: #667eea;
+    color: #ffffff;
+    transform: translateY(-2px);
+}
+
+/* Newsletter Signup Styles */
+.footer-newsletter h4 {
+    color: #ffffff;
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.footer-newsletter p {
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+}
+
+.newsletter-signup {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.newsletter-signup input[type="email"] {
+    flex: 1;
+    min-width: 200px;
+    padding: 0.75rem 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.newsletter-signup input[type="email"]::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.newsletter-signup input[type="email"]:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.newsletter-signup button {
+    padding: 0.75rem 1.5rem;
+    background: #667eea;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.newsletter-signup button:hover {
+    background: #5a6fd8;
+    transform: translateY(-1px);
+}
+
+.newsletter-signup button:active {
+    transform: translateY(0);
 }
 
 /* 13. WordPress Specific Styles

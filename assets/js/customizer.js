@@ -61,6 +61,8 @@
         initializePricingPreview();
         // Initialize CTA section live preview
         initializeCTAPreview();
+        // Initialize Footer section live preview
+        initializeFooterPreview();
     });
 
     /**
@@ -582,6 +584,83 @@
             });
         });
     }
+
+    /**
+     * Initialize live preview for footer section elements
+     *
+     * This function sets up real-time preview for the footer section fields
+     * Each field gets its own listener that updates the corresponding
+     * DOM element when the user changes the value in Customizer.
+     */
+    function initializeFooterPreview() {
+        // Footer copyright text live preview
+        wp.customize("cloudsync_footer_copyright_text", function (value) {
+            value.bind(function (newValue) {
+                updateFooterCopyright(newValue);
+            });
+        });
+
+        // Footer company address live preview
+        wp.customize("cloudsync_footer_company_address", function (value) {
+            value.bind(function (newValue) {
+                updateFooterCompanyAddress(newValue);
+            });
+        });
+
+        // Footer company phone live preview
+        wp.customize("cloudsync_footer_company_phone", function (value) {
+            value.bind(function (newValue) {
+                updateFooterCompanyPhone(newValue);
+            });
+        });
+
+        // Footer company email live preview
+        wp.customize("cloudsync_footer_company_email", function (value) {
+            value.bind(function (newValue) {
+                updateFooterCompanyEmail(newValue);
+            });
+        });
+
+        // Footer tagline live preview
+        wp.customize("cloudsync_footer_tagline", function (value) {
+            value.bind(function (newValue) {
+                updateFooterTagline(newValue);
+            });
+        });
+
+        // Footer newsletter text live preview
+        wp.customize("cloudsync_footer_newsletter_text", function (value) {
+            value.bind(function (newValue) {
+                updateFooterNewsletterText(newValue);
+            });
+        });
+
+        // Social media links live preview
+        wp.customize("cloudsync_footer_twitter_url", function (value) {
+            value.bind(function (newValue) {
+                updateFooterSocialLink('twitter', newValue);
+            });
+        });
+
+        wp.customize("cloudsync_footer_linkedin_url", function (value) {
+            value.bind(function (newValue) {
+                updateFooterSocialLink('linkedin', newValue);
+            });
+        });
+
+        wp.customize("cloudsync_footer_github_url", function (value) {
+            value.bind(function (newValue) {
+                updateFooterSocialLink('github', newValue);
+            });
+        });
+
+        wp.customize("cloudsync_footer_youtube_url", function (value) {
+            value.bind(function (newValue) {
+                updateFooterSocialLink('youtube', newValue);
+            });
+        });
+    }
+
     /**
      * =============================================
      *    1) Helper functions to update Hero section
@@ -2182,6 +2261,191 @@
             debugLog(
                 'ERROR: Could not find CTA button element with selector ".final-cta a"'
             );
+        }
+    }
+
+    /**
+     * ==================================================
+     *    6) Helper functions to update Footer section
+     * ==================================================
+     * */
+
+    /**
+     * Update footer copyright text in the preview
+     *
+     * @param {string} newText The new copyright text from Customizer
+     */
+    function updateFooterCopyright(newText) {
+        debugLog("Updating footer copyright text with:", newText);
+
+        const copyrightElement = document.querySelector(".footer-bottom .copyright");
+
+        if (copyrightElement) {
+            if (newText && newText.trim() !== "") {
+                copyrightElement.textContent = newText;
+            } else {
+                // Reset to default if empty
+                const siteName = document.body.dataset.siteName || document.title || "Site Name";
+                const currentYear = new Date().getFullYear();
+                copyrightElement.textContent = `Copyright © ${currentYear} ${siteName}. All rights reserved.`;
+            }
+            debugLog("Footer copyright updated successfully");
+        } else {
+            debugLog('ERROR: Could not find footer copyright element with selector ".footer-bottom .copyright"');
+        }
+    }
+
+    /**
+     * Update footer company address in the preview
+     *
+     * @param {string} newAddress The new address from Customizer
+     */
+    function updateFooterCompanyAddress(newAddress) {
+        debugLog("Updating footer company address with:", newAddress);
+
+        const addressContainer = document.querySelector('.footer-company-info .footer-contact-item:has(.fa-map-marker-alt) span');
+
+        if (addressContainer) {
+            if (newAddress && newAddress.trim() !== "") {
+                addressContainer.innerHTML = newAddress.replace(/\n/g, '<br>');
+                addressContainer.parentElement.style.display = 'flex';
+            } else {
+                addressContainer.parentElement.style.display = 'none';
+            }
+            debugLog("Footer company address updated successfully");
+        } else {
+            debugLog('ERROR: Could not find footer address element');
+        }
+    }
+
+    /**
+     * Update footer company phone in the preview
+     *
+     * @param {string} newPhone The new phone from Customizer
+     */
+    function updateFooterCompanyPhone(newPhone) {
+        debugLog("Updating footer company phone with:", newPhone);
+
+        const phoneContainer = document.querySelector('.footer-company-info .footer-contact-item:has(.fa-phone)');
+
+        if (phoneContainer) {
+            if (newPhone && newPhone.trim() !== "") {
+                const phoneLink = phoneContainer.querySelector('a');
+                if (phoneLink) {
+                    phoneLink.textContent = newPhone;
+                    phoneLink.href = `tel:${newPhone.replace(/[^0-9+]/g, '')}`;
+                }
+                phoneContainer.style.display = 'flex';
+            } else {
+                phoneContainer.style.display = 'none';
+            }
+            debugLog("Footer company phone updated successfully");
+        } else {
+            debugLog('ERROR: Could not find footer phone element');
+        }
+    }
+
+    /**
+     * Update footer company email in the preview
+     *
+     * @param {string} newEmail The new email from Customizer
+     */
+    function updateFooterCompanyEmail(newEmail) {
+        debugLog("Updating footer company email with:", newEmail);
+
+        const emailContainer = document.querySelector('.footer-company-info .footer-contact-item:has(.fa-envelope)');
+
+        if (emailContainer) {
+            if (newEmail && newEmail.trim() !== "") {
+                const emailLink = emailContainer.querySelector('a');
+                if (emailLink) {
+                    emailLink.textContent = newEmail;
+                    emailLink.href = `mailto:${newEmail}`;
+                }
+                emailContainer.style.display = 'flex';
+            } else {
+                emailContainer.style.display = 'none';
+            }
+            debugLog("Footer company email updated successfully");
+        } else {
+            debugLog('ERROR: Could not find footer email element');
+        }
+    }
+
+    /**
+     * Update footer tagline in the preview
+     *
+     * @param {string} newTagline The new tagline from Customizer
+     */
+    function updateFooterTagline(newTagline) {
+        debugLog("Updating footer tagline with:", newTagline);
+
+        const taglineElement = document.querySelector('.footer-company-info .footer-tagline');
+
+        if (taglineElement) {
+            if (newTagline && newTagline.trim() !== "") {
+                taglineElement.textContent = newTagline;
+                taglineElement.style.display = 'block';
+            } else {
+                taglineElement.style.display = 'none';
+            }
+            debugLog("Footer tagline updated successfully");
+        } else {
+            debugLog('ERROR: Could not find footer tagline element');
+        }
+    }
+
+    /**
+     * Update footer newsletter text in the preview
+     *
+     * @param {string} newText The new newsletter text from Customizer
+     */
+    function updateFooterNewsletterText(newText) {
+        debugLog("Updating footer newsletter text with:", newText);
+
+        const newsletterTextElement = document.querySelector('.footer-newsletter p');
+
+        if (newsletterTextElement) {
+            if (newText && newText.trim() !== "") {
+                newsletterTextElement.textContent = newText;
+                newsletterTextElement.parentElement.style.display = 'block';
+            } else {
+                newsletterTextElement.parentElement.style.display = 'none';
+            }
+            debugLog("Footer newsletter text updated successfully");
+        } else {
+            debugLog('ERROR: Could not find footer newsletter text element');
+        }
+    }
+
+    /**
+     * Update footer social media links in the preview
+     *
+     * @param {string} platform The social platform (twitter, linkedin, github, youtube)
+     * @param {string} newUrl The new URL from Customizer
+     */
+    function updateFooterSocialLink(platform, newUrl) {
+        debugLog(`Updating footer ${platform} link with:`, newUrl);
+
+        const iconClasses = {
+            twitter: 'fa-twitter',
+            linkedin: 'fa-linkedin',
+            github: 'fa-github',
+            youtube: 'fa-youtube'
+        };
+
+        const socialLink = document.querySelector(`.social-links a:has(.${iconClasses[platform]})`);
+
+        if (socialLink) {
+            if (newUrl && newUrl.trim() !== "") {
+                socialLink.href = newUrl;
+                socialLink.style.display = 'flex';
+            } else {
+                socialLink.style.display = 'none';
+            }
+            debugLog(`Footer ${platform} link updated successfully`);
+        } else {
+            debugLog(`ERROR: Could not find footer ${platform} link element`);
         }
     }
 })();

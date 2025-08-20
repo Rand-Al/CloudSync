@@ -3591,6 +3591,7 @@
                 return headerHeight + adminBarHeight;
             },
 
+
             /**
              * Cross-browser compatible smooth scroll to element
              * Handles fixed header offset and provides fallback for older browsers
