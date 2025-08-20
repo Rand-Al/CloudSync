@@ -639,6 +639,11 @@
                     activeHeading: null,
                     isScrolling: false,
 
+                    // Breakpoint transition state
+                    pageLoadTime: null, // When page was initially loaded
+                    preservedScrollPosition: null, // Scroll position during mode transitions
+                    lastKnownScrollPosition: 0, // Continuously updated scroll position
+
                     // DOM references for performance
                     tocElements: {
                         desktopContainer: null,
@@ -683,6 +688,9 @@
                             );
                             return false;
                         }
+
+                        // Record initial page load time for proper visibility timing
+                        this.state.pageLoadTime = Date.now();
 
                         // Scan page content for headings
                         utils.log("Scanning page for headings...");
@@ -984,31 +992,37 @@
 
                     utils.log("Setting up TOC event handlers");
 
-                    // Verify that required elements exist
-                    if (!this.state.tocElements.desktopContainer) {
-                        utils.log(
-                            "Desktop TOC container not found, cannot bind events",
-                            "error"
-                        );
-                        return false;
+                    // Check current mode and bind appropriate events
+                    if (this.state.currentMode === "desktop") {
+                        // Verify that required desktop elements exist
+                        if (!this.state.tocElements.desktopContainer) {
+                            utils.log(
+                                "Desktop TOC container not found, cannot bind events",
+                                "error"
+                            );
+                            return false;
+                        }
+
+                        // Setup intelligent visibility management instead of immediate activation
+                        this.setupSmartVisibility();
+
+                        // Setup navigation link handlers for smooth scrolling
+                        this.setupNavigationHandlers();
+
+                        // Setup collapse/expand functionality
+                        this.setupCollapseHandlers();
+
+                        // Setup scroll tracking for active section highlighting
+                        this.setupScrollTracking();
+
+                        // Setup reading progress bar updates
+                        this.setupProgressTracking();
+
+                        utils.log("Desktop TOC event handlers bound successfully");
+                    } else if (this.state.currentMode === "mobile") {
+                        // Mobile mode - events are already bound in createMobileTOC
+                        utils.log("Mobile TOC events already bound during creation");
                     }
-
-                    // Setup intelligent visibility management instead of immediate activation
-                    this.setupSmartVisibility();
-
-                    // Setup navigation link handlers for smooth scrolling
-                    this.setupNavigationHandlers();
-
-                    // Setup collapse/expand functionality
-                    this.setupCollapseHandlers();
-
-                    // Setup scroll tracking for active section highlighting
-                    this.setupScrollTracking();
-
-                    // Setup reading progress bar updates
-                    this.setupProgressTracking();
-
-                    utils.log("TOC event handlers bound successfully");
 
                     return true;
                 },
@@ -1147,6 +1161,11 @@
 
                     utils.log("Setting up TOC collapse/expand functionality");
 
+                    // Early return if desktop container is not available
+                    if (!this.state.tocElements.desktopContainer) {
+                        return false;
+                    }
+
                     // Find the collapse button that was created in createDesktopTOC
                     var collapseButton =
                         this.state.tocElements.desktopContainer.querySelector(
@@ -1261,6 +1280,9 @@
                             var currentScroll =
                                 window.pageYOffset ||
                                 document.documentElement.scrollTop;
+                            
+                            // Always update last known scroll position for breakpoint transitions
+                            self.state.lastKnownScrollPosition = currentScroll;
                             var scrollDifference = Math.abs(
                                 currentScroll - trackingState.lastScrollPosition
                             );
@@ -1366,6 +1388,14 @@
                 ) {
                     var utils = CloudSync.adaptivePages.utils;
 
+                    utils.log("DEBUG: updateActiveHighlight called: " + previousActiveId + " → " + newActiveId);
+
+                    // Early return if TOC elements are not available (e.g., during breakpoint transitions)
+                    if (!this.state.tocElements.tocList) {
+                        utils.log("DEBUG: tocList not available, skipping highlight update");
+                        return;
+                    }
+
                     // Remove highlight from previously active section if it exists
                     if (previousActiveId) {
                         var previousLink =
@@ -1407,6 +1437,11 @@
                 },
                 ensureActiveItemVisibility: function (activeLink) {
                     var utils = CloudSync.adaptivePages.utils;
+
+                    // Early return if desktop container is not available (e.g., during breakpoint transitions)
+                    if (!this.state.tocElements.desktopContainer) {
+                        return;
+                    }
 
                     // Find the correct scrollable container - should be .toc-navigation
                     var tocNavigation =
@@ -1748,11 +1783,8 @@
                     var utils = CloudSync.adaptivePages.utils;
                     var progressBar = this.state.tocElements.progressBar;
 
+                    // Silently return if progress bar is not available (e.g., during breakpoint transitions)
                     if (!progressBar) {
-                        utils.log(
-                            "Progress bar element not found, cannot update display",
-                            "warn"
-                        );
                         return;
                     }
 
@@ -2208,10 +2240,17 @@
                     // Panel overlay click handler (close on backdrop click)
                     var overlayClickHandler = function (event) {
                         // Close if clicked on overlay or anywhere outside panel content
-                        var panelContent = panel.querySelector(".mobile-toc-content");
-                        var isClickOutsideContent = !panelContent.contains(event.target);
-                        var isClickOnOverlay = event.target.classList.contains("mobile-toc-overlay");
-                        
+                        var panelContent = panel.querySelector(
+                            ".mobile-toc-content"
+                        );
+                        var isClickOutsideContent = !panelContent.contains(
+                            event.target
+                        );
+                        var isClickOnOverlay =
+                            event.target.classList.contains(
+                                "mobile-toc-overlay"
+                            );
+
                         if (isClickOnOverlay || isClickOutsideContent) {
                             self.toggleMobilePanel(false);
                             utils.log(
@@ -2219,25 +2258,30 @@
                             );
                         }
                     };
-                    
+
                     // Document click handler to close panel when clicking outside
                     var documentClickHandler = function (event) {
                         // Check if panel is open
                         if (!panel.classList.contains("panel-open")) {
                             return;
                         }
-                        
+
                         // Don't close if clicking on the floating button
                         if (button.contains(event.target)) {
                             return;
                         }
-                        
+
                         // Don't close if clicking inside panel content
-                        var panelContent = panel.querySelector(".mobile-toc-content");
-                        if (panelContent && panelContent.contains(event.target)) {
+                        var panelContent = panel.querySelector(
+                            ".mobile-toc-content"
+                        );
+                        if (
+                            panelContent &&
+                            panelContent.contains(event.target)
+                        ) {
                             return;
                         }
-                        
+
                         // Close panel for any other click
                         self.toggleMobilePanel(false);
                         utils.log("Mobile TOC panel closed via document click");
@@ -2263,11 +2307,14 @@
                         var targetElement = document.querySelector(targetId);
                         if (targetElement) {
                             var headerOffset = 100;
-                            
+
                             // Use getBoundingClientRect for accurate mobile positioning
                             var rect = targetElement.getBoundingClientRect();
-                            var currentScrollTop = window.pageYOffset || document.documentElement.scrollTop;
-                            var targetPosition = rect.top + currentScrollTop - headerOffset;
+                            var currentScrollTop =
+                                window.pageYOffset ||
+                                document.documentElement.scrollTop;
+                            var targetPosition =
+                                rect.top + currentScrollTop - headerOffset;
 
                             window.scrollTo({
                                 top: targetPosition,
@@ -2409,51 +2456,129 @@
                     utils.log("Mobile TOC event handlers bound successfully");
                     return true;
                 },
-                handleBreakpointChange: function (oldBreakpoint, newBreakpoint) {
+                handleBreakpointChange: function (
+                    oldBreakpoint,
+                    newBreakpoint
+                ) {
                     var utils = CloudSync.adaptivePages.utils;
-                    
-                    utils.log("TOC handling breakpoint change: " + oldBreakpoint + " → " + newBreakpoint);
-                    
+                    var self = this;
+
+                    utils.log(
+                        "TOC handling breakpoint change: " +
+                            oldBreakpoint +
+                            " → " +
+                            newBreakpoint
+                    );
+
                     // Determine new mode based on breakpoint (tablet is treated as mobile for TOC)
-                    var newMode = newBreakpoint === "desktop" ? "desktop" : "mobile";
+                    var newMode =
+                        newBreakpoint === "desktop" ? "desktop" : "mobile";
                     var oldMode = this.state.currentMode;
-                    
+
                     // Only recreate if mode actually changed
                     if (oldMode !== newMode) {
-                        utils.log("TOC mode changing from " + oldMode + " to " + newMode);
+                        utils.log(
+                            "TOC mode changing from " +
+                                oldMode +
+                                " to " +
+                                newMode
+                        );
+
+                        // Debug: Log all scroll position methods
+                        var scrollY = window.scrollY;
+                        var pageYOffset = window.pageYOffset;
+                        var docElementScrollTop = document.documentElement.scrollTop;
+                        var bodyScrollTop = document.body.scrollTop;
                         
+                        utils.log("DEBUG scroll methods: scrollY=" + scrollY + 
+                                ", pageYOffset=" + pageYOffset + 
+                                ", docElement.scrollTop=" + docElementScrollTop + 
+                                ", body.scrollTop=" + bodyScrollTop);
+                        
+                        // Preserve scroll position during transition - capture early with multiple fallbacks
+                        var capturedScroll = scrollY || pageYOffset || docElementScrollTop || bodyScrollTop || 0;
+                        
+                        // If all methods return 0, use lastKnownScrollPosition as backup
+                        this.state.preservedScrollPosition = capturedScroll > 0 ? capturedScroll : this.state.lastKnownScrollPosition;
+                        
+                        utils.log(
+                            "Preserving scroll position: " + 
+                            this.state.preservedScrollPosition + "px" + 
+                            " (captured=" + capturedScroll + ", backup=" + this.state.lastKnownScrollPosition + ")"
+                        );
+
                         // Clean up existing TOC interface
                         this.cleanup();
-                        
+
                         // Update current mode
                         this.state.currentMode = newMode;
-                        
+
                         // Create new TOC interface for the new mode
                         var interfaceCreated = false;
                         if (newMode === "desktop") {
                             interfaceCreated = this.createDesktopTOC();
                             if (interfaceCreated) {
+                                // IMPORTANT: Recalculate heading positions after layout change
+                                this.recalculateHeadingPositions();
+                                
                                 // Setup all desktop TOC functionality in correct order
                                 this.setupSmartVisibility();
                                 this.setupNavigationHandlers();
                                 this.setupCollapseHandlers();
                                 this.setupScrollTracking();
                                 this.setupProgressTracking();
-                                utils.log("Desktop TOC fully initialized with all handlers");
+                                utils.log(
+                                    "Desktop TOC fully initialized with all handlers"
+                                );
                             }
                         } else if (newMode === "mobile") {
                             interfaceCreated = this.createMobileTOC();
                             // Note: createMobileTOC already calls bindMobileEvents internally
                             // No need to call it again here
                         }
-                        
+
                         if (interfaceCreated) {
-                            utils.log("TOC successfully switched to " + newMode + " mode");
+                            utils.log(
+                                "TOC successfully switched to " +
+                                    newMode +
+                                    " mode"
+                            );
+                            
+                            // Restore preserved scroll position
+                            if (this.state.preservedScrollPosition !== null) {
+                                // Use longer delay to ensure mobile layout is fully formed
+                                setTimeout(function() {
+                                    var targetScroll = self.state.preservedScrollPosition;
+                                    
+                                    // Check if target position is valid for new layout
+                                    var maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+                                    if (targetScroll > maxScroll) {
+                                        targetScroll = maxScroll;
+                                        utils.log("DEBUG: Adjusted scroll position from " + self.state.preservedScrollPosition + "px to " + targetScroll + "px (max available)");
+                                    }
+                                    
+                                    window.scrollTo(0, targetScroll);
+                                    utils.log(
+                                        "Restored scroll position to: " + 
+                                        targetScroll + "px"
+                                    );
+                                    self.state.preservedScrollPosition = null;
+                                }, 300); // Increased delay for mobile layout completion
+                            }
                         } else {
-                            utils.log("Failed to create " + newMode + " TOC interface", "error");
+                            utils.log(
+                                "Failed to create " +
+                                    newMode +
+                                    " TOC interface",
+                                "error"
+                            );
                         }
                     } else {
-                        utils.log("TOC mode unchanged (" + newMode + "), no action needed");
+                        utils.log(
+                            "TOC mode unchanged (" +
+                                newMode +
+                                "), no action needed"
+                        );
                     }
                 },
                 setupSmartVisibility: function () {
@@ -2466,19 +2591,23 @@
 
                     // Configuration for smart visibility behavior
                     var visibilityConfig = {
-                        scrollThreshold: 0.1, // Show TOC after 15% of content scrolled
-                        timeThreshold: 5000, // Minimum time on page (10 seconds)
+                        scrollThreshold: 0.1, // Show TOC after 10% of content scrolled
+                        timeThreshold: 5000, // Minimum time on page (5 seconds)
                         hideOnTop: true, // Hide when user returns to top
                         topThreshold: 0.05, // Consider "top" as first 5% of content
+                        // Relaxed thresholds for mode switches
+                        modeSwitchTimeThreshold: 2000, // Only 2 seconds for mode switches
+                        modeSwitchScrollThreshold: 0.05, // Only 5% scroll for mode switches
                     };
 
                     // State tracking for user behavior analysis
                     var behaviorState = {
-                        pageLoadTime: Date.now(), // When user arrived on page
+                        pageLoadTime: this.state.pageLoadTime, // Use actual page load time, not current time
                         isVisible: false, // Current TOC visibility state
                         hasBeenVisible: false, // Whether TOC has ever been shown
                         lastScrollPosition: 0, // Previous scroll position for direction detection
                         scrollDirection: "down", // Current scroll direction
+                        isModeSwitch: Date.now() - this.state.pageLoadTime > 1000, // Is this a mode switch vs initial load?
                     };
 
                     var scrollHandler = utils.throttle(
@@ -2531,6 +2660,12 @@
                         passive: true,
                     });
 
+                    // Perform initial visibility check immediately (important for mode switches)
+                    setTimeout(function() {
+                        utils.log("DEBUG: Running initial visibility check after mode switch");
+                        scrollHandler();
+                    }, 100);
+
                     utils.log("Smart visibility system initialized");
                 },
                 evaluateVisibilityConditions: function (
@@ -2577,13 +2712,21 @@
                     behaviorState,
                     visibilityConfig
                 ) {
+                    var utils = CloudSync.adaptivePages.utils;
+                    
+                    // Use relaxed thresholds for mode switches, stricter for initial page load
+                    var timeThreshold = behaviorState.isModeSwitch ? 
+                        visibilityConfig.modeSwitchTimeThreshold : 
+                        visibilityConfig.timeThreshold;
+                    var scrollThreshold = behaviorState.isModeSwitch ? 
+                        visibilityConfig.modeSwitchScrollThreshold : 
+                        visibilityConfig.scrollThreshold;
+                    
                     // Check if user has spent enough time on page to warrant TOC assistance
-                    var hasMinimumTimeInvestment =
-                        timeOnPage >= visibilityConfig.timeThreshold;
+                    var hasMinimumTimeInvestment = timeOnPage >= timeThreshold;
 
                     // Check if user has scrolled enough to indicate serious reading intent
-                    var hasScrolledSufficientDistance =
-                        scrollPercent >= visibilityConfig.scrollThreshold;
+                    var hasScrolledSufficientDistance = scrollPercent >= scrollThreshold;
 
                     // Special logic for hiding TOC when user returns to top of document
                     var isAtTopOfDocument =
@@ -2602,18 +2745,27 @@
                     var overrideCondition = shouldHideAtTop;
 
                     // Final decision combines primary logic with override scenarios
-                    return primaryCondition && !overrideCondition;
+                    var result = primaryCondition && !overrideCondition;
+                    
+                    // Debug logging for visibility decision
+                    utils.log("DEBUG TOC visibility: scrollPercent=" + Math.round(scrollPercent * 100) + "%" + 
+                              ", timeOnPage=" + Math.round(timeOnPage / 1000) + "s" +
+                              ", timeThreshold=" + (timeThreshold / 1000) + "s" +
+                              ", scrollThreshold=" + Math.round(scrollThreshold * 100) + "%" +
+                              ", isModeSwitch=" + behaviorState.isModeSwitch +
+                              ", hasMinTime=" + hasMinimumTimeInvestment +
+                              ", hasScrolled=" + hasScrolledSufficientDistance +
+                              ", shouldShow=" + result);
+                    
+                    return result;
                 },
                 updateTOCVisibility: function (shouldBeVisible, behaviorState) {
                     var utils = CloudSync.adaptivePages.utils;
 
                     // Get reference to the TOC container for state manipulation
                     var tocContainer = this.state.tocElements.desktopContainer;
+                    // Silently return if container is not available (e.g., during breakpoint transitions)
                     if (!tocContainer) {
-                        utils.log(
-                            "Cannot update TOC visibility: container not found",
-                            "error"
-                        );
                         return;
                     }
 
@@ -2687,6 +2839,11 @@
 
                     utils.log("Setting up intelligent navigation handlers");
 
+                    // Early return if TOC list is not available
+                    if (!this.state.tocElements.tocList) {
+                        return;
+                    }
+
                     // Find all TOC navigation links for event binding
                     var tocLinks =
                         this.state.tocElements.tocList.querySelectorAll(
@@ -2709,6 +2866,8 @@
                                     this.getAttribute("href").substring(1); // Remove # symbol
                                 var targetElement =
                                     document.getElementById(targetId);
+
+                                utils.log("DEBUG: TOC link clicked, target: " + targetId);
 
                                 if (!targetElement) {
                                     utils.log(
@@ -2867,22 +3026,47 @@
                         }
                     }, checkInterval);
                 },
-                
-                cleanup: function () {
+
+                recalculateHeadingPositions: function () {
                     var utils = CloudSync.adaptivePages.utils;
                     
-                    utils.log("Cleaning up TOC module");
+                    utils.log("Recalculating heading positions after layout change");
                     
+                    // Use requestAnimationFrame to ensure layout is complete
+                    var self = this;
+                    requestAnimationFrame(function() {
+                        for (var i = 0; i < self.state.headings.length; i++) {
+                            var heading = self.state.headings[i];
+                            var oldPosition = heading.offsetTop;
+                            heading.offsetTop = heading.element.offsetTop;
+                            
+                            utils.log(
+                                'Updated heading "' + heading.text + '" position: ' +
+                                oldPosition + 'px → ' + heading.offsetTop + 'px'
+                            );
+                        }
+                        utils.log("Heading positions recalculated successfully");
+                    });
+                },
+
+                cleanup: function () {
+                    var utils = CloudSync.adaptivePages.utils;
+
+                    utils.log("Cleaning up TOC module");
+
                     // Remove desktop TOC elements
                     if (this.state.tocElements.desktopContainer) {
-                        var desktopContainer = this.state.tocElements.desktopContainer;
+                        var desktopContainer =
+                            this.state.tocElements.desktopContainer;
                         if (desktopContainer.parentNode) {
-                            desktopContainer.parentNode.removeChild(desktopContainer);
+                            desktopContainer.parentNode.removeChild(
+                                desktopContainer
+                            );
                         }
                         this.state.tocElements.desktopContainer = null;
                         utils.log("Removed desktop TOC container");
                     }
-                    
+
                     // Remove mobile TOC elements
                     if (this.state.tocElements.mobileButton) {
                         var mobileButton = this.state.tocElements.mobileButton;
@@ -2892,7 +3076,7 @@
                         this.state.tocElements.mobileButton = null;
                         utils.log("Removed mobile TOC button");
                     }
-                    
+
                     if (this.state.tocElements.mobilePanel) {
                         var mobilePanel = this.state.tocElements.mobilePanel;
                         if (mobilePanel.parentNode) {
@@ -2901,63 +3085,78 @@
                         this.state.tocElements.mobilePanel = null;
                         utils.log("Removed mobile TOC panel");
                     }
-                    
+
                     // Clean up intersection observer
                     if (this.state.observer) {
                         this.state.observer.disconnect();
                         this.state.observer = null;
                         utils.log("Disconnected intersection observer");
                     }
-                    
+
                     // Clean up mobile event handlers
                     if (this.state.mobileScrollHandler) {
-                        window.removeEventListener("scroll", this.state.mobileScrollHandler);
+                        window.removeEventListener(
+                            "scroll",
+                            this.state.mobileScrollHandler
+                        );
                         this.state.mobileScrollHandler = null;
                         utils.log("Removed mobile scroll handler");
                     }
-                    
+
                     // Clean up stored mobile event handlers
                     if (this.state.mobileEventHandlers) {
                         if (this.state.mobileEventHandlers.globalKey) {
-                            document.removeEventListener("keydown", this.state.mobileEventHandlers.globalKey);
+                            document.removeEventListener(
+                                "keydown",
+                                this.state.mobileEventHandlers.globalKey
+                            );
                             utils.log("Removed mobile global key handler");
                         }
                         if (this.state.mobileEventHandlers.documentClick) {
-                            document.removeEventListener("click", this.state.mobileEventHandlers.documentClick);
+                            document.removeEventListener(
+                                "click",
+                                this.state.mobileEventHandlers.documentClick
+                            );
                             utils.log("Removed mobile document click handler");
                         }
                         this.state.mobileEventHandlers = null;
                     }
-                    
+
                     // Clean up all scroll event handlers to prevent errors
                     if (this.state.eventHandlers) {
                         if (this.state.eventHandlers.scroll) {
-                            window.removeEventListener("scroll", this.state.eventHandlers.scroll);
+                            window.removeEventListener(
+                                "scroll",
+                                this.state.eventHandlers.scroll
+                            );
                             this.state.eventHandlers.scroll = null;
                             utils.log("Removed desktop scroll handler");
                         }
                         if (this.state.eventHandlers.resize) {
-                            window.removeEventListener("resize", this.state.eventHandlers.resize);
+                            window.removeEventListener(
+                                "resize",
+                                this.state.eventHandlers.resize
+                            );
                             this.state.eventHandlers.resize = null;
                             utils.log("Removed resize handler");
                         }
                     }
-                    
+
                     // Reset other state elements
                     this.state.tocElements.progressBar = null;
                     this.state.tocElements.tocList = null;
                     this.state.tocElements.mobileProgressCircle = null;
                     this.state.tocElements.mobilePanelProgress = null;
                     this.state.tocElements.mobileList = null;
-                    
+
                     // Reset mobile panel state
                     if (this.state.mobilePanel) {
                         this.state.mobilePanel = null;
                     }
-                    
+
                     // Re-enable body scrolling in case mobile panel was open
                     document.body.style.overflow = "";
-                    
+
                     utils.log("TOC cleanup completed");
                 },
             },
@@ -3500,7 +3699,27 @@
                 }
             }, this.config.resizeDebounce);
 
-            this.utils.addEventListener(window, "resize", resizeHandler, {
+            // Create wrapper that saves scroll position BEFORE debounced handler
+            var resizeWrapper = function() {
+                // Save current scroll position immediately on ANY resize event
+                // This captures scroll position before any layout changes occur
+                var currentScroll = window.scrollY || window.pageYOffset || 
+                                   document.documentElement.scrollTop || 
+                                   document.body.scrollTop || 0;
+                
+                // Store in TOC module if it exists and is active
+                if (self.state.activeModules.indexOf('tableOfContents') !== -1 && 
+                    self.modules.tableOfContents && 
+                    self.modules.tableOfContents.state) {
+                    self.modules.tableOfContents.state.lastKnownScrollPosition = currentScroll;
+                    self.utils.log("DEBUG: Saved scroll position on resize: " + currentScroll + "px");
+                }
+                
+                // Call the debounced handler
+                resizeHandler();
+            };
+
+            this.utils.addEventListener(window, "resize", resizeWrapper, {
                 passive: true,
             });
             this.utils.log("Global event listeners established");
