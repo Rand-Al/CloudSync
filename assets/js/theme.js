@@ -344,7 +344,7 @@
                     /**
                      * Show copy success feedback to user
                      * Updates button appearance and text temporarily
-                     * 
+                     *
                      * @private
                      * @function showCopySuccess
                      * @description Provides visual feedback when URL is successfully copied
@@ -363,7 +363,7 @@
                     /**
                      * Fallback copy method for older browsers
                      * Uses document.execCommand for browsers without Clipboard API
-                     * 
+                     *
                      * @private
                      * @function fallbackCopyTextToClipboard
                      * @param {string} text - Text to copy to clipboard
@@ -1008,7 +1008,7 @@
                 /**
                  * Get range of heading levels found in document
                  * Analyzes processed headings to determine level range for debugging
-                 * 
+                 *
                  * @function getHeadingLevelsRange
                  * @memberof CloudSync.adaptivePages.modules.tableOfContents
                  * @returns {string} Formatted range string (e.g., "H1-H3", "H2", or "none")
@@ -1620,7 +1620,7 @@
                     /**
                      * Recalculate document dimensions for accurate progress tracking
                      * Updates cached height values used in progress calculations
-                     * 
+                     *
                      * @private
                      * @function updateDocumentDimensions
                      * @description Updates progressState with current document and viewport heights
@@ -1820,7 +1820,7 @@
                 /**
                  * Quadratic easing function for smooth animation curves
                  * Creates natural acceleration and deceleration in progress changes
-                 * 
+                 *
                  * @function easeInOutQuad
                  * @memberof CloudSync.adaptivePages.modules.tableOfContents
                  * @param {number} t - Time parameter between 0 and 1
@@ -2301,7 +2301,7 @@
                     /**
                      * Handle mobile TOC button click/tap events
                      * Toggles mobile panel visibility when button is clicked
-                     * 
+                     *
                      * @private
                      * @function buttonClickHandler
                      * @param {Event} event - Click event object
@@ -2318,7 +2318,7 @@
                     /**
                      * Handle keyboard navigation for mobile TOC button
                      * Provides accessibility support for mobile TOC button
-                     * 
+                     *
                      * @private
                      * @function buttonKeyHandler
                      * @param {KeyboardEvent} event - Keyboard event object
@@ -2340,7 +2340,7 @@
                     /**
                      * Handle mobile TOC panel close button click
                      * Closes mobile panel when close button is clicked
-                     * 
+                     *
                      * @private
                      * @function closeButtonHandler
                      * @param {Event} event - Click event object
@@ -2356,7 +2356,7 @@
                     /**
                      * Handle mobile TOC panel overlay click
                      * Closes panel when user clicks outside panel content area
-                     * 
+                     *
                      * @private
                      * @function overlayClickHandler
                      * @param {Event} event - Click event object
@@ -3346,6 +3346,1036 @@
                     utils.log("TOC cleanup completed");
                 },
             },
+
+            /**
+             * Image Lightbox Module
+             *
+             * Provides enhanced image viewing experience with modal lightbox functionality.
+             * This is currently a placeholder implementation that will be expanded based on
+             * specific requirements for image display and user interaction patterns.
+             *
+             * Features to be implemented:
+             * - Modal image viewer with overlay
+             * - Image zoom and pan functionality
+             * - Keyboard navigation (arrow keys, escape)
+             * - Touch/swipe support for mobile devices
+             * - Gallery mode for multiple images
+             * - Responsive image loading and sizing
+             *
+             * @since 1.0.0
+             */
+            imageLightbox: {
+                /**
+                 * Configuration options for lightbox behavior
+                 */
+                config: {
+                    // Selectors for lightbox-enabled images
+                    imageSelector:
+                        ".entry-content img, .gallery img, .wp-block-image img",
+
+                    // Animation settings
+                    animationDuration: 300,
+                    fadeInClass: "lightbox-fade-in",
+                    fadeOutClass: "lightbox-fade-out",
+
+                    // Lightbox behavior
+                    closeOnClickOutside: true,
+                    closeOnEscape: true,
+                    showNavigation: true,
+                    showCounter: true,
+
+                    // Performance settings
+                    preloadAdjacent: true,
+                    maxZoomLevel: 3,
+                },
+
+                /**
+                 * Internal state management
+                 */
+                state: {
+                    isInitialized: false,
+                    isOpen: false,
+                    currentIndex: 0,
+                    images: [],
+
+                    // DOM references
+                    lightboxContainer: null,
+                    imageElement: null,
+                    overlayElement: null,
+
+                    // Event handlers for cleanup
+                    eventHandlers: {
+                        keydown: null,
+                        click: [],
+                        resize: null,
+                    },
+                },
+
+                /**
+                 * Initialize the lightbox module
+                 *
+                 * Sets up event listeners and prepares DOM structure for lightbox functionality.
+                 * Creates the lightbox HTML structure and binds all necessary events.
+                 *
+                 * @returns {boolean} Success status of initialization
+                 */
+                init: function () {
+                    var utils = CloudSync.adaptivePages.utils;
+
+                    utils.log("🖼️ Starting ImageLightbox initialization...");
+                    utils.log(
+                        "🔍 Looking for images with selector: " +
+                            this.config.imageSelector
+                    );
+
+                    if (this.state.isInitialized) {
+                        utils.log("ImageLightbox already initialized");
+                        return true;
+                    }
+
+                    try {
+                        // Find lightbox-enabled images
+                        var images = document.querySelectorAll(
+                            this.config.imageSelector
+                        );
+
+                        utils.log(
+                            "📊 Found " +
+                                images.length +
+                                " images matching selector"
+                        );
+
+                        if (images.length === 0) {
+                            utils.log(
+                                "No lightbox-enabled images found on page"
+                            );
+                            return false;
+                        }
+
+                        // Create lightbox HTML structure
+                        this.createLightboxHTML();
+
+                        // Store image references
+                        this.state.images = Array.from(images);
+
+                        // Bind events
+                        this.bindEvents();
+
+                        // Add creative UX enhancements
+                        this.addTouchSupport();
+                        this.addZoomSupport();
+
+                        utils.log(
+                            "ImageLightbox module initialized successfully",
+                            "info"
+                        );
+                        utils.log(
+                            "Found " +
+                                images.length +
+                                " lightbox-enabled images"
+                        );
+                        utils.log("Touch/swipe and zoom features enabled");
+
+                        this.state.isInitialized = true;
+                        return true;
+                    } catch (error) {
+                        utils.log(
+                            "ImageLightbox initialization failed",
+                            "error",
+                            error
+                        );
+                        return false;
+                    }
+                },
+
+                /**
+                 * Create the lightbox HTML structure and inject it into the DOM
+                 */
+                createLightboxHTML: function () {
+                    // Create main lightbox container
+                    var lightbox = document.createElement("div");
+                    lightbox.id = "cloudsync-lightbox";
+                    lightbox.className = "cloudsync-lightbox";
+                    lightbox.setAttribute("role", "dialog");
+                    lightbox.setAttribute("aria-modal", "true");
+                    lightbox.setAttribute("aria-hidden", "true");
+                    lightbox.setAttribute("aria-labelledby", "lightbox-title");
+
+                    lightbox.innerHTML =
+                        '<div class="lightbox-overlay" role="presentation"></div>' +
+                        '<div class="lightbox-container">' +
+                        '<button class="lightbox-close" type="button" aria-label="Close lightbox">' +
+                        '<i class="fas fa-times" aria-hidden="true"></i>' +
+                        "</button>" +
+                        '<div class="lightbox-counter" aria-live="polite">' +
+                        '<span class="current">1</span> / <span class="total">1</span>' +
+                        "</div>" +
+                        '<div class="lightbox-image-wrapper">' +
+                        '<div class="lightbox-loading">' +
+                        '<div class="lightbox-spinner" role="status" aria-label="Loading image"></div>' +
+                        "</div>" +
+                        '<img class="lightbox-image" alt="" role="img" />' +
+                        "</div>" +
+                        '<button class="lightbox-nav lightbox-prev" type="button" aria-label="Previous image">' +
+                        '<i class="fas fa-chevron-left" aria-hidden="true"></i>' +
+                        "</button>" +
+                        '<button class="lightbox-nav lightbox-next" type="button" aria-label="Next image">' +
+                        '<i class="fas fa-chevron-right" aria-hidden="true"></i>' +
+                        "</button>" +
+                        '<div class="lightbox-info" id="lightbox-title">' +
+                        '<div class="lightbox-title"></div>' +
+                        '<div class="lightbox-meta"></div>' +
+                        "</div>" +
+                        "</div>";
+
+                    // Inject into body
+                    document.body.appendChild(lightbox);
+
+                    // Store DOM references
+                    this.state.lightboxContainer = lightbox;
+                    this.state.imageElement =
+                        lightbox.querySelector(".lightbox-image");
+                    this.state.overlayElement =
+                        lightbox.querySelector(".lightbox-overlay");
+                },
+
+                /**
+                 * Bind all event listeners for lightbox functionality
+                 */
+                bindEvents: function () {
+                    var self = this;
+                    var utils = CloudSync.adaptivePages.utils;
+
+                    utils.log(
+                        "🔗 Binding click events to " +
+                            this.state.images.length +
+                            " images"
+                    );
+
+                    // Image click events
+                    this.state.images.forEach(function (image, index) {
+                        var handler = function (e) {
+                            utils.log(
+                                "🖱️ Image click detected! Index: " +
+                                    index +
+                                    ", Image src: " +
+                                    image.src
+                            );
+                            e.preventDefault();
+                            self.open(index);
+                        };
+
+                        utils.log(
+                            "📎 Adding click handler to image " +
+                                (index + 1) +
+                                ": " +
+                                (image.src || "no src")
+                        );
+
+                        image.addEventListener("click", handler);
+                        image.style.cursor = "zoom-in";
+
+                        // Store handler reference for cleanup
+                        self.state.eventHandlers.click.push({
+                            element: image,
+                            handler: handler,
+                        });
+
+                        utils.log(
+                            "✅ Click handler successfully added to image " +
+                                (index + 1)
+                        );
+                    });
+
+                    utils.log(
+                        "🎯 Total click handlers bound: " +
+                            this.state.eventHandlers.click.length
+                    );
+
+                    // Close button
+                    var closeBtn =
+                        this.state.lightboxContainer.querySelector(
+                            ".lightbox-close"
+                        );
+                    closeBtn.addEventListener("click", function () {
+                        self.close();
+                    });
+
+                    // Navigation buttons
+                    var prevBtn =
+                        this.state.lightboxContainer.querySelector(
+                            ".lightbox-prev"
+                        );
+                    var nextBtn =
+                        this.state.lightboxContainer.querySelector(
+                            ".lightbox-next"
+                        );
+
+                    prevBtn.addEventListener("click", function () {
+                        self.previous();
+                    });
+
+                    nextBtn.addEventListener("click", function () {
+                        self.next();
+                    });
+
+                    // Overlay click to close
+                    this.state.overlayElement.addEventListener(
+                        "click",
+                        function () {
+                            if (self.config.closeOnClickOutside) {
+                                self.close();
+                            }
+                        }
+                    );
+
+                    // Keyboard events
+                    var keyHandler = function (e) {
+                        if (!self.state.isOpen) return;
+
+                        switch (e.key) {
+                            case "Escape":
+                                if (self.config.closeOnEscape) {
+                                    self.close();
+                                }
+                                break;
+                            case "ArrowLeft":
+                                e.preventDefault();
+                                self.previous();
+                                break;
+                            case "ArrowRight":
+                                e.preventDefault();
+                                self.next();
+                                break;
+                            case " ":
+                                e.preventDefault();
+                                self.next();
+                                break;
+                        }
+                    };
+
+                    document.addEventListener("keydown", keyHandler);
+                    this.state.eventHandlers.keydown = keyHandler;
+
+                    // Resize handler for responsive updates
+                    var resizeHandler = utils.throttle(function () {
+                        if (self.state.isOpen) {
+                            self.updateLayout();
+                        }
+                    }, 250);
+
+                    window.addEventListener("resize", resizeHandler);
+                    this.state.eventHandlers.resize = resizeHandler;
+                },
+
+                /**
+                 * Open lightbox for specified image
+                 *
+                 * @param {number} index - Index of image to display
+                 * @returns {boolean} Success status
+                 */
+                open: function (index) {
+                    var utils = CloudSync.adaptivePages.utils;
+                    utils.log("🚀 Opening lightbox for image index: " + index);
+
+                    if (!this.state.isInitialized || this.state.isOpen) {
+                        utils.log(
+                            "❌ Lightbox open failed - not initialized or already open"
+                        );
+                        return false;
+                    }
+
+                    if (index < 0 || index >= this.state.images.length) {
+                        utils.log("Invalid image index: " + index, "error");
+                        return false;
+                    }
+
+                    try {
+                        this.state.currentIndex = index;
+                        this.state.isOpen = true;
+
+                        // Prevent body scrolling
+                        document.body.style.overflow = "hidden";
+
+                        // Show lightbox
+                        this.state.lightboxContainer.classList.add(
+                            "lightbox-open"
+                        );
+                        this.state.lightboxContainer.setAttribute(
+                            "aria-hidden",
+                            "false"
+                        );
+
+                        // Show current image
+                        this.showImage(index);
+
+                        // Update counter and navigation
+                        this.updateCounter();
+                        this.updateNavigation();
+
+                        // Focus management
+                        var closeBtn =
+                            this.state.lightboxContainer.querySelector(
+                                ".lightbox-close"
+                            );
+                        if (closeBtn) {
+                            closeBtn.focus();
+                        }
+
+                        utils.log("Lightbox opened for image " + (index + 1));
+                        return true;
+                    } catch (error) {
+                        utils.log("Failed to open lightbox", "error", error);
+                        return false;
+                    }
+                },
+
+                /**
+                 * Close the lightbox
+                 *
+                 * @returns {boolean} Success status
+                 */
+                close: function () {
+                    var utils = CloudSync.adaptivePages.utils;
+                    if (!this.state.isOpen) {
+                        return false;
+                    }
+
+                    try {
+                        this.state.isOpen = false;
+
+                        // Hide lightbox
+                        this.state.lightboxContainer.classList.remove(
+                            "lightbox-open"
+                        );
+                        this.state.lightboxContainer.setAttribute(
+                            "aria-hidden",
+                            "true"
+                        );
+
+                        // Restore body scrolling
+                        document.body.style.overflow = "";
+
+                        // Clear image
+                        this.state.imageElement.src = "";
+                        this.state.imageElement.alt = "";
+                        this.state.imageElement.classList.remove("loaded");
+
+                        // Hide info panel
+                        var infoPanel =
+                            this.state.lightboxContainer.querySelector(
+                                ".lightbox-info"
+                            );
+                        if (infoPanel) {
+                            infoPanel.classList.remove("visible");
+                        }
+
+                        utils.log("Lightbox closed");
+                        return true;
+                    } catch (error) {
+                        utils.log("Failed to close lightbox", "error", error);
+                        return false;
+                    }
+                },
+
+                /**
+                 * Navigate to next image in gallery
+                 *
+                 * @returns {boolean} Success status
+                 */
+                next: function () {
+                    var utils = CloudSync.adaptivePages.utils;
+                    if (!this.state.isOpen || this.state.images.length <= 1) {
+                        return false;
+                    }
+
+                    var nextIndex =
+                        (this.state.currentIndex + 1) %
+                        this.state.images.length;
+                    this.showImage(nextIndex);
+                    this.state.currentIndex = nextIndex;
+                    this.updateCounter();
+                    this.updateNavigation();
+
+                    utils.log("Navigated to next image: " + (nextIndex + 1));
+                    return true;
+                },
+
+                /**
+                 * Navigate to previous image in gallery
+                 *
+                 * @returns {boolean} Success status
+                 */
+                previous: function () {
+                    var utils = CloudSync.adaptivePages.utils;
+                    if (!this.state.isOpen || this.state.images.length <= 1) {
+                        return false;
+                    }
+
+                    var prevIndex = this.state.currentIndex - 1;
+                    if (prevIndex < 0) {
+                        prevIndex = this.state.images.length - 1;
+                    }
+
+                    this.showImage(prevIndex);
+                    this.state.currentIndex = prevIndex;
+                    this.updateCounter();
+                    this.updateNavigation();
+
+                    utils.log(
+                        "Navigated to previous image: " + (prevIndex + 1)
+                    );
+                    return true;
+                },
+
+                /**
+                 * Show specific image in the lightbox
+                 *
+                 * @param {number} index - Image index to show
+                 */
+                showImage: function (index) {
+                    var utils = CloudSync.adaptivePages.utils;
+                    if (index < 0 || index >= this.state.images.length) {
+                        return;
+                    }
+
+                    var targetImage = this.state.images[index];
+                    var lightboxImage = this.state.imageElement;
+                    var loadingSpinner =
+                        this.state.lightboxContainer.querySelector(
+                            ".lightbox-loading"
+                        );
+                    var infoPanel =
+                        this.state.lightboxContainer.querySelector(
+                            ".lightbox-info"
+                        );
+
+                    // Show loading spinner
+                    if (loadingSpinner) {
+                        loadingSpinner.classList.remove("hidden");
+                    }
+
+                    // Hide previous image
+                    lightboxImage.classList.remove("loaded");
+
+                    // Preload new image
+                    var img = new Image();
+                    img.onload = function () {
+                        // Set image source and attributes
+                        lightboxImage.src = targetImage.src;
+                        lightboxImage.alt = targetImage.alt || "";
+                        lightboxImage.classList.add("loaded");
+
+                        // Hide loading spinner
+                        if (loadingSpinner) {
+                            loadingSpinner.classList.add("hidden");
+                        }
+
+                        // Update info panel
+                        var titleElement =
+                            infoPanel.querySelector(".lightbox-title");
+                        var metaElement =
+                            infoPanel.querySelector(".lightbox-meta");
+
+                        if (titleElement && metaElement) {
+                            var title =
+                                targetImage.getAttribute("data-title") ||
+                                targetImage.title ||
+                                targetImage.alt ||
+                                "Image " + (index + 1);
+
+                            var meta = "";
+                            if (
+                                targetImage.naturalWidth &&
+                                targetImage.naturalHeight
+                            ) {
+                                meta =
+                                    targetImage.naturalWidth +
+                                    " × " +
+                                    targetImage.naturalHeight;
+                            }
+
+                            titleElement.textContent = title;
+                            metaElement.textContent = meta;
+
+                            // Show info panel with delay
+                            setTimeout(function () {
+                                if (infoPanel) {
+                                    infoPanel.classList.add("visible");
+                                }
+                            }, 300);
+                        }
+                    };
+
+                    img.onerror = function () {
+                        utils.log(
+                            "Failed to load image: " + targetImage.src,
+                            "error"
+                        );
+                        if (loadingSpinner) {
+                            loadingSpinner.classList.add("hidden");
+                        }
+                    };
+
+                    img.src = targetImage.src;
+
+                    // Preload adjacent images for better UX
+                    if (this.config.preloadAdjacent) {
+                        this.preloadAdjacentImages(index);
+                    }
+                },
+
+                /**
+                 * Preload adjacent images for smoother navigation
+                 *
+                 * @param {number} currentIndex - Current image index
+                 */
+                preloadAdjacentImages: function (currentIndex) {
+                    var imagesToPreload = [];
+
+                    // Previous image
+                    var prevIndex = currentIndex - 1;
+                    if (prevIndex < 0) {
+                        prevIndex = this.state.images.length - 1;
+                    }
+                    if (prevIndex !== currentIndex) {
+                        imagesToPreload.push(prevIndex);
+                    }
+
+                    // Next image
+                    var nextIndex =
+                        (currentIndex + 1) % this.state.images.length;
+                    if (nextIndex !== currentIndex) {
+                        imagesToPreload.push(nextIndex);
+                    }
+
+                    // Preload images
+                    var self = this;
+                    imagesToPreload.forEach(function (index) {
+                        if (index >= 0 && index < self.state.images.length) {
+                            self.preloadImage(self.state.images[index].src);
+                        }
+                    });
+                },
+
+                /**
+                 * Preload a single image
+                 *
+                 * @param {string} src - Image source URL
+                 */
+                preloadImage: function (src) {
+                    var img = new Image();
+                    img.src = src;
+                },
+
+                /**
+                 * Update the counter display
+                 */
+                updateCounter: function () {
+                    var counter =
+                        this.state.lightboxContainer.querySelector(
+                            ".lightbox-counter"
+                        );
+                    if (counter && this.state.images.length > 1) {
+                        var current = counter.querySelector(".current");
+                        var total = counter.querySelector(".total");
+
+                        if (current && total) {
+                            current.textContent = this.state.currentIndex + 1;
+                            total.textContent = this.state.images.length;
+                        }
+
+                        counter.style.display = "block";
+                    } else if (counter) {
+                        counter.style.display = "none";
+                    }
+                },
+
+                /**
+                 * Update navigation buttons state
+                 */
+                updateNavigation: function () {
+                    var prevBtn =
+                        this.state.lightboxContainer.querySelector(
+                            ".lightbox-prev"
+                        );
+                    var nextBtn =
+                        this.state.lightboxContainer.querySelector(
+                            ".lightbox-next"
+                        );
+
+                    if (this.state.images.length <= 1) {
+                        if (prevBtn) prevBtn.style.display = "none";
+                        if (nextBtn) nextBtn.style.display = "none";
+                    } else {
+                        if (prevBtn) prevBtn.style.display = "flex";
+                        if (nextBtn) nextBtn.style.display = "flex";
+                    }
+                },
+
+                /**
+                 * Update layout for responsive changes
+                 */
+                updateLayout: function () {
+                    // Handle responsive layout updates if needed
+                    // This method can be expanded for advanced responsive features
+                    utils.log("Lightbox layout updated for viewport change");
+                },
+
+                /**
+                 * Clean up lightbox resources and event listeners
+                 */
+                cleanup: function () {
+                    if (!this.state.isInitialized) {
+                        return;
+                    }
+
+                    try {
+                        // Close lightbox if open
+                        if (this.state.isOpen) {
+                            this.close();
+                        }
+
+                        // Remove event listeners
+                        if (this.state.eventHandlers.keydown) {
+                            document.removeEventListener(
+                                "keydown",
+                                this.state.eventHandlers.keydown
+                            );
+                        }
+
+                        if (this.state.eventHandlers.resize) {
+                            window.removeEventListener(
+                                "resize",
+                                this.state.eventHandlers.resize
+                            );
+                        }
+
+                        // Clean up image event listeners
+                        this.state.eventHandlers.click.forEach(function (
+                            handlerInfo
+                        ) {
+                            handlerInfo.element.removeEventListener(
+                                "click",
+                                handlerInfo.handler
+                            );
+                            handlerInfo.element.style.cursor = "";
+                        });
+                        this.state.eventHandlers.click = [];
+
+                        // Remove DOM elements
+                        if (
+                            this.state.lightboxContainer &&
+                            this.state.lightboxContainer.parentNode
+                        ) {
+                            this.state.lightboxContainer.parentNode.removeChild(
+                                this.state.lightboxContainer
+                            );
+                        }
+
+                        // Reset state
+                        this.state.isInitialized = false;
+                        this.state.isOpen = false;
+                        this.state.currentIndex = 0;
+                        this.state.images = [];
+                        this.state.lightboxContainer = null;
+                        this.state.imageElement = null;
+                        this.state.overlayElement = null;
+                        this.state.eventHandlers = {
+                            keydown: null,
+                            click: null,
+                            resize: null,
+                        };
+
+                        utils.log(
+                            "ImageLightbox cleanup completed successfully"
+                        );
+                    } catch (error) {
+                        utils.log(
+                            "ImageLightbox cleanup encountered errors",
+                            "error",
+                            error
+                        );
+                    }
+                },
+
+                /**
+                 * Add touch/swipe support for mobile navigation
+                 * This is a bonus UX feature for mobile devices
+                 */
+                addTouchSupport: function () {
+                    if (!this.state.lightboxContainer) {
+                        return;
+                    }
+
+                    var self = this;
+                    var startX = 0;
+                    var startY = 0;
+                    var distX = 0;
+                    var distY = 0;
+                    var threshold = 50; // minimum distance for swipe
+                    var restraint = 100; // maximum perpendicular distance
+                    var allowedTime = 300; // maximum time allowed to travel that distance
+                    var startTime = 0;
+
+                    var imageWrapper =
+                        this.state.lightboxContainer.querySelector(
+                            ".lightbox-image-wrapper"
+                        );
+                    if (!imageWrapper) return;
+
+                    // Touch start
+                    imageWrapper.addEventListener(
+                        "touchstart",
+                        function (e) {
+                            if (!self.state.isOpen) return;
+
+                            var touchObj = e.changedTouches[0];
+                            startX = touchObj.pageX;
+                            startY = touchObj.pageY;
+                            startTime = new Date().getTime();
+                            e.preventDefault();
+                        },
+                        { passive: false }
+                    );
+
+                    // Touch move - provide visual feedback
+                    imageWrapper.addEventListener(
+                        "touchmove",
+                        function (e) {
+                            if (!self.state.isOpen) return;
+
+                            var touchObj = e.changedTouches[0];
+                            distX = touchObj.pageX - startX;
+                            distY = touchObj.pageY - startY;
+
+                            // Visual feedback for swipe
+                            if (Math.abs(distX) > 20) {
+                                imageWrapper.classList.add("swiping");
+                                imageWrapper.style.transform =
+                                    "translateX(" + distX * 0.3 + "px)";
+                            }
+
+                            e.preventDefault();
+                        },
+                        { passive: false }
+                    );
+
+                    // Touch end
+                    imageWrapper.addEventListener(
+                        "touchend",
+                        function (e) {
+                            if (!self.state.isOpen) return;
+
+                            var elapsedTime = new Date().getTime() - startTime;
+
+                            // Reset visual feedback
+                            imageWrapper.classList.remove("swiping");
+                            imageWrapper.style.transform = "";
+
+                            // Check if swipe meets criteria
+                            if (elapsedTime <= allowedTime) {
+                                if (
+                                    Math.abs(distX) >= threshold &&
+                                    Math.abs(distY) <= restraint
+                                ) {
+                                    if (distX > 0) {
+                                        // Swipe right - previous image
+                                        self.previous();
+                                    } else {
+                                        // Swipe left - next image
+                                        self.next();
+                                    }
+                                } else if (
+                                    Math.abs(distY) >= threshold &&
+                                    Math.abs(distX) <= restraint
+                                ) {
+                                    if (distY > 0) {
+                                        // Swipe down - close lightbox
+                                        self.close();
+                                    }
+                                }
+                            }
+
+                            e.preventDefault();
+                        },
+                        { passive: false }
+                    );
+                },
+
+                /**
+                 * Add zoom functionality with mouse wheel and touch pinch
+                 * This is a creative UX enhancement
+                 */
+                addZoomSupport: function () {
+                    if (!this.state.imageElement) {
+                        return;
+                    }
+
+                    var self = this;
+                    var currentZoom = 1;
+                    var maxZoom = this.config.maxZoomLevel || 3;
+                    var minZoom = 1;
+                    var zoomIndicator =
+                        this.state.lightboxContainer.querySelector(
+                            ".lightbox-zoom-indicator"
+                        );
+
+                    // Create zoom indicator if it doesn't exist
+                    if (!zoomIndicator) {
+                        zoomIndicator = document.createElement("div");
+                        zoomIndicator.className = "lightbox-zoom-indicator";
+                        zoomIndicator.textContent = "100%";
+                        this.state.lightboxContainer.appendChild(zoomIndicator);
+                    }
+
+                    // Mouse wheel zoom
+                    this.state.imageElement.addEventListener(
+                        "wheel",
+                        function (e) {
+                            if (!self.state.isOpen) return;
+
+                            e.preventDefault();
+
+                            var delta = e.deltaY > 0 ? -0.1 : 0.1;
+                            currentZoom = Math.max(
+                                minZoom,
+                                Math.min(maxZoom, currentZoom + delta)
+                            );
+
+                            self.state.imageElement.style.transform =
+                                "scale(" + currentZoom + ")";
+
+                            // Update cursor
+                            if (currentZoom > 1) {
+                                self.state.imageElement.classList.add("zoomed");
+                            } else {
+                                self.state.imageElement.classList.remove(
+                                    "zoomed"
+                                );
+                            }
+
+                            // Show zoom indicator
+                            zoomIndicator.textContent =
+                                Math.round(currentZoom * 100) + "%";
+                            zoomIndicator.classList.add("visible");
+
+                            // Hide zoom indicator after delay
+                            clearTimeout(self.zoomIndicatorTimeout);
+                            self.zoomIndicatorTimeout = setTimeout(function () {
+                                zoomIndicator.classList.remove("visible");
+                            }, 1000);
+                        },
+                        { passive: false }
+                    );
+
+                    // Click to zoom toggle
+                    this.state.imageElement.addEventListener(
+                        "click",
+                        function (e) {
+                            if (!self.state.isOpen) return;
+
+                            e.stopPropagation();
+
+                            if (currentZoom > 1) {
+                                // Reset zoom
+                                currentZoom = 1;
+                                self.state.imageElement.style.transform =
+                                    "scale(1)";
+                                self.state.imageElement.classList.remove(
+                                    "zoomed"
+                                );
+                            } else {
+                                // Zoom in
+                                currentZoom = 2;
+                                self.state.imageElement.style.transform =
+                                    "scale(2)";
+                                self.state.imageElement.classList.add("zoomed");
+                            }
+
+                            // Update zoom indicator
+                            zoomIndicator.textContent =
+                                Math.round(currentZoom * 100) + "%";
+                            zoomIndicator.classList.add("visible");
+
+                            clearTimeout(self.zoomIndicatorTimeout);
+                            self.zoomIndicatorTimeout = setTimeout(function () {
+                                zoomIndicator.classList.remove("visible");
+                            }, 1000);
+                        }
+                    );
+
+                    // Reset zoom when changing images
+                    var originalShowImage = this.showImage;
+                    this.showImage = function (index) {
+                        currentZoom = 1;
+                        self.state.imageElement.style.transform = "scale(1)";
+                        self.state.imageElement.classList.remove("zoomed");
+                        zoomIndicator.classList.remove("visible");
+
+                        originalShowImage.call(self, index);
+                    };
+                },
+
+                /**
+                 * Test function for debugging lightbox functionality
+                 * Call from browser console: CloudSync.adaptivePages.modules.imageLightbox.testLightbox()
+                 */
+                testLightbox: function () {
+                    var utils = CloudSync.adaptivePages.utils;
+
+                    utils.log("🧪 LIGHTBOX DIAGNOSTIC TEST");
+                    utils.log("========================");
+                    utils.log(
+                        "Module initialized: " + this.state.isInitialized
+                    );
+                    utils.log("Lightbox is open: " + this.state.isOpen);
+                    utils.log("Image selector: " + this.config.imageSelector);
+
+                    var foundImages = document.querySelectorAll(
+                        this.config.imageSelector
+                    );
+                    utils.log(
+                        "Images found with selector: " + foundImages.length
+                    );
+
+                    if (foundImages.length > 0) {
+                        utils.log(
+                            "First image src: " +
+                                (foundImages[0].src || "no src")
+                        );
+                        utils.log(
+                            "First image classes: " + foundImages[0].className
+                        );
+                        utils.log(
+                            "First image parent: " +
+                                foundImages[0].parentElement.tagName
+                        );
+                    }
+
+                    utils.log(
+                        "Stored images in state: " + this.state.images.length
+                    );
+                    utils.log(
+                        "Event handlers bound: " +
+                            this.state.eventHandlers.click.length
+                    );
+
+                    if (foundImages.length > 0 && this.state.isInitialized) {
+                        utils.log(
+                            "🚀 Testing manual lightbox open for first image..."
+                        );
+                        this.open(0);
+                    }
+
+                    return {
+                        initialized: this.state.isInitialized,
+                        imagesFound: foundImages.length,
+                        imagesStored: this.state.images.length,
+                        handlersbound: this.state.eventHandlers.click.length,
+                    };
+                },
+            },
         },
 
         /**
@@ -3590,7 +4620,6 @@
 
                 return headerHeight + adminBarHeight;
             },
-
 
             /**
              * Cross-browser compatible smooth scroll to element
@@ -4185,7 +5214,7 @@
         /**
          * Temporary testing function for TOC module development
          * Provides comprehensive testing and debugging for table of contents functionality
-         * 
+         *
          * @function testTOCModule
          * @memberof CloudSync.adaptivePages
          * @returns {boolean} True if initialization successful, false otherwise
