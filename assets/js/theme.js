@@ -17,6 +17,17 @@
         CloudSync.init();
     });
 
+    /**
+     * =====================================================
+     * SECTION 1: CORE THEME FUNCTIONALITY
+     * =====================================================
+     *
+     * This section contains the main CloudSync object with
+     * essential theme functions including smooth scrolling,
+     * mobile menu, scroll animations, parallax effects,
+     * interactive cards, and copy link functionality.
+     */
+
     // Main theme object containing all functionality
     var CloudSync = {
         /**
@@ -330,6 +341,15 @@
                         fallbackCopyTextToClipboard(url);
                     }
 
+                    /**
+                     * Show copy success feedback to user
+                     * Updates button appearance and text temporarily
+                     * 
+                     * @private
+                     * @function showCopySuccess
+                     * @description Provides visual feedback when URL is successfully copied
+                     * @since 1.0.0
+                     */
                     function showCopySuccess() {
                         button.classList.add("copied");
                         buttonText.textContent = "Copied!";
@@ -340,6 +360,16 @@
                         }, 2000);
                     }
 
+                    /**
+                     * Fallback copy method for older browsers
+                     * Uses document.execCommand for browsers without Clipboard API
+                     * 
+                     * @private
+                     * @function fallbackCopyTextToClipboard
+                     * @param {string} text - Text to copy to clipboard
+                     * @description Creates temporary textarea element for copy operation
+                     * @since 1.0.0
+                     */
                     function fallbackCopyTextToClipboard(text) {
                         var textArea = document.createElement("textarea");
                         textArea.value = text;
@@ -365,6 +395,18 @@
                 });
             });
         },
+
+        /**
+         * =====================================================
+         * SECTION 2: SMART HEADER SYSTEM
+         * =====================================================
+         *
+         * Intelligent header behavior that hides/shows based on
+         * scroll direction. Enhances user experience by maximizing
+         * content visibility while maintaining easy access to
+         * navigation when needed.
+         */
+
         /**
          * Smart Header Module for CloudSync Theme
          *
@@ -572,6 +614,18 @@
             },
         },
     };
+
+    /**
+     * =====================================================
+     * SECTION 3: ADAPTIVE PAGES SYSTEM
+     * =====================================================
+     *
+     * Comprehensive system that automatically enhances pages
+     * based on content analysis, providing intelligent navigation,
+     * reading progress, and interactive features. Built with
+     * modular architecture for maintainability and extensibility.
+     */
+
     /**
      * CloudSync Adaptive Pages System - Production Architecture
      *
@@ -805,7 +859,6 @@
                         return false;
                     }
                 },
-                destroy: function () {},
                 scanHeadings: function () {
                     var utils = CloudSync.adaptivePages.utils;
                     utils.log("Starting headings scan process");
@@ -952,6 +1005,15 @@
 
                     return true;
                 },
+                /**
+                 * Get range of heading levels found in document
+                 * Analyzes processed headings to determine level range for debugging
+                 * 
+                 * @function getHeadingLevelsRange
+                 * @memberof CloudSync.adaptivePages.modules.tableOfContents
+                 * @returns {string} Formatted range string (e.g., "H1-H3", "H2", or "none")
+                 * @since 1.0.0
+                 */
                 getHeadingLevelsRange: function () {
                     // Return empty indicator if no headings processed
                     if (
@@ -984,8 +1046,6 @@
                         );
                     }
                 },
-                generateTOC: function () {},
-
                 bindEvents: function () {
                     var utils = CloudSync.adaptivePages.utils;
                     var self = this; // Store reference for use in event handlers
@@ -1018,10 +1078,14 @@
                         // Setup reading progress bar updates
                         this.setupProgressTracking();
 
-                        utils.log("Desktop TOC event handlers bound successfully");
+                        utils.log(
+                            "Desktop TOC event handlers bound successfully"
+                        );
                     } else if (this.state.currentMode === "mobile") {
                         // Mobile mode - events are already bound in createMobileTOC
-                        utils.log("Mobile TOC events already bound during creation");
+                        utils.log(
+                            "Mobile TOC events already bound during creation"
+                        );
                     }
 
                     return true;
@@ -1280,7 +1344,7 @@
                             var currentScroll =
                                 window.pageYOffset ||
                                 document.documentElement.scrollTop;
-                            
+
                             // Always update last known scroll position for breakpoint transitions
                             self.state.lastKnownScrollPosition = currentScroll;
                             var scrollDifference = Math.abs(
@@ -1388,11 +1452,18 @@
                 ) {
                     var utils = CloudSync.adaptivePages.utils;
 
-                    utils.log("DEBUG: updateActiveHighlight called: " + previousActiveId + " → " + newActiveId);
+                    utils.log(
+                        "DEBUG: updateActiveHighlight called: " +
+                            previousActiveId +
+                            " → " +
+                            newActiveId
+                    );
 
                     // Early return if TOC elements are not available (e.g., during breakpoint transitions)
                     if (!this.state.tocElements.tocList) {
-                        utils.log("DEBUG: tocList not available, skipping highlight update");
+                        utils.log(
+                            "DEBUG: tocList not available, skipping highlight update"
+                        );
                         return;
                     }
 
@@ -1546,7 +1617,15 @@
                         viewportHeight: 0, // Cached viewport height for performance
                     };
 
-                    // Function to recalculate document dimensions when needed
+                    /**
+                     * Recalculate document dimensions for accurate progress tracking
+                     * Updates cached height values used in progress calculations
+                     * 
+                     * @private
+                     * @function updateDocumentDimensions
+                     * @description Updates progressState with current document and viewport heights
+                     * @since 1.0.0
+                     */
                     var updateDocumentDimensions = function () {
                         progressState.documentHeight = Math.max(
                             document.body.scrollHeight,
@@ -1738,6 +1817,16 @@
                     // Ensure final result stays within valid bounds
                     return Math.min(1, Math.max(0, adjustedProgress));
                 },
+                /**
+                 * Quadratic easing function for smooth animation curves
+                 * Creates natural acceleration and deceleration in progress changes
+                 * 
+                 * @function easeInOutQuad
+                 * @memberof CloudSync.adaptivePages.modules.tableOfContents
+                 * @param {number} t - Time parameter between 0 and 1
+                 * @returns {number} Eased value between 0 and 1
+                 * @since 1.0.0
+                 */
                 easeInOutQuad: function (t) {
                     // Quadratic easing function for smooth animation curves
                     // Creates natural acceleration and deceleration in progress changes
@@ -2209,7 +2298,16 @@
                     var button = this.state.tocElements.mobileButton;
                     var panel = this.state.tocElements.mobilePanel;
 
-                    // Floating button click/tap handler
+                    /**
+                     * Handle mobile TOC button click/tap events
+                     * Toggles mobile panel visibility when button is clicked
+                     * 
+                     * @private
+                     * @function buttonClickHandler
+                     * @param {Event} event - Click event object
+                     * @description Prevents default behavior and toggles mobile panel
+                     * @since 1.0.0
+                     */
                     var buttonClickHandler = function (event) {
                         event.preventDefault();
                         event.stopPropagation();
@@ -2217,7 +2315,16 @@
                         utils.log("Mobile TOC button clicked");
                     };
 
-                    // Keyboard support for floating button
+                    /**
+                     * Handle keyboard navigation for mobile TOC button
+                     * Provides accessibility support for mobile TOC button
+                     * 
+                     * @private
+                     * @function buttonKeyHandler
+                     * @param {KeyboardEvent} event - Keyboard event object
+                     * @description Handles Enter, Space, and Escape key interactions
+                     * @since 1.0.0
+                     */
                     var buttonKeyHandler = function (event) {
                         if (event.key === "Enter" || event.key === " ") {
                             event.preventDefault();
@@ -2230,14 +2337,32 @@
                         }
                     };
 
-                    // Panel close button handler
+                    /**
+                     * Handle mobile TOC panel close button click
+                     * Closes mobile panel when close button is clicked
+                     * 
+                     * @private
+                     * @function closeButtonHandler
+                     * @param {Event} event - Click event object
+                     * @description Prevents default behavior and closes mobile panel
+                     * @since 1.0.0
+                     */
                     var closeButtonHandler = function (event) {
                         event.preventDefault();
                         self.toggleMobilePanel(false);
                         utils.log("Mobile TOC panel closed via close button");
                     };
 
-                    // Panel overlay click handler (close on backdrop click)
+                    /**
+                     * Handle mobile TOC panel overlay click
+                     * Closes panel when user clicks outside panel content area
+                     * 
+                     * @private
+                     * @function overlayClickHandler
+                     * @param {Event} event - Click event object
+                     * @description Implements backdrop click to close functionality
+                     * @since 1.0.0
+                     */
                     var overlayClickHandler = function (event) {
                         // Close if clicked on overlay or anywhere outside panel content
                         var panelContent = panel.querySelector(
@@ -2487,24 +2612,44 @@
                         // Debug: Log all scroll position methods
                         var scrollY = window.scrollY;
                         var pageYOffset = window.pageYOffset;
-                        var docElementScrollTop = document.documentElement.scrollTop;
+                        var docElementScrollTop =
+                            document.documentElement.scrollTop;
                         var bodyScrollTop = document.body.scrollTop;
-                        
-                        utils.log("DEBUG scroll methods: scrollY=" + scrollY + 
-                                ", pageYOffset=" + pageYOffset + 
-                                ", docElement.scrollTop=" + docElementScrollTop + 
-                                ", body.scrollTop=" + bodyScrollTop);
-                        
-                        // Preserve scroll position during transition - capture early with multiple fallbacks
-                        var capturedScroll = scrollY || pageYOffset || docElementScrollTop || bodyScrollTop || 0;
-                        
-                        // If all methods return 0, use lastKnownScrollPosition as backup
-                        this.state.preservedScrollPosition = capturedScroll > 0 ? capturedScroll : this.state.lastKnownScrollPosition;
-                        
+
                         utils.log(
-                            "Preserving scroll position: " + 
-                            this.state.preservedScrollPosition + "px" + 
-                            " (captured=" + capturedScroll + ", backup=" + this.state.lastKnownScrollPosition + ")"
+                            "DEBUG scroll methods: scrollY=" +
+                                scrollY +
+                                ", pageYOffset=" +
+                                pageYOffset +
+                                ", docElement.scrollTop=" +
+                                docElementScrollTop +
+                                ", body.scrollTop=" +
+                                bodyScrollTop
+                        );
+
+                        // Preserve scroll position during transition - capture early with multiple fallbacks
+                        var capturedScroll =
+                            scrollY ||
+                            pageYOffset ||
+                            docElementScrollTop ||
+                            bodyScrollTop ||
+                            0;
+
+                        // If all methods return 0, use lastKnownScrollPosition as backup
+                        this.state.preservedScrollPosition =
+                            capturedScroll > 0
+                                ? capturedScroll
+                                : this.state.lastKnownScrollPosition;
+
+                        utils.log(
+                            "Preserving scroll position: " +
+                                this.state.preservedScrollPosition +
+                                "px" +
+                                " (captured=" +
+                                capturedScroll +
+                                ", backup=" +
+                                this.state.lastKnownScrollPosition +
+                                ")"
                         );
 
                         // Clean up existing TOC interface
@@ -2520,7 +2665,7 @@
                             if (interfaceCreated) {
                                 // IMPORTANT: Recalculate heading positions after layout change
                                 this.recalculateHeadingPositions();
-                                
+
                                 // Setup all desktop TOC functionality in correct order
                                 this.setupSmartVisibility();
                                 this.setupNavigationHandlers();
@@ -2543,24 +2688,35 @@
                                     newMode +
                                     " mode"
                             );
-                            
+
                             // Restore preserved scroll position
                             if (this.state.preservedScrollPosition !== null) {
                                 // Use longer delay to ensure mobile layout is fully formed
-                                setTimeout(function() {
-                                    var targetScroll = self.state.preservedScrollPosition;
-                                    
+                                setTimeout(function () {
+                                    var targetScroll =
+                                        self.state.preservedScrollPosition;
+
                                     // Check if target position is valid for new layout
-                                    var maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+                                    var maxScroll =
+                                        document.documentElement.scrollHeight -
+                                        window.innerHeight;
                                     if (targetScroll > maxScroll) {
                                         targetScroll = maxScroll;
-                                        utils.log("DEBUG: Adjusted scroll position from " + self.state.preservedScrollPosition + "px to " + targetScroll + "px (max available)");
+                                        utils.log(
+                                            "DEBUG: Adjusted scroll position from " +
+                                                self.state
+                                                    .preservedScrollPosition +
+                                                "px to " +
+                                                targetScroll +
+                                                "px (max available)"
+                                        );
                                     }
-                                    
+
                                     window.scrollTo(0, targetScroll);
                                     utils.log(
-                                        "Restored scroll position to: " + 
-                                        targetScroll + "px"
+                                        "Restored scroll position to: " +
+                                            targetScroll +
+                                            "px"
                                     );
                                     self.state.preservedScrollPosition = null;
                                 }, 300); // Increased delay for mobile layout completion
@@ -2607,7 +2763,8 @@
                         hasBeenVisible: false, // Whether TOC has ever been shown
                         lastScrollPosition: 0, // Previous scroll position for direction detection
                         scrollDirection: "down", // Current scroll direction
-                        isModeSwitch: Date.now() - this.state.pageLoadTime > 1000, // Is this a mode switch vs initial load?
+                        isModeSwitch:
+                            Date.now() - this.state.pageLoadTime > 1000, // Is this a mode switch vs initial load?
                     };
 
                     var scrollHandler = utils.throttle(
@@ -2661,8 +2818,10 @@
                     });
 
                     // Perform initial visibility check immediately (important for mode switches)
-                    setTimeout(function() {
-                        utils.log("DEBUG: Running initial visibility check after mode switch");
+                    setTimeout(function () {
+                        utils.log(
+                            "DEBUG: Running initial visibility check after mode switch"
+                        );
                         scrollHandler();
                     }, 100);
 
@@ -2713,20 +2872,21 @@
                     visibilityConfig
                 ) {
                     var utils = CloudSync.adaptivePages.utils;
-                    
+
                     // Use relaxed thresholds for mode switches, stricter for initial page load
-                    var timeThreshold = behaviorState.isModeSwitch ? 
-                        visibilityConfig.modeSwitchTimeThreshold : 
-                        visibilityConfig.timeThreshold;
-                    var scrollThreshold = behaviorState.isModeSwitch ? 
-                        visibilityConfig.modeSwitchScrollThreshold : 
-                        visibilityConfig.scrollThreshold;
-                    
+                    var timeThreshold = behaviorState.isModeSwitch
+                        ? visibilityConfig.modeSwitchTimeThreshold
+                        : visibilityConfig.timeThreshold;
+                    var scrollThreshold = behaviorState.isModeSwitch
+                        ? visibilityConfig.modeSwitchScrollThreshold
+                        : visibilityConfig.scrollThreshold;
+
                     // Check if user has spent enough time on page to warrant TOC assistance
                     var hasMinimumTimeInvestment = timeOnPage >= timeThreshold;
 
                     // Check if user has scrolled enough to indicate serious reading intent
-                    var hasScrolledSufficientDistance = scrollPercent >= scrollThreshold;
+                    var hasScrolledSufficientDistance =
+                        scrollPercent >= scrollThreshold;
 
                     // Special logic for hiding TOC when user returns to top of document
                     var isAtTopOfDocument =
@@ -2746,17 +2906,31 @@
 
                     // Final decision combines primary logic with override scenarios
                     var result = primaryCondition && !overrideCondition;
-                    
+
                     // Debug logging for visibility decision
-                    utils.log("DEBUG TOC visibility: scrollPercent=" + Math.round(scrollPercent * 100) + "%" + 
-                              ", timeOnPage=" + Math.round(timeOnPage / 1000) + "s" +
-                              ", timeThreshold=" + (timeThreshold / 1000) + "s" +
-                              ", scrollThreshold=" + Math.round(scrollThreshold * 100) + "%" +
-                              ", isModeSwitch=" + behaviorState.isModeSwitch +
-                              ", hasMinTime=" + hasMinimumTimeInvestment +
-                              ", hasScrolled=" + hasScrolledSufficientDistance +
-                              ", shouldShow=" + result);
-                    
+                    utils.log(
+                        "DEBUG TOC visibility: scrollPercent=" +
+                            Math.round(scrollPercent * 100) +
+                            "%" +
+                            ", timeOnPage=" +
+                            Math.round(timeOnPage / 1000) +
+                            "s" +
+                            ", timeThreshold=" +
+                            timeThreshold / 1000 +
+                            "s" +
+                            ", scrollThreshold=" +
+                            Math.round(scrollThreshold * 100) +
+                            "%" +
+                            ", isModeSwitch=" +
+                            behaviorState.isModeSwitch +
+                            ", hasMinTime=" +
+                            hasMinimumTimeInvestment +
+                            ", hasScrolled=" +
+                            hasScrolledSufficientDistance +
+                            ", shouldShow=" +
+                            result
+                    );
+
                     return result;
                 },
                 updateTOCVisibility: function (shouldBeVisible, behaviorState) {
@@ -2867,7 +3041,10 @@
                                 var targetElement =
                                     document.getElementById(targetId);
 
-                                utils.log("DEBUG: TOC link clicked, target: " + targetId);
+                                utils.log(
+                                    "DEBUG: TOC link clicked, target: " +
+                                        targetId
+                                );
 
                                 if (!targetElement) {
                                     utils.log(
@@ -3029,23 +3206,32 @@
 
                 recalculateHeadingPositions: function () {
                     var utils = CloudSync.adaptivePages.utils;
-                    
-                    utils.log("Recalculating heading positions after layout change");
-                    
+
+                    utils.log(
+                        "Recalculating heading positions after layout change"
+                    );
+
                     // Use requestAnimationFrame to ensure layout is complete
                     var self = this;
-                    requestAnimationFrame(function() {
+                    requestAnimationFrame(function () {
                         for (var i = 0; i < self.state.headings.length; i++) {
                             var heading = self.state.headings[i];
                             var oldPosition = heading.offsetTop;
                             heading.offsetTop = heading.element.offsetTop;
-                            
+
                             utils.log(
-                                'Updated heading "' + heading.text + '" position: ' +
-                                oldPosition + 'px → ' + heading.offsetTop + 'px'
+                                'Updated heading "' +
+                                    heading.text +
+                                    '" position: ' +
+                                    oldPosition +
+                                    "px → " +
+                                    heading.offsetTop +
+                                    "px"
                             );
                         }
-                        utils.log("Heading positions recalculated successfully");
+                        utils.log(
+                            "Heading positions recalculated successfully"
+                        );
                     });
                 },
 
@@ -3161,6 +3347,17 @@
                 },
             },
         },
+
+        /**
+         * =====================================================
+         * SECTION 4: UTILITY FUNCTIONS
+         * =====================================================
+         *
+         * Core utilities that provide shared functionality across
+         * all modules. Think of this as the "standard library"
+         * for our adaptive pages system including logging,
+         * DOM manipulation, throttling, and helper functions.
+         */
 
         /**
          * Core utilities that provide shared functionality across all modules
@@ -3452,6 +3649,17 @@
                 this.state.isInitialized = false;
             },
         },
+
+        /**
+         * =====================================================
+         * SECTION 5: SYSTEM INITIALIZATION & COORDINATION
+         * =====================================================
+         *
+         * Main initialization coordinator and system orchestration
+         * functions. Handles module initialization, page analysis,
+         * breakpoint detection, and global event management.
+         */
+
         /**
          * Main initialization coordinator for the adaptive pages system
          * This method serves as the central hub that orchestrates all system components
@@ -3700,21 +3908,32 @@
             }, this.config.resizeDebounce);
 
             // Create wrapper that saves scroll position BEFORE debounced handler
-            var resizeWrapper = function() {
+            var resizeWrapper = function () {
                 // Save current scroll position immediately on ANY resize event
                 // This captures scroll position before any layout changes occur
-                var currentScroll = window.scrollY || window.pageYOffset || 
-                                   document.documentElement.scrollTop || 
-                                   document.body.scrollTop || 0;
-                
+                var currentScroll =
+                    window.scrollY ||
+                    window.pageYOffset ||
+                    document.documentElement.scrollTop ||
+                    document.body.scrollTop ||
+                    0;
+
                 // Store in TOC module if it exists and is active
-                if (self.state.activeModules.indexOf('tableOfContents') !== -1 && 
-                    self.modules.tableOfContents && 
-                    self.modules.tableOfContents.state) {
-                    self.modules.tableOfContents.state.lastKnownScrollPosition = currentScroll;
-                    self.utils.log("DEBUG: Saved scroll position on resize: " + currentScroll + "px");
+                if (
+                    self.state.activeModules.indexOf("tableOfContents") !==
+                        -1 &&
+                    self.modules.tableOfContents &&
+                    self.modules.tableOfContents.state
+                ) {
+                    self.modules.tableOfContents.state.lastKnownScrollPosition =
+                        currentScroll;
+                    self.utils.log(
+                        "DEBUG: Saved scroll position on resize: " +
+                            currentScroll +
+                            "px"
+                    );
                 }
-                
+
                 // Call the debounced handler
                 resizeHandler();
             };
@@ -3839,6 +4058,17 @@
         },
 
         /**
+         * =====================================================
+         * SECTION 6: DEVELOPMENT & TESTING
+         * =====================================================
+         *
+         * Debug functions, testing utilities, and development
+         * helpers for system monitoring, troubleshooting,
+         * and quality assurance. Should be removed or
+         * disabled in production builds.
+         */
+
+        /**
          * Enhanced debug system with more comprehensive state reporting
          * This version shows the actual values being stored and retrieved
          */
@@ -3951,7 +4181,16 @@
                 );
             }
         },
-        // Temporary testing function for TOC module development
+        /**
+         * Temporary testing function for TOC module development
+         * Provides comprehensive testing and debugging for table of contents functionality
+         * 
+         * @function testTOCModule
+         * @memberof CloudSync.adaptivePages
+         * @returns {boolean} True if initialization successful, false otherwise
+         * @since 1.0.0
+         * @todo Remove in production builds
+         */
         testTOCModule: function () {
             var utils = this.utils;
             utils.log("=== STARTING TOC MODULE TEST ===");
