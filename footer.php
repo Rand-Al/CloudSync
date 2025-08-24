@@ -2,39 +2,6 @@
 
 <footer class="site-footer" id="colophon">
 
-    <?php if (is_active_sidebar('footer-1') || is_active_sidebar('footer-2') || is_active_sidebar('footer-3') || is_active_sidebar('footer-4')) : ?>
-        <div class="footer-content">
-            <div class="container">
-                <div class="footer-grid">
-
-                    <?php if (is_active_sidebar('footer-1')) : ?>
-                        <div class="footer-section">
-                            <?php dynamic_sidebar('footer-1'); ?>
-                        </div>
-                    <?php endif; ?>
-
-                    <?php if (is_active_sidebar('footer-2')) : ?>
-                        <div class="footer-section">
-                            <?php dynamic_sidebar('footer-2'); ?>
-                        </div>
-                    <?php endif; ?>
-
-                    <?php if (is_active_sidebar('footer-3')) : ?>
-                        <div class="footer-section">
-                            <?php dynamic_sidebar('footer-3'); ?>
-                        </div>
-                    <?php endif; ?>
-
-                    <?php if (is_active_sidebar('footer-4')) : ?>
-                        <div class="footer-section">
-                            <?php dynamic_sidebar('footer-4'); ?>
-                        </div>
-                    <?php endif; ?>
-
-                </div>
-            </div>
-        </div>
-    <?php endif; ?>
 
     <?php
     // Get customizer values for footer
@@ -130,10 +97,10 @@
                         <div class="footer-newsletter">
                             <h4><?php esc_html_e('Stay Updated', 'cloudsync'); ?></h4>
                             <p><?php echo esc_html($newsletter_text); ?></p>
-                            <div class="newsletter-signup">
+                            <form class="newsletter-signup">
                                 <input type="email" placeholder="<?php esc_attr_e('Enter your email', 'cloudsync'); ?>" aria-label="<?php esc_attr_e('Email address for newsletter', 'cloudsync'); ?>">
                                 <button type="submit"><?php esc_html_e('Subscribe', 'cloudsync'); ?></button>
-                            </div>
+                            </form>
                         </div>
                     <?php endif; ?>
 

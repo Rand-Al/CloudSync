@@ -53,21 +53,22 @@ Support: https://support.cloudsync-theme.com
    CLOUDSYNC SAAS LANDING THEME STYLES
    
    Table of Contents:
-   1. CSS Reset & Base Styles
-   2. Typography System
-   3. WordPress Core Compatibility
-   4. Layout & Grid System
-   5. Component Styles (Buttons, Forms, Cards)
-   6. Header & Navigation
-   7. Hero Section
-   8. Features Section
-   9. How It Works Section
-   10. Pricing Section
-   11. CTA Section
-   12. Footer
-   13. WordPress Specific Styles
-   14. Responsive Design
-   15. Utility Classes
+   
+   Note: Base styles, layout, and components are now in separate CSS modules
+   for better organization and performance. This file contains theme-specific
+   sections and WordPress compatibility styles.
+   
+   1. WordPress Core Compatibility
+   2. Header & Navigation
+   3. Hero Section
+   4. Features Section
+   5. How It Works Section
+   6. Pricing Section
+   7. CTA Section
+   8. Footer
+   9. WordPress Specific Styles
+   10. Responsive Design
+   11. Theme-Specific Utilities
    ========================================================================== */
 
 /* 1. CSS Reset & Base Styles
@@ -201,34 +202,7 @@ a:focus {
 /* 3. WordPress Core Compatibility
    ========================================================================== */
 
-/* Essential WordPress alignment classes */
-.alignleft {
-    float: left;
-    margin: 0 1.5rem 1rem 0;
-}
-
-.alignright {
-    float: right;
-    margin: 0 0 1rem 1.5rem;
-}
-
-.aligncenter {
-    display: block;
-    margin: 0 auto 1rem;
-    text-align: center;
-}
-
-.alignwide {
-    width: 100vw;
-    max-width: 100vw;
-    margin-left: calc(50% - 50vw);
-}
-
-.alignfull {
-    width: 100vw;
-    max-width: 100vw;
-    margin-left: calc(50% - 50vw);
-}
+/* WordPress alignment classes moved to gutenberg.css module */
 
 /* WordPress image and caption styles */
 .wp-caption {
