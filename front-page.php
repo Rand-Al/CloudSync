@@ -326,22 +326,22 @@ get_header(); ?>
             </div>
             <div class="contact-form-container fade-in">
                 <form class="contact-form" id="cloudsync-contact-form" method="post">
-                    <?php wp_nonce_field('cloudsync_contact_form', 'cloudsync_contact_nonce'); ?>
+                    <?php wp_nonce_field('cloudsync_contact_nonce', 'cloudsync_contact_nonce'); ?>
                     <div class="form-group">
                         <label for="contact-name"><?php echo esc_html(cloudsync_get_customizer_value('cloudsync_form_name_label', 'Your Name')); ?></label>
-                        <input type="text" id="contact-name" name="contact_name" required>
+                        <input type="text" id="contact-name" name="name" required>
                     </div>
                     <div class="form-group">
                         <label for="contact-email"><?php echo esc_html(cloudsync_get_customizer_value('cloudsync_form_email_label', 'Email Address')); ?></label>
-                        <input type="email" id="contact-email" name="contact_email" required>
+                        <input type="email" id="contact-email" name="email" required>
                     </div>
                     <div class="form-group">
-                        <label for="contact-company"><?php echo esc_html(cloudsync_get_customizer_value('cloudsync_form_company_label', 'Company (Optional)')); ?></label>
-                        <input type="text" id="contact-company" name="contact_company">
+                        <label for="contact-subject"><?php echo esc_html(cloudsync_get_customizer_value('cloudsync_form_company_label', 'Subject')); ?></label>
+                        <input type="text" id="contact-subject" name="subject" required>
                     </div>
                     <div class="form-group">
                         <label for="contact-message"><?php echo esc_html(cloudsync_get_customizer_value('cloudsync_form_message_label', 'Message')); ?></label>
-                        <textarea id="contact-message" name="contact_message" rows="5" required></textarea>
+                        <textarea id="contact-message" name="message" rows="5" required></textarea>
                     </div>
                     <button type="submit" class="cta-btn form-submit-btn">
                         <span class="btn-text"><?php echo esc_html(cloudsync_get_customizer_value('cloudsync_form_submit_text', 'Send Message')); ?></span>

@@ -211,12 +211,16 @@
     transition: opacity 0.3s ease;
 }
 
+.btn-loading {
+    display: none;
+}
+
 .form-submit-btn.loading .btn-text {
-    opacity: 0;
+    display: none;
 }
 
 .form-submit-btn.loading .btn-loading {
-    opacity: 1;
+    display: inline;
 }
 
 /* =============================================================================

@@ -243,6 +243,20 @@ function cloudsync_scripts() {
         true                                         // Load in footer for better performance
     );
 
+    // Localize AJAX data for contact form
+    wp_localize_script(
+        'cloudsync-theme-js',
+        'cloudsync_ajax',
+        array(
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce'    => wp_create_nonce('cloudsync_contact_nonce'),
+            'strings'  => array(
+                'sending'  => __('Sending...', 'cloudsync'),
+                'error'    => __('An error occurred. Please try again.', 'cloudsync')
+            )
+        )
+    );
+
     // Enqueue Google Fonts for modern typography
     // Inter font family provides excellent readability and professional appearance
     wp_enqueue_style(
@@ -302,6 +316,107 @@ function cloudsync_get_customizer_value($setting_name, $default = '') {
     return get_theme_mod($setting_name, $default);
 }
 
+
+/**
+ * Handle AJAX contact form submission
+ * 
+ * Processes contact form data via AJAX, validates input,
+ * sends email notification, and returns JSON response
+ * 
+ * @since 1.0.0
+ */
+function cloudsync_handle_contact_form() {
+    
+    // Verify nonce for security
+    if (!wp_verify_nonce($_POST['nonce'], 'cloudsync_contact_nonce')) {
+        wp_send_json_error(array('message' => __('Security verification failed', 'cloudsync')));
+        wp_die();
+    }
+    
+    // Sanitize and validate form data
+    $name = sanitize_text_field($_POST['name'] ?? '');
+    $email = sanitize_email($_POST['email'] ?? '');
+    $subject = sanitize_text_field($_POST['subject'] ?? '');
+    $message = sanitize_textarea_field($_POST['message'] ?? '');
+    
+    // Validation
+    $errors = array();
+    
+    if (empty($name)) {
+        $errors[] = __('Name is required', 'cloudsync');
+    }
+    
+    if (empty($email) || !is_email($email)) {
+        $errors[] = __('Valid email is required', 'cloudsync');
+    }
+    
+    if (empty($subject)) {
+        $errors[] = __('Subject is required', 'cloudsync');
+    }
+    
+    if (empty($message)) {
+        $errors[] = __('Message is required', 'cloudsync');
+    }
+    
+    // Return validation errors
+    if (!empty($errors)) {
+        wp_send_json_error(array('message' => implode('<br>', $errors)));
+        wp_die();
+    }
+    
+    // Prepare email
+    $admin_email = get_option('admin_email');
+    $site_name = get_bloginfo('name');
+    
+    $email_subject = sprintf('[%s] Contact Form: %s', $site_name, $subject);
+    $email_message = sprintf(
+        "New contact form submission from %s:\n\n" .
+        "Name: %s\n" .
+        "Email: %s\n" .
+        "Subject: %s\n\n" .
+        "Message:\n%s\n\n" .
+        "---\n" .
+        "This email was sent from the contact form on %s",
+        $site_name,
+        $name,
+        $email,
+        $subject,
+        $message,
+        home_url()
+    );
+    
+    $headers = array(
+        'Content-Type: text/plain; charset=UTF-8',
+        sprintf('From: %s <%s>', $site_name, $admin_email),
+        sprintf('Reply-To: %s <%s>', $name, $email)
+    );
+    
+    // Send email (or log for development)
+    if (defined('WP_DEBUG') && WP_DEBUG) {
+        // Development mode - log email instead of sending
+        error_log("CONTACT FORM EMAIL:\n" . $email_message);
+        $email_sent = true; // Simulate success for testing
+    } else {
+        // Production mode - actually send email
+        $email_sent = wp_mail($admin_email, $email_subject, $email_message, $headers);
+    }
+    
+    if ($email_sent) {
+        wp_send_json_success(array(
+            'message' => __('Thank you! Your message has been sent successfully.', 'cloudsync')
+        ));
+    } else {
+        wp_send_json_error(array(
+            'message' => __('Sorry, there was an error sending your message. Please try again.', 'cloudsync')
+        ));
+    }
+    
+    wp_die();
+}
+
+// Register AJAX handlers for both logged-in and non-logged-in users
+add_action('wp_ajax_cloudsync_contact_form', 'cloudsync_handle_contact_form');
+add_action('wp_ajax_nopriv_cloudsync_contact_form', 'cloudsync_handle_contact_form');
 
 
 // Include additional theme functionality files

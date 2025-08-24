@@ -41,6 +41,7 @@
             this.parallaxCards();
             this.interactiveCards();
             this.initCopyLinkButton();
+            this.contactForm.init();
             this.adaptivePages.init();
             this.smartHeader.init();
         },
@@ -394,6 +395,95 @@
                     }
                 });
             });
+        },
+
+        /**
+         * Contact Form AJAX Handler
+         * Handles form submission without page reload
+         */
+        contactForm: {
+            init: function () {
+                var form = document.getElementById('cloudsync-contact-form');
+                if (!form) return;
+
+                form.addEventListener('submit', this.handleSubmit.bind(this));
+            },
+
+            handleSubmit: function (e) {
+                e.preventDefault();
+                
+                var form = e.target;
+                var submitBtn = form.querySelector('.form-submit-btn');
+                var responseDiv = form.querySelector('.form-response') || this.createResponseDiv(form);
+                
+                // Disable submit button and show loading state
+                submitBtn.disabled = true;
+                submitBtn.classList.add('loading');
+                submitBtn.querySelector('.btn-text').textContent = cloudsync_ajax.strings.sending;
+                
+                // Prepare form data
+                var formData = new FormData();
+                formData.append('action', 'cloudsync_contact_form');
+                formData.append('nonce', cloudsync_ajax.nonce);
+                formData.append('name', form.name.value);
+                formData.append('email', form.email.value);
+                formData.append('subject', form.subject.value);
+                formData.append('message', form.message.value);
+                
+                // Submit via AJAX
+                fetch(cloudsync_ajax.ajax_url, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    this.handleResponse(data, form, submitBtn, responseDiv);
+                })
+                .catch(error => {
+                    this.handleError(error, submitBtn, responseDiv);
+                });
+            },
+
+            handleResponse: function (data, form, submitBtn, responseDiv) {
+                // Reset button state
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('loading');
+                submitBtn.querySelector('.btn-text').textContent = 'Send Message';
+                
+                // Show response message
+                responseDiv.textContent = data.data.message;
+                responseDiv.className = 'form-response show ' + (data.success ? 'success' : 'error');
+                
+                // Clear form on success
+                if (data.success) {
+                    form.reset();
+                }
+                
+                // Hide response after 5 seconds
+                setTimeout(() => {
+                    responseDiv.classList.remove('show');
+                }, 5000);
+            },
+
+            handleError: function (error, submitBtn, responseDiv) {
+                // Reset button state
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('loading');
+                submitBtn.querySelector('.btn-text').textContent = 'Send Message';
+                
+                // Show error message
+                responseDiv.textContent = cloudsync_ajax.strings.error;
+                responseDiv.className = 'form-response show error';
+                
+                console.error('Contact form error:', error);
+            },
+
+            createResponseDiv: function (form) {
+                var div = document.createElement('div');
+                div.className = 'form-response';
+                form.appendChild(div);
+                return div;
+            }
         },
 
         /**
