@@ -35,6 +35,7 @@
          * This method orchestrates the setup of all interactive features
          */
         init: function () {
+            // Core functionality
             this.smoothScrolling();
             this.mobileMenu();
             this.scrollAnimations();
@@ -44,6 +45,10 @@
             this.contactForm.init();
             this.adaptivePages.init();
             this.smartHeader.init();
+            
+            // Performance optimizations
+            this.lazyLoading.init();
+            this.performance.init();
         },
         /**
          * Smooth scrolling for internal anchor links
@@ -5356,6 +5361,153 @@
             utils.log("=== TOC MODULE TEST COMPLETED ===");
             return initResult;
         },
+
+        /**
+         * =====================================================
+         * PERFORMANCE: LAZY LOADING MODULE
+         * =====================================================
+         */
+        lazyLoading: {
+            init: function() {
+                this.setupIntersectionObserver();
+                this.loadCriticalImages();
+                utils.log('Lazy loading initialized');
+            },
+
+            setupIntersectionObserver: function() {
+                // Check for IntersectionObserver support
+                if (!('IntersectionObserver' in window)) {
+                    this.fallbackLoading();
+                    return;
+                }
+
+                const imageObserver = new IntersectionObserver((entries, observer) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const img = entry.target;
+                            this.loadImage(img);
+                            observer.unobserve(img);
+                        }
+                    });
+                }, {
+                    rootMargin: '50px 0px',
+                    threshold: 0.01
+                });
+
+                // Observe all lazy images
+                document.querySelectorAll('img[data-src], img[loading="lazy"]').forEach(img => {
+                    imageObserver.observe(img);
+                });
+            },
+
+            loadImage: function(img) {
+                if (img.dataset.src) {
+                    // Show loading placeholder
+                    img.style.filter = 'blur(5px)';
+                    img.style.transition = 'filter 0.3s ease';
+                    
+                    img.src = img.dataset.src;
+                    img.onload = () => {
+                        img.style.filter = 'none';
+                        img.classList.add('loaded');
+                    };
+                    img.onerror = () => {
+                        img.classList.add('error');
+                        utils.log('Failed to load image: ' + img.dataset.src);
+                    };
+                    
+                    delete img.dataset.src;
+                }
+            },
+
+            loadCriticalImages: function() {
+                // Immediately load above-the-fold images
+                const heroImages = document.querySelectorAll('.hero-section img, .header img');
+                heroImages.forEach(img => {
+                    if (img.dataset.src) {
+                        this.loadImage(img);
+                    }
+                });
+            },
+
+            fallbackLoading: function() {
+                // Fallback for browsers without IntersectionObserver
+                document.querySelectorAll('img[data-src]').forEach(img => {
+                    this.loadImage(img);
+                });
+            }
+        },
+
+        /**
+         * =====================================================
+         * PERFORMANCE: RESOURCE OPTIMIZATION
+         * =====================================================
+         */
+        performance: {
+            init: function() {
+                this.optimizeScripts();
+                this.setupResourceHints();
+                this.monitorPerformance();
+                utils.log('Performance optimizations initialized');
+            },
+
+            optimizeScripts: function() {
+                // Defer non-critical scripts
+                const scripts = document.querySelectorAll('script[data-defer]');
+                scripts.forEach(script => {
+                    if (script.src) {
+                        const newScript = document.createElement('script');
+                        newScript.src = script.src;
+                        newScript.defer = true;
+                        document.head.appendChild(newScript);
+                        script.remove();
+                    }
+                });
+            },
+
+            setupResourceHints: function() {
+                // Add dns-prefetch for external resources
+                const prefetchDomains = [
+                    'fonts.googleapis.com',
+                    'fonts.gstatic.com',
+                    'cdnjs.cloudflare.com'
+                ];
+
+                prefetchDomains.forEach(domain => {
+                    if (!document.querySelector(`link[href*="${domain}"]`)) {
+                        const link = document.createElement('link');
+                        link.rel = 'dns-prefetch';
+                        link.href = `//${domain}`;
+                        document.head.appendChild(link);
+                    }
+                });
+            },
+
+            monitorPerformance: function() {
+                // Monitor Core Web Vitals
+                if ('performance' in window && 'PerformanceObserver' in window) {
+                    try {
+                        const observer = new PerformanceObserver((list) => {
+                            for (const entry of list.getEntries()) {
+                                if (entry.entryType === 'largest-contentful-paint') {
+                                    utils.log('LCP: ' + entry.startTime + 'ms');
+                                }
+                                if (entry.entryType === 'first-input') {
+                                    utils.log('FID: ' + entry.processingStart - entry.startTime + 'ms');
+                                }
+                                if (entry.entryType === 'layout-shift') {
+                                    utils.log('CLS: ' + entry.value);
+                                }
+                            }
+                        });
+
+                        observer.observe({entryTypes: ['largest-contentful-paint', 'first-input', 'layout-shift']});
+                    } catch (e) {
+                        utils.log('Performance monitoring not supported');
+                    }
+                }
+            }
+        }
     };
 
     // Временно делаем CloudSync глобальным для отладки

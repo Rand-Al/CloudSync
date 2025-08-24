@@ -188,22 +188,27 @@ add_action('after_setup_theme', 'cloudsync_theme_setup');
  * @since 1.0.0
  */
 function cloudsync_scripts() {
-
-    // Enqueue modular CSS files for better organization and performance
+    
+    // Performance optimization: Use critical CSS inline for above-the-fold content
+    // Non-critical CSS is loaded asynchronously via performance module
+    
+    // Only enqueue base CSS for immediate loading (contains critical layout)
     wp_enqueue_style(
         'cloudsync-base',
         get_template_directory_uri() . '/assets/css/modules/base.css',
         array(),
         cloudsync_get_theme_version()
     );
-
+    
+    // Layout CSS - critical for structure
     wp_enqueue_style(
         'cloudsync-layout',
         get_template_directory_uri() . '/assets/css/modules/layout.css',
         array('cloudsync-base'),
         cloudsync_get_theme_version()
     );
-
+    
+    // Non-critical CSS files - these will be deferred by performance module
     wp_enqueue_style(
         'cloudsync-components',
         get_template_directory_uri() . '/assets/css/modules/components.css',
@@ -225,12 +230,12 @@ function cloudsync_scripts() {
         cloudsync_get_theme_version()
     );
 
-    // Main theme stylesheet (contains sections-specific styles)
+    // Main theme stylesheet - combines all sections
     wp_enqueue_style(
-        'cloudsync-style',                    // Unique handle for this stylesheet
-        get_stylesheet_uri(),                 // Path to style.css file
-        array('cloudsync-base', 'cloudsync-layout', 'cloudsync-components', 'cloudsync-gutenberg', 'cloudsync-contact'), // Dependencies
-        cloudsync_get_theme_version()        // Version number for cache busting
+        'cloudsync-style',
+        get_stylesheet_uri(),
+        array('cloudsync-base', 'cloudsync-layout'),
+        cloudsync_get_theme_version()
     );
 
 
@@ -257,22 +262,21 @@ function cloudsync_scripts() {
         )
     );
 
-    // Enqueue Google Fonts for modern typography
-    // Inter font family provides excellent readability and professional appearance
+    // Performance optimized Google Fonts loading
+    // Preconnect is handled in performance module
     wp_enqueue_style(
-        'cloudsync-google-fonts',                    // Unique handle
+        'cloudsync-google-fonts',
         'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap',
-        array(),                                     // No dependencies
-        null                                         // No version for external resources
+        array(),
+        null
     );
 
-    // Enqueue Font Awesome for icons
-    // Version 6.0.0 provides comprehensive icon library for modern web design
+    // Font Awesome - will be deferred by performance module
     wp_enqueue_style(
-        'cloudsync-font-awesome',                    // Unique handle
+        'cloudsync-font-awesome',
         'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css',
-        array(),                                     // No dependencies
-        '6.0.0'                                      // Specific version for reliability
+        array(),
+        '6.0.0'
     );
 }
 add_action('wp_enqueue_scripts', 'cloudsync_scripts');
@@ -588,3 +592,4 @@ require_once get_template_directory() . '/inc/template-functions.php';
 require_once get_template_directory() . '/inc/customizer.php';
 require_once get_template_directory() . '/inc/seo.php';
 require_once get_template_directory() . '/inc/security.php';
+require_once get_template_directory() . '/inc/performance.php';
