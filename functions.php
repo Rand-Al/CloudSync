@@ -116,7 +116,7 @@ function cloudsync_theme_setup() {
     add_theme_support('wp-block-styles');
     add_theme_support('align-wide');
     add_theme_support('responsive-embeds');
-    
+
     // Add support for custom color palette matching theme design
     add_theme_support('editor-color-palette', array(
         array(
@@ -188,10 +188,10 @@ add_action('after_setup_theme', 'cloudsync_theme_setup');
  * @since 1.0.0
  */
 function cloudsync_scripts() {
-    
+
     // Performance optimization: Use critical CSS inline for above-the-fold content
     // Non-critical CSS is loaded asynchronously via performance module
-    
+
     // Only enqueue base CSS for immediate loading (contains critical layout)
     wp_enqueue_style(
         'cloudsync-base',
@@ -199,7 +199,7 @@ function cloudsync_scripts() {
         array(),
         cloudsync_get_theme_version()
     );
-    
+
     // Layout CSS - critical for structure
     wp_enqueue_style(
         'cloudsync-layout',
@@ -207,7 +207,7 @@ function cloudsync_scripts() {
         array('cloudsync-base'),
         cloudsync_get_theme_version()
     );
-    
+
     // Non-critical CSS files - these will be deferred by performance module
     wp_enqueue_style(
         'cloudsync-components',
@@ -226,6 +226,13 @@ function cloudsync_scripts() {
     wp_enqueue_style(
         'cloudsync-contact',
         get_template_directory_uri() . '/assets/css/modules/contact.css',
+        array('cloudsync-base'),
+        cloudsync_get_theme_version()
+    );
+
+    wp_enqueue_style(
+        'cloudsync-404',
+        get_template_directory_uri() . '/assets/css/modules/404.css',
         array('cloudsync-base'),
         cloudsync_get_theme_version()
     );
@@ -331,40 +338,40 @@ function cloudsync_get_customizer_value($setting_name, $default = '') {
  * @since 1.0.0
  */
 function cloudsync_handle_contact_form() {
-    
+
     // Verify nonce for security
     if (!wp_verify_nonce($_POST['nonce'], 'cloudsync_contact_nonce')) {
         wp_send_json_error(array('message' => __('Security verification failed', 'cloudsync')));
         wp_die();
     }
-    
+
     // Rate limiting check
     if (!cloudsync_check_rate_limit()) {
         wp_send_json_error(array('message' => __('Too many requests. Please wait before submitting again.', 'cloudsync')));
         wp_die();
     }
-    
+
     // Check honeypot field (anti-spam)
     if (!empty($_POST['website_url'])) {
         // Honeypot field filled - likely spam
         wp_send_json_error(array('message' => __('Spam detected', 'cloudsync')));
         wp_die();
     }
-    
+
     // Sanitize and validate form data with enhanced security
     $name = sanitize_text_field(wp_unslash($_POST['name'] ?? ''));
     $email = sanitize_email(wp_unslash($_POST['email'] ?? ''));
     $subject = sanitize_text_field(wp_unslash($_POST['subject'] ?? ''));
     $message = sanitize_textarea_field(wp_unslash($_POST['message'] ?? ''));
-    
+
     // Additional XSS protection - strip all HTML tags
     $name = wp_strip_all_tags($name);
     $subject = wp_strip_all_tags($subject);
     $message = wp_strip_all_tags($message);
-    
+
     // Enhanced validation with length limits
     $errors = array();
-    
+
     if (empty($name)) {
         $errors[] = __('Name is required', 'cloudsync');
     } elseif (strlen($name) < 2) {
@@ -372,13 +379,13 @@ function cloudsync_handle_contact_form() {
     } elseif (strlen($name) > 100) {
         $errors[] = __('Name must be less than 100 characters', 'cloudsync');
     }
-    
+
     if (empty($email) || !is_email($email)) {
         $errors[] = __('Valid email is required', 'cloudsync');
     } elseif (strlen($email) > 254) {
         $errors[] = __('Email address is too long', 'cloudsync');
     }
-    
+
     if (empty($subject)) {
         $errors[] = __('Subject is required', 'cloudsync');
     } elseif (strlen($subject) < 3) {
@@ -386,7 +393,7 @@ function cloudsync_handle_contact_form() {
     } elseif (strlen($subject) > 200) {
         $errors[] = __('Subject must be less than 200 characters', 'cloudsync');
     }
-    
+
     if (empty($message)) {
         $errors[] = __('Message is required', 'cloudsync');
     } elseif (strlen($message) < 10) {
@@ -394,31 +401,31 @@ function cloudsync_handle_contact_form() {
     } elseif (strlen($message) > 5000) {
         $errors[] = __('Message must be less than 5000 characters', 'cloudsync');
     }
-    
+
     // Check for suspicious patterns (basic spam detection)
     if (cloudsync_contains_spam_patterns($name . ' ' . $subject . ' ' . $message)) {
         $errors[] = __('Message contains suspicious content', 'cloudsync');
     }
-    
+
     // Return validation errors
     if (!empty($errors)) {
         wp_send_json_error(array('message' => implode('<br>', $errors)));
         wp_die();
     }
-    
+
     // Prepare email
     $admin_email = get_option('admin_email');
     $site_name = get_bloginfo('name');
-    
+
     $email_subject = sprintf('[%s] Contact Form: %s', $site_name, $subject);
     $email_message = sprintf(
         "New contact form submission from %s:\n\n" .
-        "Name: %s\n" .
-        "Email: %s\n" .
-        "Subject: %s\n\n" .
-        "Message:\n%s\n\n" .
-        "---\n" .
-        "This email was sent from the contact form on %s",
+            "Name: %s\n" .
+            "Email: %s\n" .
+            "Subject: %s\n\n" .
+            "Message:\n%s\n\n" .
+            "---\n" .
+            "This email was sent from the contact form on %s",
         $site_name,
         $name,
         $email,
@@ -426,13 +433,13 @@ function cloudsync_handle_contact_form() {
         $message,
         home_url()
     );
-    
+
     $headers = array(
         'Content-Type: text/plain; charset=UTF-8',
         sprintf('From: %s <%s>', $site_name, $admin_email),
         sprintf('Reply-To: %s <%s>', $name, $email)
     );
-    
+
     // Send email (or log for development)
     if (defined('WP_DEBUG') && WP_DEBUG) {
         // Development mode - log email instead of sending
@@ -442,7 +449,7 @@ function cloudsync_handle_contact_form() {
         // Production mode - actually send email
         $email_sent = wp_mail($admin_email, $email_subject, $email_message, $headers);
     }
-    
+
     if ($email_sent) {
         wp_send_json_success(array(
             'message' => __('Thank you! Your message has been sent successfully.', 'cloudsync')
@@ -452,7 +459,7 @@ function cloudsync_handle_contact_form() {
             'message' => __('Sorry, there was an error sending your message. Please try again.', 'cloudsync')
         ));
     }
-    
+
     wp_die();
 }
 
@@ -470,20 +477,20 @@ add_action('wp_ajax_nopriv_cloudsync_contact_form', 'cloudsync_handle_contact_fo
 function cloudsync_check_rate_limit() {
     $user_ip = cloudsync_get_user_ip();
     $transient_key = 'cloudsync_rate_limit_' . md5($user_ip);
-    
+
     $submission_count = get_transient($transient_key);
-    
+
     if ($submission_count === false) {
         // First submission in the time window
         set_transient($transient_key, 1, 5 * MINUTE_IN_SECONDS); // 5 minutes
         return true;
     }
-    
+
     if ($submission_count >= 3) {
         // Too many submissions
         return false;
     }
-    
+
     // Increment counter
     set_transient($transient_key, $submission_count + 1, 5 * MINUTE_IN_SECONDS);
     return true;
@@ -507,7 +514,7 @@ function cloudsync_get_user_ip() {
         'HTTP_FORWARDED',            // Proxy
         'REMOTE_ADDR'                // Standard
     );
-    
+
     foreach ($ip_headers as $header) {
         if (!empty($_SERVER[$header])) {
             $ip = $_SERVER[$header];
@@ -521,7 +528,7 @@ function cloudsync_get_user_ip() {
             }
         }
     }
-    
+
     return '0.0.0.0'; // Fallback
 }
 
@@ -534,7 +541,7 @@ function cloudsync_get_user_ip() {
  */
 function cloudsync_contains_spam_patterns($text) {
     $text = strtolower($text);
-    
+
     // Common spam patterns
     $spam_patterns = array(
         // URLs and links
@@ -544,7 +551,7 @@ function cloudsync_contains_spam_patterns($text) {
         '.com',
         '.org',
         '.net',
-        
+
         // Common spam words
         'viagra',
         'cialis',
@@ -560,30 +567,30 @@ function cloudsync_contains_spam_patterns($text) {
         'click here',
         'free offer',
         'limited time',
-        
+
         // Suspicious patterns
         'dear sir/madam',
         'dear sir',
         'dear madam',
     );
-    
+
     foreach ($spam_patterns as $pattern) {
         if (strpos($text, $pattern) !== false) {
             return true;
         }
     }
-    
+
     // Check for excessive repeated characters
     if (preg_match('/(.)\1{10,}/', $text)) {
         return true;
     }
-    
+
     // Check for excessive capitalization
     $caps_ratio = strlen(preg_replace('/[^A-Z]/', '', $text)) / max(strlen($text), 1);
     if ($caps_ratio > 0.7 && strlen($text) > 10) {
         return true;
     }
-    
+
     return false;
 }
 

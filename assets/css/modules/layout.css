@@ -22,9 +22,15 @@
     gap: 2rem;
 }
 
-.grid-2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
-.grid-3 { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
-.grid-4 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.grid-2 {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+.grid-3 {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+.grid-4 {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
 
 /* Flexbox Utilities */
 .flex {
@@ -49,11 +55,6 @@
 
 .flex-column {
     flex-direction: column;
-}
-
-/* Section Spacing */
-section {
-    padding: 5rem 0;
 }
 
 .section-header {

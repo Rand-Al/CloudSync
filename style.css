@@ -29,7 +29,6 @@ Use it to make something cool, have fun, and share what you've learned with othe
 ✓ SEO Optimized Structure
 ✓ Cross-Browser Compatible
 ✓ Translation Ready
-✓ Widget Ready Areas
 ✓ Professional Documentation
 ✓ Video Setup Tutorial
 ✓ Lifetime Updates
@@ -51,8 +50,6 @@ Support: https://support.cloudsync-theme.com
 
 /* ==========================================================================
    CLOUDSYNC SAAS LANDING THEME STYLES
-   
-   Table of Contents:
    
    Note: Base styles, layout, and components are now in separate CSS modules
    for better organization and performance. This file contains theme-specific
@@ -324,7 +321,6 @@ button,
 input[type="submit"],
 input[type="button"] {
     display: inline-block;
-    padding: 0.75rem 1.5rem;
     border: none;
     border-radius: 50px;
     font-weight: 600;
@@ -550,11 +546,6 @@ select:focus {
    ========================================================================== */
 
 .hero {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    position: relative;
-    overflow: hidden;
     padding-top: 100px; /* Account for fixed header */
 }
 
@@ -563,11 +554,6 @@ select:focus {
     grid-template-columns: 1fr 1fr;
     gap: 4rem;
     align-items: center;
-}
-@media (max-width: 766px) {
-    .hero-content {
-        padding-bottom: 50px;
-    }
 }
 
 .hero-text h1 {
@@ -1090,7 +1076,6 @@ select:focus {
 .newsletter-signup input[type="email"] {
     flex: 1;
     min-width: 200px;
-    padding: 0.75rem 1rem;
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 6px;
     background: rgba(255, 255, 255, 0.1);
@@ -1299,6 +1284,7 @@ select:focus {
         border-radius: 0 0 12px 12px;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         transition: all 0.1s ease 0s;
+        height: 100vh;
     }
 
     .main-navigation ul.show {
@@ -1327,7 +1313,6 @@ select:focus {
 
     /* Hero section mobile */
     .hero {
-        min-height: 80vh;
         padding-top: 120px;
     }
 
@@ -3979,14 +3964,14 @@ select:focus {
     right: 0;
     bottom: 0;
     z-index: 10000;
-    
+
     /* Initially hidden */
     opacity: 0;
     visibility: hidden;
-    
+
     /* Smooth transitions */
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    
+
     /* Prevent body scroll when lightbox is open */
     overflow: hidden;
 }
@@ -4004,22 +3989,30 @@ select:focus {
     left: 0;
     right: 0;
     bottom: 0;
-    
+
     /* CloudSync gradient background */
-    background: linear-gradient(135deg, 
-        rgba(15, 23, 42, 0.95) 0%, 
+    background: linear-gradient(
+        135deg,
+        rgba(15, 23, 42, 0.95) 0%,
         rgba(30, 41, 59, 0.98) 50%,
         rgba(15, 23, 42, 0.95) 100%
     );
-    
+
     /* Glassmorphism blur effect */
     backdrop-filter: blur(25px) saturate(180%);
     -webkit-backdrop-filter: blur(25px) saturate(180%);
-    
+
     /* Subtle pattern overlay */
-    background-image: 
-        radial-gradient(circle at 25% 25%, rgba(102, 126, 234, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 75% 75%, rgba(102, 126, 234, 0.05) 0%, transparent 50%);
+    background-image: radial-gradient(
+            circle at 25% 25%,
+            rgba(102, 126, 234, 0.1) 0%,
+            transparent 50%
+        ),
+        radial-gradient(
+            circle at 75% 75%,
+            rgba(102, 126, 234, 0.05) 0%,
+            transparent 50%
+        );
 }
 
 /* Main Container */
@@ -4039,18 +4032,17 @@ select:focus {
     position: relative;
     max-width: 90vw;
     max-height: 85vh;
-    
+
     /* Glassmorphism container */
     background: rgba(30, 41, 59, 0.2);
     border: 1px solid rgba(102, 126, 234, 0.2);
     border-radius: 20px;
-    box-shadow: 
-        0 25px 50px rgba(0, 0, 0, 0.5),
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5),
         0 10px 25px rgba(102, 126, 234, 0.1),
         inset 0 1px 1px rgba(255, 255, 255, 0.1);
-    
+
     overflow: hidden;
-    
+
     /* Animation for image container */
     transform: scale(0.8);
     transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -4066,11 +4058,11 @@ select:focus {
     height: 100%;
     object-fit: contain;
     display: block;
-    
+
     /* Smooth opacity transition */
     opacity: 0;
     transition: opacity 0.3s ease;
-    
+
     /* Cursor for zoom indication */
     cursor: zoom-in;
 }
@@ -4091,7 +4083,7 @@ select:focus {
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 10002;
-    
+
     opacity: 1;
     transition: opacity 0.3s ease;
 }
@@ -4112,8 +4104,12 @@ select:focus {
 }
 
 @keyframes lightbox-spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 /* Close Button */
@@ -4122,27 +4118,27 @@ select:focus {
     top: 2rem;
     right: 2rem;
     z-index: 10003;
-    
+
     /* Glassmorphism button */
     width: 50px;
     height: 50px;
     background: rgba(30, 41, 59, 0.8);
     border: 1px solid rgba(102, 126, 234, 0.3);
     border-radius: 50%;
-    
+
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    
+
     /* Icon styling */
     display: flex;
     align-items: center;
     justify-content: center;
     color: rgba(255, 255, 255, 0.9);
     font-size: 1.25rem;
-    
+
     cursor: pointer;
     transition: all 0.3s ease;
-    
+
     /* Subtle glow effect */
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
@@ -4161,22 +4157,22 @@ select:focus {
     top: 2rem;
     left: 2rem;
     z-index: 10003;
-    
+
     /* Glassmorphism styling */
     background: rgba(30, 41, 59, 0.8);
     border: 1px solid rgba(102, 126, 234, 0.3);
     border-radius: 25px;
     padding: 0.75rem 1.25rem;
-    
+
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    
+
     /* Typography */
     color: rgba(255, 255, 255, 0.9);
     font-size: 0.9rem;
     font-weight: 500;
     letter-spacing: 0.5px;
-    
+
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
@@ -4186,29 +4182,29 @@ select:focus {
     top: 50%;
     transform: translateY(-50%);
     z-index: 10003;
-    
+
     /* Glassmorphism styling */
     width: 60px;
     height: 60px;
     background: rgba(30, 41, 59, 0.8);
     border: 1px solid rgba(102, 126, 234, 0.3);
     border-radius: 50%;
-    
+
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    
+
     /* Icon styling */
     display: flex;
     align-items: center;
     justify-content: center;
     color: rgba(255, 255, 255, 0.9);
     font-size: 1.5rem;
-    
+
     cursor: pointer;
     transition: all 0.3s ease;
-    
+
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    
+
     /* Initially hidden, shown on hover */
     opacity: 0;
     visibility: hidden;
@@ -4254,20 +4250,20 @@ select:focus {
     left: 50%;
     transform: translateX(-50%);
     z-index: 10003;
-    
+
     /* Glassmorphism styling */
     background: rgba(30, 41, 59, 0.8);
     border: 1px solid rgba(102, 126, 234, 0.3);
     border-radius: 15px;
     padding: 1rem 1.5rem;
     max-width: 400px;
-    
+
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    
+
     text-align: center;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    
+
     /* Initially hidden */
     opacity: 0;
     visibility: hidden;
@@ -4305,13 +4301,13 @@ select:focus {
     left: 50%;
     transform: translateX(-50%);
     z-index: 10003;
-    
+
     background: rgba(30, 41, 59, 0.9);
     border-radius: 20px;
     padding: 0.5rem 1rem;
     color: rgba(255, 255, 255, 0.8);
     font-size: 0.8rem;
-    
+
     opacity: 0;
     transition: opacity 0.3s ease;
 }
@@ -4325,13 +4321,13 @@ select:focus {
     .lightbox-container {
         padding: 1rem;
     }
-    
+
     .lightbox-image-wrapper {
         max-width: 95vw;
         max-height: 80vh;
         border-radius: 16px;
     }
-    
+
     .lightbox-close {
         top: 1rem;
         right: 1rem;
@@ -4339,43 +4335,43 @@ select:focus {
         height: 45px;
         font-size: 1.1rem;
     }
-    
+
     .lightbox-counter {
         top: 1rem;
         left: 1rem;
         padding: 0.5rem 1rem;
         font-size: 0.8rem;
     }
-    
+
     .lightbox-nav {
         width: 50px;
         height: 50px;
         font-size: 1.25rem;
     }
-    
+
     .lightbox-prev {
         left: 1rem;
     }
-    
+
     .lightbox-next {
         right: 1rem;
     }
-    
+
     .lightbox-info {
         bottom: 1rem;
         padding: 0.75rem 1rem;
         max-width: 300px;
         font-size: 0.9rem;
     }
-    
+
     .lightbox-title {
         font-size: 0.9rem;
     }
-    
+
     .lightbox-meta {
         font-size: 0.75rem;
     }
-    
+
     /* Show navigation buttons on mobile */
     .lightbox-nav {
         opacity: 1;
@@ -4388,13 +4384,13 @@ select:focus {
     .lightbox-container {
         padding: 0.5rem;
     }
-    
+
     .lightbox-image-wrapper {
         max-width: 98vw;
         max-height: 75vh;
         border-radius: 12px;
     }
-    
+
     .lightbox-close {
         top: 0.5rem;
         right: 0.5rem;
@@ -4402,26 +4398,26 @@ select:focus {
         height: 40px;
         font-size: 1rem;
     }
-    
+
     .lightbox-counter {
         top: 0.5rem;
         left: 0.5rem;
     }
-    
+
     .lightbox-nav {
         width: 45px;
         height: 45px;
         font-size: 1.1rem;
     }
-    
+
     .lightbox-prev {
         left: 0.5rem;
     }
-    
+
     .lightbox-next {
         right: 0.5rem;
     }
-    
+
     .lightbox-info {
         bottom: 0.5rem;
         font-size: 0.8rem;
@@ -4440,7 +4436,7 @@ select:focus {
     .lightbox-overlay {
         background: rgba(0, 0, 0, 0.95);
     }
-    
+
     .lightbox-close,
     .lightbox-nav,
     .lightbox-counter,
@@ -4462,7 +4458,7 @@ select:focus {
         transition: none !important;
         animation: none !important;
     }
-    
+
     .lightbox-spinner {
         animation: none;
         border-top: 3px solid rgba(102, 126, 234, 0.8);

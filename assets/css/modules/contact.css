@@ -20,15 +20,22 @@
 }
 
 .contact::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: 
-        radial-gradient(circle at 20% 80%, rgba(102, 126, 234, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(118, 75, 162, 0.1) 0%, transparent 50%);
+    background: radial-gradient(
+            circle at 20% 80%,
+            rgba(102, 126, 234, 0.1) 0%,
+            transparent 50%
+        ),
+        radial-gradient(
+            circle at 80% 20%,
+            rgba(118, 75, 162, 0.1) 0%,
+            transparent 50%
+        );
     pointer-events: none;
 }
 
@@ -99,7 +106,9 @@
     font-size: 24px;
     color: white;
 }
-
+.contact-details {
+    width: 100%;
+}
 .contact-details h4 {
     color: white;
     font-size: 20px;
@@ -133,6 +142,7 @@
     background: rgba(255, 255, 255, 0.05);
     border-radius: 20px;
     padding: 40px;
+    width: 100%;
     border: 1px solid rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(10px);
 }
@@ -164,7 +174,7 @@
     background: rgba(255, 255, 255, 0.05);
     color: white;
     font-size: 16px;
-    font-family: 'Inter', sans-serif;
+    font-family: "Inter", sans-serif;
     transition: all 0.3s ease;
     backdrop-filter: blur(10px);
 }
@@ -197,7 +207,7 @@
     overflow: hidden;
     border: none;
     cursor: pointer;
-    font-family: 'Inter', sans-serif;
+    font-family: "Inter", sans-serif;
     margin-top: 16px;
 }
 
@@ -264,42 +274,44 @@
     .contact {
         padding: 80px 0;
     }
-    
+
     .contact-content {
         flex-direction: column;
         gap: 40px;
+        align-items: center;
+        justify-content: center;
     }
-    
+
     .contact-info {
         gap: 24px;
     }
-    
+
     .contact-item {
         padding: 24px;
         gap: 16px;
     }
-    
+
     .contact-icon {
         width: 50px;
         height: 50px;
     }
-    
+
     .contact-icon i {
         font-size: 20px;
     }
-    
+
     .contact-details h4 {
         font-size: 18px;
     }
-    
+
     .contact-form-container {
         padding: 30px 24px;
     }
-    
+
     .contact-form {
         gap: 20px;
     }
-    
+
     .form-group input,
     .form-group textarea {
         padding: 14px 16px;
@@ -311,21 +323,21 @@
     .contact {
         padding: 60px 0;
     }
-    
+
     .contact-item {
         flex-direction: column;
         text-align: center;
         padding: 20px;
     }
-    
+
     .contact-icon {
         align-self: center;
     }
-    
+
     .contact-form-container {
         padding: 24px 20px;
     }
-    
+
     .form-group input,
     .form-group textarea {
         padding: 12px 16px;
@@ -349,7 +361,7 @@
     .form-group textarea {
         transition: none;
     }
-    
+
     .contact-item:hover {
         transform: none;
     }
