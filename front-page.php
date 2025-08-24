@@ -343,6 +343,13 @@ get_header(); ?>
                         <label for="contact-message"><?php echo esc_html(cloudsync_get_customizer_value('cloudsync_form_message_label', 'Message')); ?></label>
                         <textarea id="contact-message" name="message" rows="5" required></textarea>
                     </div>
+                    
+                    <!-- Honeypot field for spam prevention (hidden from users) -->
+                    <div class="honeypot-field" style="position: absolute; left: -9999px; opacity: 0; height: 0; overflow: hidden;">
+                        <label for="website_url">Website URL (leave blank)</label>
+                        <input type="text" id="website_url" name="website_url" tabindex="-1" autocomplete="off">
+                    </div>
+                    
                     <button type="submit" class="cta-btn form-submit-btn">
                         <span class="btn-text"><?php echo esc_html(cloudsync_get_customizer_value('cloudsync_form_submit_text', 'Send Message')); ?></span>
                         <span class="btn-loading" style="display: none;">

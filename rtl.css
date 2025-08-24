@@ -1,0 +1,363 @@
+/*
+Theme Name: CloudSync - RTL Support
+Description: Right-to-left language support for CloudSync theme
+Version: 1.0.0
+Text Domain: cloudsync
+*/
+
+/* ==========================================================================
+   RTL (Right-to-Left) Language Support
+   ========================================================================== */
+
+/* Body and base direction */
+body.rtl {
+    direction: rtl;
+    text-align: right;
+}
+
+/* Navigation adjustments */
+.rtl .site-navigation {
+    text-align: right;
+}
+
+.rtl .main-navigation ul {
+    text-align: right;
+}
+
+.rtl .main-navigation ul li {
+    float: right;
+}
+
+.rtl .main-navigation ul li:last-child {
+    margin-right: 0;
+    margin-left: 40px;
+}
+
+/* Hero section adjustments */
+.rtl .hero-content {
+    text-align: right;
+}
+
+.rtl .hero-buttons {
+    justify-content: flex-end;
+}
+
+.rtl .hero-buttons .btn:first-child {
+    margin-right: 0;
+    margin-left: 20px;
+}
+
+.rtl .hero-floating-cards {
+    right: auto;
+    left: 0;
+}
+
+.rtl .floating-card:nth-child(1) {
+    right: auto;
+    left: 0;
+}
+
+.rtl .floating-card:nth-child(2) {
+    right: auto;
+    left: 100px;
+}
+
+.rtl .floating-card:nth-child(3) {
+    right: auto;
+    left: -50px;
+}
+
+/* Features section */
+.rtl .features-grid {
+    direction: rtl;
+}
+
+.rtl .feature-card {
+    text-align: right;
+}
+
+.rtl .feature-icon {
+    margin-right: 0;
+    margin-left: 20px;
+}
+
+/* How it works section */
+.rtl .steps-container {
+    direction: rtl;
+}
+
+.rtl .step-item {
+    text-align: right;
+}
+
+.rtl .step-number {
+    right: auto;
+    left: 0;
+}
+
+.rtl .step-content {
+    padding-right: 0;
+    padding-left: 80px;
+}
+
+/* Pricing section */
+.rtl .pricing-grid {
+    direction: rtl;
+}
+
+.rtl .pricing-card {
+    text-align: right;
+}
+
+.rtl .pricing-features li::before {
+    right: auto;
+    left: 0;
+    margin-right: 0;
+    margin-left: 10px;
+}
+
+/* Contact section */
+.rtl .contact-content {
+    direction: rtl;
+}
+
+.rtl .contact-info {
+    text-align: right;
+}
+
+.rtl .contact-info-item {
+    text-align: right;
+}
+
+.rtl .contact-info-item i {
+    margin-right: 0;
+    margin-left: 15px;
+    float: right;
+}
+
+.rtl .contact-form {
+    text-align: right;
+}
+
+.rtl .contact-form label {
+    text-align: right;
+}
+
+.rtl .contact-form input,
+.rtl .contact-form textarea {
+    text-align: right;
+}
+
+/* Footer adjustments */
+.rtl .footer-content {
+    direction: rtl;
+}
+
+.rtl .footer-section {
+    text-align: right;
+}
+
+.rtl .footer-social a {
+    margin-right: 0;
+    margin-left: 15px;
+}
+
+.rtl .footer-social a:last-child {
+    margin-left: 0;
+}
+
+/* Form elements */
+.rtl input[type="text"],
+.rtl input[type="email"],
+.rtl input[type="url"],
+.rtl input[type="password"],
+.rtl input[type="search"],
+.rtl input[type="number"],
+.rtl input[type="tel"],
+.rtl input[type="range"],
+.rtl input[type="date"],
+.rtl input[type="month"],
+.rtl input[type="week"],
+.rtl input[type="time"],
+.rtl input[type="datetime"],
+.rtl input[type="datetime-local"],
+.rtl input[type="color"],
+.rtl textarea,
+.rtl select {
+    text-align: right;
+}
+
+/* Buttons alignment */
+.rtl .btn-group {
+    text-align: right;
+}
+
+.rtl .btn-group .btn {
+    margin-right: 0;
+    margin-left: 10px;
+}
+
+.rtl .btn-group .btn:first-child {
+    margin-left: 0;
+}
+
+/* Lists */
+.rtl ul,
+.rtl ol {
+    padding-right: 20px;
+    padding-left: 0;
+}
+
+.rtl li {
+    text-align: right;
+}
+
+/* Blockquotes */
+.rtl blockquote {
+    text-align: right;
+    border-right: 4px solid #667eea;
+    border-left: none;
+    padding-right: 20px;
+    padding-left: 0;
+}
+
+/* Images and media */
+.rtl .wp-caption {
+    text-align: right;
+}
+
+.rtl .wp-caption-text {
+    text-align: right;
+}
+
+.rtl .alignleft {
+    float: right;
+    margin-right: 0;
+    margin-left: 20px;
+}
+
+.rtl .alignright {
+    float: left;
+    margin-left: 0;
+    margin-right: 20px;
+}
+
+/* Tables */
+.rtl table {
+    text-align: right;
+}
+
+.rtl th,
+.rtl td {
+    text-align: right;
+}
+
+/* Gutenberg blocks adjustments */
+.rtl .wp-block-columns {
+    direction: rtl;
+}
+
+.rtl .wp-block-column {
+    text-align: right;
+}
+
+.rtl .wp-block-quote {
+    text-align: right;
+    border-right: 4px solid #667eea;
+    border-left: none;
+    padding-right: 20px;
+    padding-left: 0;
+}
+
+.rtl .wp-block-pullquote {
+    text-align: right;
+}
+
+.rtl .wp-block-image .wp-element-caption {
+    text-align: right;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .rtl .hero-buttons {
+        justify-content: center;
+    }
+    
+    .rtl .contact-content {
+        flex-direction: column;
+    }
+    
+    .rtl .contact-info,
+    .rtl .contact-form {
+        text-align: center;
+    }
+    
+    .rtl .contact-info-item {
+        text-align: center;
+    }
+    
+    .rtl .contact-info-item i {
+        float: none;
+        margin-left: 0;
+        margin-right: 0;
+    }
+    
+    .rtl .step-content {
+        padding-left: 0;
+        text-align: center;
+    }
+    
+    .rtl .step-number {
+        position: static;
+        margin: 0 auto 20px;
+    }
+}
+
+/* Custom logo RTL adjustments */
+.rtl .custom-logo-link {
+    float: right;
+}
+
+.rtl .site-branding {
+    text-align: right;
+}
+
+/* Menu toggle for mobile */
+.rtl .menu-toggle {
+    float: left;
+}
+
+/* Search form */
+.rtl .search-form {
+    direction: rtl;
+}
+
+.rtl .search-field {
+    text-align: right;
+}
+
+/* Comments (if enabled) */
+.rtl .comment-list {
+    text-align: right;
+}
+
+.rtl .comment-body {
+    text-align: right;
+}
+
+.rtl .comment-meta {
+    text-align: right;
+}
+
+.rtl .comment-content {
+    text-align: right;
+}
+
+.rtl .reply {
+    text-align: left;
+}
+
+/* WordPress admin bar adjustments */
+.rtl #wpadminbar {
+    direction: rtl;
+}
