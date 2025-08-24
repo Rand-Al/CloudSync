@@ -279,4 +279,81 @@ get_header(); ?>
     </div>
 </section>
 
+<!-- Contact Section -->
+<section class="contact" id="contact">
+    <div class="container">
+        <div class="section-header fade-in">
+            <h2>
+                <?php echo esc_html(cloudsync_get_customizer_value('cloudsync_contact_title', 'Get Started Today')); ?>
+            </h2>
+            <p>
+                <?php echo esc_html(cloudsync_get_customizer_value('cloudsync_contact_description', 'Ready to transform your workflow? Get in touch with our team and discover how CloudSync can revolutionize your business.')); ?>
+            </p>
+        </div>
+        <div class="contact-content">
+            <div class="contact-info fade-in">
+                <div class="contact-item">
+                    <div class="contact-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div class="contact-details">
+                        <h4><?php echo esc_html(cloudsync_get_customizer_value('cloudsync_contact_email_label', 'Email Us')); ?></h4>
+                        <p><a href="mailto:<?php echo esc_attr(cloudsync_get_customizer_value('cloudsync_contact_email', 'hello@cloudsync.com')); ?>">
+                            <?php echo esc_html(cloudsync_get_customizer_value('cloudsync_contact_email', 'hello@cloudsync.com')); ?>
+                        </a></p>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-icon">
+                        <i class="fas fa-phone"></i>
+                    </div>
+                    <div class="contact-details">
+                        <h4><?php echo esc_html(cloudsync_get_customizer_value('cloudsync_contact_phone_label', 'Call Us')); ?></h4>
+                        <p><a href="tel:<?php echo esc_attr(str_replace(' ', '', cloudsync_get_customizer_value('cloudsync_contact_phone', '+1 (555) 123-4567'))); ?>">
+                            <?php echo esc_html(cloudsync_get_customizer_value('cloudsync_contact_phone', '+1 (555) 123-4567')); ?>
+                        </a></p>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <div class="contact-details">
+                        <h4><?php echo esc_html(cloudsync_get_customizer_value('cloudsync_contact_address_label', 'Visit Us')); ?></h4>
+                        <p><?php echo esc_html(cloudsync_get_customizer_value('cloudsync_contact_address', '123 Tech Street, San Francisco, CA 94105')); ?></p>
+                    </div>
+                </div>
+            </div>
+            <div class="contact-form-container fade-in">
+                <form class="contact-form" id="cloudsync-contact-form" method="post">
+                    <?php wp_nonce_field('cloudsync_contact_form', 'cloudsync_contact_nonce'); ?>
+                    <div class="form-group">
+                        <label for="contact-name"><?php echo esc_html(cloudsync_get_customizer_value('cloudsync_form_name_label', 'Your Name')); ?></label>
+                        <input type="text" id="contact-name" name="contact_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="contact-email"><?php echo esc_html(cloudsync_get_customizer_value('cloudsync_form_email_label', 'Email Address')); ?></label>
+                        <input type="email" id="contact-email" name="contact_email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="contact-company"><?php echo esc_html(cloudsync_get_customizer_value('cloudsync_form_company_label', 'Company (Optional)')); ?></label>
+                        <input type="text" id="contact-company" name="contact_company">
+                    </div>
+                    <div class="form-group">
+                        <label for="contact-message"><?php echo esc_html(cloudsync_get_customizer_value('cloudsync_form_message_label', 'Message')); ?></label>
+                        <textarea id="contact-message" name="contact_message" rows="5" required></textarea>
+                    </div>
+                    <button type="submit" class="cta-btn form-submit-btn">
+                        <span class="btn-text"><?php echo esc_html(cloudsync_get_customizer_value('cloudsync_form_submit_text', 'Send Message')); ?></span>
+                        <span class="btn-loading" style="display: none;">
+                            <i class="fas fa-spinner fa-spin"></i> <?php echo esc_html(cloudsync_get_customizer_value('cloudsync_form_loading_text', 'Sending...')); ?>
+                        </span>
+                    </button>
+                    <div class="form-response" id="form-response"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
 <?php get_footer(); ?>

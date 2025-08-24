@@ -218,11 +218,18 @@ function cloudsync_scripts() {
         cloudsync_get_theme_version()
     );
 
+    wp_enqueue_style(
+        'cloudsync-contact',
+        get_template_directory_uri() . '/assets/css/modules/contact.css',
+        array('cloudsync-base'),
+        cloudsync_get_theme_version()
+    );
+
     // Main theme stylesheet (contains sections-specific styles)
     wp_enqueue_style(
         'cloudsync-style',                    // Unique handle for this stylesheet
         get_stylesheet_uri(),                 // Path to style.css file
-        array('cloudsync-base', 'cloudsync-layout', 'cloudsync-components', 'cloudsync-gutenberg'), // Dependencies
+        array('cloudsync-base', 'cloudsync-layout', 'cloudsync-components', 'cloudsync-gutenberg', 'cloudsync-contact'), // Dependencies
         cloudsync_get_theme_version()        // Version number for cache busting
     );
 

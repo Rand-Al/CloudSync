@@ -2448,4 +2448,141 @@
             debugLog(`ERROR: Could not find footer ${platform} link element`);
         }
     }
+
+    /* =============================================================================
+       CONTACT SECTION LIVE PREVIEW
+       ============================================================================= */
+
+    // Contact Section Title
+    wp.customize('cloudsync_contact_title', function(value) {
+        value.bind(function(newValue) {
+            debugLog("Updating contact title with:", newValue);
+            const titleElement = document.querySelector('.contact .section-header h2');
+            if (titleElement) {
+                titleElement.textContent = newValue;
+                debugLog("Contact title updated successfully");
+            } else {
+                debugLog("ERROR: Could not find contact title element");
+            }
+        });
+    });
+
+    // Contact Section Description
+    wp.customize('cloudsync_contact_description', function(value) {
+        value.bind(function(newValue) {
+            debugLog("Updating contact description with:", newValue);
+            const descElement = document.querySelector('.contact .section-header p');
+            if (descElement) {
+                descElement.textContent = newValue;
+                debugLog("Contact description updated successfully");
+            } else {
+                debugLog("ERROR: Could not find contact description element");
+            }
+        });
+    });
+
+    // Contact Email
+    wp.customize('cloudsync_contact_email', function(value) {
+        value.bind(function(newValue) {
+            debugLog("Updating contact email with:", newValue);
+            const emailLink = document.querySelector('.contact-item a[href^="mailto:"]');
+            const emailText = document.querySelector('.contact-item a[href^="mailto:"]');
+            if (emailLink && emailText) {
+                emailLink.href = 'mailto:' + newValue;
+                emailText.textContent = newValue;
+                debugLog("Contact email updated successfully");
+            } else {
+                debugLog("ERROR: Could not find contact email elements");
+            }
+        });
+    });
+
+    // Contact Phone
+    wp.customize('cloudsync_contact_phone', function(value) {
+        value.bind(function(newValue) {
+            debugLog("Updating contact phone with:", newValue);
+            const phoneLink = document.querySelector('.contact-item a[href^="tel:"]');
+            const phoneText = document.querySelector('.contact-item a[href^="tel:"]');
+            if (phoneLink && phoneText) {
+                phoneLink.href = 'tel:' + newValue.replace(/[^+\d]/g, '');
+                phoneText.textContent = newValue;
+                debugLog("Contact phone updated successfully");
+            } else {
+                debugLog("ERROR: Could not find contact phone elements");
+            }
+        });
+    });
+
+    // Contact Address
+    wp.customize('cloudsync_contact_address', function(value) {
+        value.bind(function(newValue) {
+            debugLog("Updating contact address with:", newValue);
+            const addressElement = document.querySelector('.contact-item:last-child .contact-details p');
+            if (addressElement) {
+                addressElement.textContent = newValue;
+                debugLog("Contact address updated successfully");
+            } else {
+                debugLog("ERROR: Could not find contact address element");
+            }
+        });
+    });
+
+    // Contact Info Labels
+    wp.customize('cloudsync_contact_email_label', function(value) {
+        value.bind(function(newValue) {
+            const label = document.querySelector('.contact-item:first-child .contact-details h4');
+            if (label) label.textContent = newValue;
+        });
+    });
+
+    wp.customize('cloudsync_contact_phone_label', function(value) {
+        value.bind(function(newValue) {
+            const label = document.querySelector('.contact-item:nth-child(2) .contact-details h4');
+            if (label) label.textContent = newValue;
+        });
+    });
+
+    wp.customize('cloudsync_contact_address_label', function(value) {
+        value.bind(function(newValue) {
+            const label = document.querySelector('.contact-item:last-child .contact-details h4');
+            if (label) label.textContent = newValue;
+        });
+    });
+
+    // Form Field Labels
+    wp.customize('cloudsync_form_name_label', function(value) {
+        value.bind(function(newValue) {
+            const label = document.querySelector('label[for="contact-name"]');
+            if (label) label.textContent = newValue;
+        });
+    });
+
+    wp.customize('cloudsync_form_email_label', function(value) {
+        value.bind(function(newValue) {
+            const label = document.querySelector('label[for="contact-email"]');
+            if (label) label.textContent = newValue;
+        });
+    });
+
+    wp.customize('cloudsync_form_company_label', function(value) {
+        value.bind(function(newValue) {
+            const label = document.querySelector('label[for="contact-company"]');
+            if (label) label.textContent = newValue;
+        });
+    });
+
+    wp.customize('cloudsync_form_message_label', function(value) {
+        value.bind(function(newValue) {
+            const label = document.querySelector('label[for="contact-message"]');
+            if (label) label.textContent = newValue;
+        });
+    });
+
+    wp.customize('cloudsync_form_submit_text', function(value) {
+        value.bind(function(newValue) {
+            const submitText = document.querySelector('.form-submit-btn .btn-text');
+            if (submitText) submitText.textContent = newValue;
+        });
+    });
+
 })();
