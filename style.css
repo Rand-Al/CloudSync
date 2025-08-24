@@ -196,6 +196,11 @@ a:focus {
 .entry-content h1 {
     margin-top: 0;
 }
+@media (max-width: 486px) {
+    .entry-content h1 {
+        font-size: 26px;
+    }
+}
 /* 3. WordPress Core Compatibility
    ========================================================================== */
 
@@ -546,9 +551,14 @@ select:focus {
    ========================================================================== */
 
 .hero {
+    padding-bottom: 100px;
     padding-top: 100px; /* Account for fixed header */
 }
-
+@media (max-width: 768px) {
+    .hero {
+        padding-bottom: 50px;
+    }
+}
 .hero-content {
     display: grid;
     grid-template-columns: 1fr 1fr;
