@@ -422,3 +422,4 @@ add_action('wp_ajax_nopriv_cloudsync_contact_form', 'cloudsync_handle_contact_fo
 // Include additional theme functionality files
 require_once get_template_directory() . '/inc/template-functions.php';
 require_once get_template_directory() . '/inc/customizer.php';
+require_once get_template_directory() . '/inc/seo.php';
