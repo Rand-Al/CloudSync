@@ -1,0 +1,87 @@
+CloudSync Theme - Complete Setup Guide
+Transform your WordPress site into a professional SaaS landing page in under 15 minutes
+
+What You'll Achieve
+By following this guide, your website will display a complete, professional landing page with hero section, features showcase, pricing plans, and contact form - exactly like our demo site. All content will be fully customizable through the WordPress Customizer interface.
+
+Before You Begin
+Ensure you have a fresh WordPress installation (version 5.0 or higher) with administrator access. If you're replacing an existing theme, we recommend backing up your site first using any backup plugin or your hosting provider's backup feature.
+
+Step 1: Install and Activate the CloudSync Theme
+Navigate to your WordPress admin dashboard and locate the Appearance menu on the left sidebar. Click on "Themes" to access your theme management area.
+Click the "Add New" button at the top of the page, then choose "Upload Theme" option. Click "Choose File" to select the CloudSync theme ZIP file you downloaded.
+WordPress will upload and install the theme automatically. Once installation completes, click "Activate" to make CloudSync your active theme.
+Important Note: Your site will immediately switch to CloudSync, though it won't look complete yet - that's perfectly normal and expected.
+
+Step 2: Import Demo Content Pages
+This step creates the essential pages your landing page needs, including Privacy Policy and Terms of Service.
+Navigation Path: Dashboard → Tools → Import
+
+Select "WordPress" from the import options (you may need to install the WordPress importer plugin first if prompted)
+Click "Choose File" and select the "demo-content.xml" file from your CloudSync theme folder
+Click "Upload file and import" to begin the process
+When asked about importing user accounts, you can safely skip this step by leaving the user fields empty
+
+The import process typically takes 30-60 seconds. Once complete, you'll see a success message confirming that pages were imported successfully.
+
+Step 3: Configure WordPress Settings
+This crucial step ensures your homepage displays correctly as a landing page rather than a blog.
+Navigation Path: Dashboard → Settings → Reading
+
+Under "Your homepage displays," select "A static page" instead of "Your latest posts"
+In the "Homepage" dropdown, select "Home" (this is the landing page imported in Step 2)
+Leave "Posts page" empty since CloudSync is designed as a landing page theme
+Click "Save Changes" to apply these settings
+
+Your homepage will now display the CloudSync landing page template.
+
+Step 4: Import Customizer Settings (The Magic Step)
+This step transforms your basic page structure into a beautiful, professionally designed landing page with compelling content.
+First, install the required plugin:
+Navigation Path: Dashboard → Plugins → Add New
+
+Search for "Customizer Export/Import" plugin by The Beaver Builder Team
+Install and activate this free, trusted plugin
+
+Then, import your settings:
+Navigation Path: Dashboard → Appearance → Customize
+
+Look for the new "Export/Import" section in the Customizer
+Click "Export/Import," then select the "Import" tab
+Click "Choose File" and select the "customizer-settings.json" file from your CloudSync theme folder
+Click "Import" to begin the process (takes 10-20 seconds)
+After import completes, click "Publish" to save all changes
+
+Visit your website's homepage now - you'll see a complete, professional SaaS landing page that looks exactly like our demo!
+
+Step 5: Customize with Your Content
+Your landing page is now fully functional, but contains demo content that should be replaced with your actual business information.
+Navigation Path: Dashboard → Appearance → Customize → CloudSync Theme Options
+Hero Section: Change the main headline, description, and button text. Click any field, type your new content, and see it update in real-time.
+Features Section: Contains six customizable feature cards. Update icons using FontAwesome class names (like "fas fa-chart-line"), change titles to match your benefits, and rewrite descriptions for your value proposition.
+Pricing Section: Adjust plan names, prices, and feature lists to match your offerings. Update button links to point to your signup or contact pages.
+Contact Section: Add your real business information, including email, phone, and address.
+Pro Tip: Focus on benefits rather than features, use concrete numbers when possible, and ensure your unique value proposition is clear throughout.
+
+Step 6: Final Touches and Testing
+Content Review: Navigate through your entire site to ensure everything displays correctly. Test all buttons and links to confirm they point to the right destinations.
+Contact Form: The contact form works automatically, sending messages to your WordPress admin email address.
+Images: Consider replacing demo images with your own professional photos through Media Library, then selecting them in the Customizer.
+Mobile Testing: Test your site on mobile devices or use your browser's developer tools to simulate mobile viewing. CloudSync is fully responsive.
+
+Troubleshooting Common Issues
+Homepage not showing landing page design?
+Double-check Step 3 to ensure you've set "A static page" as your homepage display option and selected "Home" as your homepage.
+Some customizer settings didn't import?
+Try the import process again - occasionally server timeouts can interrupt the process. The import is safe to repeat multiple times.
+Still seeing placeholder text?
+This indicates the customizer import was incomplete. Return to Step 4 and ensure the JSON file imported successfully.
+Need additional help?
+WordPress.org forums and your hosting provider's support team are excellent resources for technical assistance.
+
+You're Ready for Success!
+Congratulations! You now have a professional SaaS landing page that's optimized for conversions and ready to grow your business.
+Remember that great landing pages are constantly improved - monitor your visitor behavior and test different headlines, descriptions, and calls-to-action to maximize your results.
+Your CloudSync theme includes lifetime updates and professional support, ensuring your landing page stays modern and effective as your business grows.
+
+Questions or need help? Contact our support team at support@cloudsync-theme.com
