@@ -2550,7 +2550,7 @@ select:focus {
     transform: translateY(-50%) translateX(0);
 }
 .advanced-toc.collapsed .toc-header {
-    padding-left: 5px;
+    padding-left: 13px;
 }
 .advanced-toc.collapsed .toc-title span,
 .advanced-toc.collapsed .toc-navigation,
