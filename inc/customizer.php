@@ -93,6 +93,7 @@ require_once get_template_directory() . '/inc/customizer/features-section.php';
 //  4. HOW IT WORKS SECTION SETTINGS
 //============================================================================= */
 
+require_once get_template_directory() . '/inc/customizer/how-it-works-section.php';
 
 //=============================================================================
 //4. PRICING SECTION SETTINGS 

@@ -57,7 +57,7 @@
 
 
                 <!-- CTA Button -->
-                <a href="#" class="cta-btn header-cta">
+                <a href="#contact" class="cta-btn header-cta">
                     <?php esc_html_e('Get Started', 'cloudsync'); ?>
                 </a>
 
