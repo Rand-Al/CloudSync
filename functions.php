@@ -331,4 +331,4 @@ require_once get_template_directory() . '/inc/template-functions.php';
 require_once get_template_directory() . '/inc/customizer.php';
 require_once get_template_directory() . '/inc/seo.php';
 require_once get_template_directory() . '/inc/security.php';
-require_once get_template_directory() . '/inc/form-handler.php';
+require_once get_template_directory() . '/inc/forms.php';
