@@ -313,19 +313,42 @@ get_header(); ?>
                     <?php wp_nonce_field('cloudsync_contact_nonce', 'cloudsync_contact_nonce'); ?>
                     <div class="form-group">
                         <label for="contact-name"><?php echo esc_html(cloudsync_get_customizer_value('cloudsync_form_name_label', 'Your Name')); ?></label>
-                        <input type="text" id="contact-name" name="name" required>
+                        <input
+                            type="text"
+                            placeholder="<?php echo esc_html(cloudsync_get_customizer_value('cloudsync_form_name_placeholder', ' ')); ?>" id="contact-name"
+                            name="name"
+                            required>
                     </div>
                     <div class="form-group">
                         <label for="contact-email"><?php echo esc_html(cloudsync_get_customizer_value('cloudsync_form_email_label', 'Email Address')); ?></label>
-                        <input type="email" id="contact-email" name="email" required>
+                        <input
+                            type="email"
+                            placeholder="<?php echo esc_html(cloudsync_get_customizer_value('cloudsync_form_email_placeholder', ' ')); ?>"
+                            id="contact-email"
+                            name="email"
+                            required>
                     </div>
                     <div class="form-group">
-                        <label for="contact-subject"><?php echo esc_html(cloudsync_get_customizer_value('cloudsync_form_company_label', 'Subject')); ?></label>
-                        <input type="text" id="contact-subject" name="subject" required>
+                        <label for="contact-subject">
+                            <?php echo esc_html(cloudsync_get_customizer_value('cloudsync_form_company_label', 'Subject')); ?>
+                        </label>
+                        <input
+                            type="text"
+                            placeholder="<?php echo esc_html(cloudsync_get_customizer_value('cloudsync_form_company_placeholder', ' ')); ?>"
+                            id="contact-subject"
+                            name="subject"
+                            required>
                     </div>
                     <div class="form-group">
-                        <label for="contact-message"><?php echo esc_html(cloudsync_get_customizer_value('cloudsync_form_message_label', 'Message')); ?></label>
-                        <textarea id="contact-message" name="message" rows="5" required></textarea>
+                        <label for="contact-message">
+                            <?php echo esc_html(cloudsync_get_customizer_value('cloudsync_form_message_label', 'Message')); ?>
+                        </label>
+                        <textarea
+                            id="contact-message"
+                            name="message"
+                            rows="5"
+                            placeholder="<?php echo esc_html(cloudsync_get_customizer_value('cloudsync_form_message_placeholder', ' ')); ?>"
+                            required></textarea>
                     </div>
 
                     <!-- Honeypot field for spam prevention (hidden from users) -->
@@ -335,7 +358,9 @@ get_header(); ?>
                     </div>
 
                     <button type="submit" class="cta-btn form-submit-btn">
-                        <span class="btn-text"><?php echo esc_html(cloudsync_get_customizer_value('cloudsync_form_submit_text', 'Send Message')); ?></span>
+                        <span class="btn-text">
+                            <?php echo esc_html(cloudsync_get_customizer_value('cloudsync_form_submit_text', 'Send Message')); ?>
+                        </span>
                         <span class="btn-loading" style="display: none;">
                             <i class="fas fa-spinner fa-spin"></i> <?php echo esc_html(cloudsync_get_customizer_value('cloudsync_form_loading_text', 'Sending...')); ?>
                         </span>

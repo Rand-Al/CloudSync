@@ -336,3 +336,24 @@ function truncateWords($text, $wordLimit = 5) {
 
     return $text;
 }
+
+/**
+ * Get theme version for cache busting
+ * 
+ * This function retrieves the current theme version from style.css header
+ * and uses it for enqueuing stylesheets and scripts. This ensures that
+ * when users update the theme, browsers will load fresh files instead
+ * of serving cached versions that might be outdated.
+ * 
+ * @since 1.0.0
+ * @return string Theme version number
+ */
+function cloudsync_get_theme_version() {
+
+    // Get current theme object
+    $theme = wp_get_theme();
+
+    // Return version number from style.css header
+    // Falls back to current timestamp if version is not found
+    return $theme->get('Version') ?: time();
+}

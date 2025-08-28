@@ -61,6 +61,8 @@
         initializePricingPreview();
         // Initialize CTA section live preview
         initializeCTAPreview();
+        // Initialize Contact section live preview
+        initializeContactPreview();
         // Initialize Footer section live preview
         initializeFooterPreview();
     });
@@ -586,6 +588,127 @@
     }
 
     /**
+     * Initialize live preview for contact section elements
+     *
+     * This function sets up real-time preview for the contact section fields
+     * Each field gets its own listener that updates the corresponding
+     * DOM element when the user changes the value in Customizer.
+     */
+    function initializeContactPreview() {
+        // Contact Section Title
+        wp.customize("cloudsync_contact_title", function (value) {
+            value.bind(function (newValue) {
+                updateContactTitle(newValue);
+            });
+        });
+
+        // Contact Section Description
+        wp.customize("cloudsync_contact_description", function (value) {
+            value.bind(function (newValue) {
+                updateContactDescription(newValue);
+            });
+        });
+
+        // Contact Email
+        wp.customize("cloudsync_contact_email", function (value) {
+            value.bind(function (newValue) {
+                updateContactItem(0, "content", newValue);
+            });
+        });
+
+        // Contact Phone
+        wp.customize("cloudsync_contact_phone", function (value) {
+            value.bind(function (newValue) {
+                updateContactItem(1, "content", newValue);
+            });
+        });
+
+        // Contact Address
+        wp.customize("cloudsync_contact_address", function (value) {
+            value.bind(function (newValue) {
+                updateContactItem(2, "content", newValue);
+            });
+        });
+
+        // Contact Info Labels
+        wp.customize("cloudsync_contact_email_label", function (value) {
+            value.bind(function (newValue) {
+                updateContactItem(0, "label", newValue);
+            });
+        });
+
+        wp.customize("cloudsync_contact_phone_label", function (value) {
+            value.bind(function (newValue) {
+                updateContactItem(1, "label", newValue);
+            });
+        });
+
+        wp.customize("cloudsync_contact_address_label", function (value) {
+            value.bind(function (newValue) {
+                updateContactItem(2, "label", newValue);
+            });
+        });
+
+        // Form Field Labels
+        wp.customize("cloudsync_form_name_label", function (value) {
+            value.bind(function (newValue) {
+                updateFormField("contact-name", "label", newValue);
+            });
+        });
+
+        wp.customize("cloudsync_form_email_label", function (value) {
+            value.bind(function (newValue) {
+                updateFormField("contact-email", "label", newValue);
+            });
+        });
+
+        wp.customize("cloudsync_form_company_label", function (value) {
+            value.bind(function (newValue) {
+                updateFormField("contact-subject", "label", newValue);
+            });
+        });
+
+        wp.customize("cloudsync_form_message_label", function (value) {
+            value.bind(function (newValue) {
+                updateFormField("contact-message", "label", newValue);
+            });
+        });
+
+        // Form Field Placeholders
+        wp.customize("cloudsync_form_name_placeholder", function (value) {
+            value.bind(function (newValue) {
+                updateFormField("contact-name", "placeholder", newValue);
+            });
+        });
+
+        wp.customize("cloudsync_form_email_placeholder", function (value) {
+            value.bind(function (newValue) {
+                updateFormField("contact-email", "placeholder", newValue);
+            });
+        });
+
+        wp.customize("cloudsync_form_company_placeholder", function (value) {
+            value.bind(function (newValue) {
+                updateFormField("contact-subject", "placeholder", newValue);
+            });
+        });
+
+        wp.customize("cloudsync_form_message_placeholder", function (value) {
+            value.bind(function (newValue) {
+                updateFormField("contact-message", "placeholder", newValue);
+            });
+        });
+
+        wp.customize("cloudsync_form_submit_text", function (value) {
+            value.bind(function (newValue) {
+                const submitText = document.querySelector(
+                    ".form-submit-btn .btn-text"
+                );
+                if (submitText) submitText.textContent = newValue;
+            });
+        });
+    }
+    /**
      * Initialize live preview for footer section elements
      *
      * This function sets up real-time preview for the footer section fields
@@ -638,25 +761,25 @@
         // Social media links live preview
         wp.customize("cloudsync_footer_twitter_url", function (value) {
             value.bind(function (newValue) {
-                updateFooterSocialLink('twitter', newValue);
+                updateFooterSocialLink("twitter", newValue);
             });
         });
 
         wp.customize("cloudsync_footer_linkedin_url", function (value) {
             value.bind(function (newValue) {
-                updateFooterSocialLink('linkedin', newValue);
+                updateFooterSocialLink("linkedin", newValue);
             });
         });
 
         wp.customize("cloudsync_footer_github_url", function (value) {
             value.bind(function (newValue) {
-                updateFooterSocialLink('github', newValue);
+                updateFooterSocialLink("github", newValue);
             });
         });
 
         wp.customize("cloudsync_footer_youtube_url", function (value) {
             value.bind(function (newValue) {
-                updateFooterSocialLink('youtube', newValue);
+                updateFooterSocialLink("youtube", newValue);
             });
         });
     }
@@ -2264,9 +2387,358 @@
         }
     }
 
+    /** =============================================================================
+        6) Helper functions to update Contact section
+       ============================================================================= */
+
+    /**
+     * Update Contact title in the preview
+     *
+     * This function finds the Contact title element and updates it
+     *
+     * @param {string} newTitle The new title text from Customizer
+     */
+    function updateContactTitle(newTitle) {
+        debugLog("Updating contact title with:", newTitle);
+        const titleElement = document.querySelector(
+            ".contact .section-header h2"
+        );
+        if (titleElement) {
+            titleElement.textContent = newTitle;
+            debugLog("Contact title updated successfully");
+        } else {
+            debugLog("ERROR: Could not find contact title element");
+        }
+    }
+    /**
+     * Update Contact description in the preview
+     *
+     * This function finds the Contact description paragraph and updates
+     * its content with the new text from Customizer.
+     *
+     * @param {string} newDescription The new description text from Customizer
+     */
+    function updateContactDescription(newDescription) {
+        debugLog("Updating contact description with:", newDescription);
+        const descElement = document.querySelector(
+            ".contact .section-header p"
+        );
+        if (descElement) {
+            descElement.textContent = newDescription;
+            debugLog("Contact description updated successfully");
+        } else {
+            debugLog("ERROR: Could not find contact description element");
+        }
+    }
+    /**
+    
+     * Universal function for updating contact item elements with comprehensive error handling
+     * Integrates with the theme's centralized debug logging system
+     *
+     * @param {number} contactIndex - Zero-based index (0-2) for the three contact items (email, phone, address)
+     * @param {string} elementType - Type of element to update ('icon', 'label', 'content')
+     * @param {string} newValue - New value for the element
+     * @returns {boolean} - Success status of the update operation
+     */
+    function updateContactItem(contactIndex, elementType, newValue) {
+        // Inner function that performs the actual DOM update
+        function performContactUpdate() {
+            // Validate contactIndex parameter before proceeding
+            if (
+                typeof contactIndex !== "number" ||
+                contactIndex < 0 ||
+                contactIndex > 2
+            ) {
+                debugLog("Invalid contact index provided. Expected: 0-2", {
+                    provided: contactIndex,
+                });
+                return false;
+            }
+
+            // Validate elementType parameter
+            if (
+                !elementType ||
+                typeof elementType !== "string" ||
+                !["icon", "label", "content"].includes(elementType)
+            ) {
+                debugLog(
+                    "Invalid element type provided. Expected: 'icon', 'label', or 'content'",
+                    {
+                        provided: elementType,
+                    }
+                );
+                return false;
+            }
+
+            // Validate newValue parameter to ensure it's a valid string
+            if (
+                !newValue ||
+                typeof newValue !== "string" ||
+                newValue.trim() === ""
+            ) {
+                debugLog("Invalid value provided", { value: newValue });
+                return false;
+            }
+
+            // Query all contact-item elements from the DOM
+            const contactItems = document.querySelectorAll(".contact-item");
+            // Check if we found any contact-item elements at all
+            if (contactItems.length === 0) {
+                debugLog("No contact-item elements found in DOM");
+                return false;
+            }
+
+            // Check if the requested contact item index exists in our NodeList
+            if (contactIndex >= contactItems.length) {
+                debugLog("Contact item index not found", {
+                    requested: contactIndex,
+                    available: contactItems.length,
+                });
+                return false;
+            }
+
+            // Get the specific contact item element we want to update
+            const targetContact = contactItems[contactIndex];
+
+            // Additional safety check for the target contact element
+            if (!targetContact) {
+                debugLog("Contact item element is null or undefined", {
+                    index: contactIndex,
+                });
+                return false;
+            }
+
+            let targetElement;
+            let cleanValue = newValue.trim();
+
+            // Find the appropriate element based on elementType
+            switch (elementType) {
+                case "icon":
+                    targetElement =
+                        targetContact.querySelector(".contact-icon i");
+                    if (!targetElement) {
+                        debugLog("Icon element not found in contact item", {
+                            contactIndex: contactIndex,
+                        });
+                        return false;
+                    }
+                    // For icons, we update the class attribute (FontAwesome classes)
+                    targetElement.className = cleanValue;
+                    break;
+
+                case "label":
+                    targetElement = targetContact.querySelector(
+                        ".contact-details h4"
+                    );
+                    if (!targetElement) {
+                        debugLog(
+                            "Label element (h4) not found in contact item",
+                            {
+                                contactIndex: contactIndex,
+                            }
+                        );
+                        return false;
+                    }
+                    targetElement.innerText = cleanValue;
+                    break;
+
+                case "content":
+                    targetElement =
+                        targetContact.querySelector(".contact-details p");
+                    if (!targetElement) {
+                        debugLog(
+                            "Content element (p) not found in contact item",
+                            {
+                                contactIndex: contactIndex,
+                            }
+                        );
+                        return false;
+                    }
+                    // For content, we might need to preserve link structure for email and phone
+                    const linkElement = targetElement.querySelector("a");
+                    if (linkElement) {
+                        // Update both link text and href for email/phone
+                        linkElement.innerText = cleanValue;
+                        if (contactIndex === 0) {
+                            // Email item
+                            linkElement.href = `mailto:${cleanValue}`;
+                        } else if (contactIndex === 1) {
+                            // Phone item
+                            linkElement.href = `tel:${cleanValue.replace(
+                                /\s/g,
+                                ""
+                            )}`;
+                        }
+                    } else {
+                        // No link, just update text content (address case)
+                        targetElement.innerText = cleanValue;
+                    }
+                    break;
+            }
+
+            // Log successful update for debugging purposes
+            debugLog("Successfully updated contact item element", {
+                contactIndex: contactIndex,
+                elementType: elementType,
+                newValue: cleanValue,
+            });
+
+            return true;
+        }
+
+        // Attempt immediate update first (most common success case)
+        if (performContactUpdate()) {
+            return true; // Success on first attempt, exit early
+        }
+
+        // If immediate update failed, the DOM might not be ready yet
+        debugLog(
+            "Immediate contact update failed, attempting delayed update...",
+            {
+                contactIndex: contactIndex,
+                elementType: elementType,
+            }
+        );
+
+        // Schedule a retry after a short delay to allow DOM to fully load
+        setTimeout(() => {
+            if (!performContactUpdate()) {
+                // If even the delayed attempt fails, log an error for debugging
+                debugLog("Failed to update contact item after delay", {
+                    contactIndex: contactIndex,
+                    elementType: elementType,
+                    newValue: newValue,
+                });
+            }
+        }, 500);
+
+        // Return false for immediate attempt (delayed attempt status is handled in callback)
+        return false;
+    }
+
+    /**
+     * Universal function for updating form field elements with comprehensive error handling
+     * Integrates with the theme's centralized debug logging system
+     *
+     * @param {string} fieldId - ID of the form field ('contact-name', 'contact-email', 'contact-company', 'contact-message')
+     * @param {string} elementType - Type of element to update ('label', 'placeholder')
+     * @param {string} newValue - New value for the element
+     * @returns {boolean} - Success status of the update operation
+     */
+    function updateFormField(fieldId, elementType, newValue) {
+        // Inner function that performs the actual DOM update
+        function performFormFieldUpdate() {
+            // Validate fieldId parameter
+            if (
+                !fieldId ||
+                typeof fieldId !== "string" ||
+                fieldId.trim() === ""
+            ) {
+                debugLog("Invalid field ID provided", {
+                    provided: fieldId,
+                });
+                return false;
+            }
+
+            // Validate elementType parameter
+            if (
+                !elementType ||
+                typeof elementType !== "string" ||
+                !["label", "placeholder"].includes(elementType)
+            ) {
+                debugLog(
+                    "Invalid element type provided. Expected: 'label' or 'placeholder'",
+                    {
+                        provided: elementType,
+                    }
+                );
+                return false;
+            }
+
+            // Validate newValue parameter to ensure it's a valid string
+            if (
+                !newValue ||
+                typeof newValue !== "string" ||
+                newValue.trim() === ""
+            ) {
+                debugLog("Invalid value provided", { value: newValue });
+                return false;
+            }
+
+            let targetElement;
+            let cleanValue = newValue.trim();
+            let cleanFieldId = fieldId.trim();
+
+            // Find the appropriate element based on elementType
+            switch (elementType) {
+                case "label":
+                    targetElement = document.querySelector(
+                        `label[for="${cleanFieldId}"]`
+                    );
+                    if (!targetElement) {
+                        debugLog("Label element not found for form field", {
+                            fieldId: cleanFieldId,
+                        });
+                        return false;
+                    }
+                    targetElement.textContent = cleanValue;
+                    break;
+
+                case "placeholder":
+                    targetElement = document.querySelector(`#${cleanFieldId}`);
+                    if (!targetElement) {
+                        debugLog("Form field element not found", {
+                            fieldId: cleanFieldId,
+                        });
+                        return false;
+                    }
+                    targetElement.placeholder = cleanValue;
+                    break;
+            }
+
+            // Log successful update for debugging purposes
+            debugLog("Successfully updated form field element", {
+                fieldId: cleanFieldId,
+                elementType: elementType,
+                newValue: cleanValue,
+            });
+
+            return true;
+        }
+
+        // Attempt immediate update first (most common success case)
+        if (performFormFieldUpdate()) {
+            return true; // Success on first attempt, exit early
+        }
+
+        // If immediate update failed, the DOM might not be ready yet
+        debugLog(
+            "Immediate form field update failed, attempting delayed update...",
+            {
+                fieldId: fieldId,
+                elementType: elementType,
+            }
+        );
+
+        // Schedule a retry after a short delay to allow DOM to fully load
+        setTimeout(() => {
+            if (!performFormFieldUpdate()) {
+                // If even the delayed attempt fails, log an error for debugging
+                debugLog("Failed to update form field after delay", {
+                    fieldId: fieldId,
+                    elementType: elementType,
+                    newValue: newValue,
+                });
+            }
+        }, 500);
+
+        // Return false for immediate attempt (delayed attempt status is handled in callback)
+        return false;
+    }
+
     /**
      * ==================================================
-     *    6) Helper functions to update Footer section
+     * 7) Helper functions to update Footer section
      * ==================================================
      * */
 
@@ -2278,20 +2750,27 @@
     function updateFooterCopyright(newText) {
         debugLog("Updating footer copyright text with:", newText);
 
-        const copyrightElement = document.querySelector(".footer-bottom .copyright");
+        const copyrightElement = document.querySelector(
+            ".footer-bottom .copyright"
+        );
 
         if (copyrightElement) {
             if (newText && newText.trim() !== "") {
                 copyrightElement.textContent = newText;
             } else {
                 // Reset to default if empty
-                const siteName = document.body.dataset.siteName || document.title || "Site Name";
+                const siteName =
+                    document.body.dataset.siteName ||
+                    document.title ||
+                    "Site Name";
                 const currentYear = new Date().getFullYear();
                 copyrightElement.textContent = `Copyright © ${currentYear} ${siteName}. All rights reserved.`;
             }
             debugLog("Footer copyright updated successfully");
         } else {
-            debugLog('ERROR: Could not find footer copyright element with selector ".footer-bottom .copyright"');
+            debugLog(
+                'ERROR: Could not find footer copyright element with selector ".footer-bottom .copyright"'
+            );
         }
     }
 
@@ -2303,18 +2782,20 @@
     function updateFooterCompanyAddress(newAddress) {
         debugLog("Updating footer company address with:", newAddress);
 
-        const addressContainer = document.querySelector('.footer-company-info .footer-contact-item:has(.fa-map-marker-alt) span');
+        const addressContainer = document.querySelector(
+            ".footer-company-info .footer-contact-item:has(.fa-map-marker-alt) span"
+        );
 
         if (addressContainer) {
             if (newAddress && newAddress.trim() !== "") {
-                addressContainer.innerHTML = newAddress.replace(/\n/g, '<br>');
-                addressContainer.parentElement.style.display = 'flex';
+                addressContainer.innerHTML = newAddress.replace(/\n/g, "<br>");
+                addressContainer.parentElement.style.display = "flex";
             } else {
-                addressContainer.parentElement.style.display = 'none';
+                addressContainer.parentElement.style.display = "none";
             }
             debugLog("Footer company address updated successfully");
         } else {
-            debugLog('ERROR: Could not find footer address element');
+            debugLog("ERROR: Could not find footer address element");
         }
     }
 
@@ -2326,22 +2807,24 @@
     function updateFooterCompanyPhone(newPhone) {
         debugLog("Updating footer company phone with:", newPhone);
 
-        const phoneContainer = document.querySelector('.footer-company-info .footer-contact-item:has(.fa-phone)');
+        const phoneContainer = document.querySelector(
+            ".footer-company-info .footer-contact-item:has(.fa-phone)"
+        );
 
         if (phoneContainer) {
             if (newPhone && newPhone.trim() !== "") {
-                const phoneLink = phoneContainer.querySelector('a');
+                const phoneLink = phoneContainer.querySelector("a");
                 if (phoneLink) {
                     phoneLink.textContent = newPhone;
-                    phoneLink.href = `tel:${newPhone.replace(/[^0-9+]/g, '')}`;
+                    phoneLink.href = `tel:${newPhone.replace(/[^0-9+]/g, "")}`;
                 }
-                phoneContainer.style.display = 'flex';
+                phoneContainer.style.display = "flex";
             } else {
-                phoneContainer.style.display = 'none';
+                phoneContainer.style.display = "none";
             }
             debugLog("Footer company phone updated successfully");
         } else {
-            debugLog('ERROR: Could not find footer phone element');
+            debugLog("ERROR: Could not find footer phone element");
         }
     }
 
@@ -2353,22 +2836,24 @@
     function updateFooterCompanyEmail(newEmail) {
         debugLog("Updating footer company email with:", newEmail);
 
-        const emailContainer = document.querySelector('.footer-company-info .footer-contact-item:has(.fa-envelope)');
+        const emailContainer = document.querySelector(
+            ".footer-company-info .footer-contact-item:has(.fa-envelope)"
+        );
 
         if (emailContainer) {
             if (newEmail && newEmail.trim() !== "") {
-                const emailLink = emailContainer.querySelector('a');
+                const emailLink = emailContainer.querySelector("a");
                 if (emailLink) {
                     emailLink.textContent = newEmail;
                     emailLink.href = `mailto:${newEmail}`;
                 }
-                emailContainer.style.display = 'flex';
+                emailContainer.style.display = "flex";
             } else {
-                emailContainer.style.display = 'none';
+                emailContainer.style.display = "none";
             }
             debugLog("Footer company email updated successfully");
         } else {
-            debugLog('ERROR: Could not find footer email element');
+            debugLog("ERROR: Could not find footer email element");
         }
     }
 
@@ -2380,18 +2865,20 @@
     function updateFooterTagline(newTagline) {
         debugLog("Updating footer tagline with:", newTagline);
 
-        const taglineElement = document.querySelector('.footer-company-info .footer-tagline');
+        const taglineElement = document.querySelector(
+            ".footer-company-info .footer-tagline"
+        );
 
         if (taglineElement) {
             if (newTagline && newTagline.trim() !== "") {
                 taglineElement.textContent = newTagline;
-                taglineElement.style.display = 'block';
+                taglineElement.style.display = "block";
             } else {
-                taglineElement.style.display = 'none';
+                taglineElement.style.display = "none";
             }
             debugLog("Footer tagline updated successfully");
         } else {
-            debugLog('ERROR: Could not find footer tagline element');
+            debugLog("ERROR: Could not find footer tagline element");
         }
     }
 
@@ -2403,18 +2890,20 @@
     function updateFooterNewsletterText(newText) {
         debugLog("Updating footer newsletter text with:", newText);
 
-        const newsletterTextElement = document.querySelector('.footer-newsletter p');
+        const newsletterTextElement = document.querySelector(
+            ".footer-newsletter p"
+        );
 
         if (newsletterTextElement) {
             if (newText && newText.trim() !== "") {
                 newsletterTextElement.textContent = newText;
-                newsletterTextElement.parentElement.style.display = 'block';
+                newsletterTextElement.parentElement.style.display = "block";
             } else {
-                newsletterTextElement.parentElement.style.display = 'none';
+                newsletterTextElement.parentElement.style.display = "none";
             }
             debugLog("Footer newsletter text updated successfully");
         } else {
-            debugLog('ERROR: Could not find footer newsletter text element');
+            debugLog("ERROR: Could not find footer newsletter text element");
         }
     }
 
@@ -2428,161 +2917,26 @@
         debugLog(`Updating footer ${platform} link with:`, newUrl);
 
         const iconClasses = {
-            twitter: 'fa-twitter',
-            linkedin: 'fa-linkedin',
-            github: 'fa-github',
-            youtube: 'fa-youtube'
+            twitter: "fa-twitter",
+            linkedin: "fa-linkedin",
+            github: "fa-github",
+            youtube: "fa-youtube",
         };
 
-        const socialLink = document.querySelector(`.social-links a:has(.${iconClasses[platform]})`);
+        const socialLink = document.querySelector(
+            `.social-links a:has(.${iconClasses[platform]})`
+        );
 
         if (socialLink) {
             if (newUrl && newUrl.trim() !== "") {
                 socialLink.href = newUrl;
-                socialLink.style.display = 'flex';
+                socialLink.style.display = "flex";
             } else {
-                socialLink.style.display = 'none';
+                socialLink.style.display = "none";
             }
             debugLog(`Footer ${platform} link updated successfully`);
         } else {
             debugLog(`ERROR: Could not find footer ${platform} link element`);
         }
     }
-
-    /* =============================================================================
-       CONTACT SECTION LIVE PREVIEW
-       ============================================================================= */
-
-    // Contact Section Title
-    wp.customize('cloudsync_contact_title', function(value) {
-        value.bind(function(newValue) {
-            debugLog("Updating contact title with:", newValue);
-            const titleElement = document.querySelector('.contact .section-header h2');
-            if (titleElement) {
-                titleElement.textContent = newValue;
-                debugLog("Contact title updated successfully");
-            } else {
-                debugLog("ERROR: Could not find contact title element");
-            }
-        });
-    });
-
-    // Contact Section Description
-    wp.customize('cloudsync_contact_description', function(value) {
-        value.bind(function(newValue) {
-            debugLog("Updating contact description with:", newValue);
-            const descElement = document.querySelector('.contact .section-header p');
-            if (descElement) {
-                descElement.textContent = newValue;
-                debugLog("Contact description updated successfully");
-            } else {
-                debugLog("ERROR: Could not find contact description element");
-            }
-        });
-    });
-
-    // Contact Email
-    wp.customize('cloudsync_contact_email', function(value) {
-        value.bind(function(newValue) {
-            debugLog("Updating contact email with:", newValue);
-            const emailLink = document.querySelector('.contact-item a[href^="mailto:"]');
-            const emailText = document.querySelector('.contact-item a[href^="mailto:"]');
-            if (emailLink && emailText) {
-                emailLink.href = 'mailto:' + newValue;
-                emailText.textContent = newValue;
-                debugLog("Contact email updated successfully");
-            } else {
-                debugLog("ERROR: Could not find contact email elements");
-            }
-        });
-    });
-
-    // Contact Phone
-    wp.customize('cloudsync_contact_phone', function(value) {
-        value.bind(function(newValue) {
-            debugLog("Updating contact phone with:", newValue);
-            const phoneLink = document.querySelector('.contact-item a[href^="tel:"]');
-            const phoneText = document.querySelector('.contact-item a[href^="tel:"]');
-            if (phoneLink && phoneText) {
-                phoneLink.href = 'tel:' + newValue.replace(/[^+\d]/g, '');
-                phoneText.textContent = newValue;
-                debugLog("Contact phone updated successfully");
-            } else {
-                debugLog("ERROR: Could not find contact phone elements");
-            }
-        });
-    });
-
-    // Contact Address
-    wp.customize('cloudsync_contact_address', function(value) {
-        value.bind(function(newValue) {
-            debugLog("Updating contact address with:", newValue);
-            const addressElement = document.querySelector('.contact-item:last-child .contact-details p');
-            if (addressElement) {
-                addressElement.textContent = newValue;
-                debugLog("Contact address updated successfully");
-            } else {
-                debugLog("ERROR: Could not find contact address element");
-            }
-        });
-    });
-
-    // Contact Info Labels
-    wp.customize('cloudsync_contact_email_label', function(value) {
-        value.bind(function(newValue) {
-            const label = document.querySelector('.contact-item:first-child .contact-details h4');
-            if (label) label.textContent = newValue;
-        });
-    });
-
-    wp.customize('cloudsync_contact_phone_label', function(value) {
-        value.bind(function(newValue) {
-            const label = document.querySelector('.contact-item:nth-child(2) .contact-details h4');
-            if (label) label.textContent = newValue;
-        });
-    });
-
-    wp.customize('cloudsync_contact_address_label', function(value) {
-        value.bind(function(newValue) {
-            const label = document.querySelector('.contact-item:last-child .contact-details h4');
-            if (label) label.textContent = newValue;
-        });
-    });
-
-    // Form Field Labels
-    wp.customize('cloudsync_form_name_label', function(value) {
-        value.bind(function(newValue) {
-            const label = document.querySelector('label[for="contact-name"]');
-            if (label) label.textContent = newValue;
-        });
-    });
-
-    wp.customize('cloudsync_form_email_label', function(value) {
-        value.bind(function(newValue) {
-            const label = document.querySelector('label[for="contact-email"]');
-            if (label) label.textContent = newValue;
-        });
-    });
-
-    wp.customize('cloudsync_form_company_label', function(value) {
-        value.bind(function(newValue) {
-            const label = document.querySelector('label[for="contact-company"]');
-            if (label) label.textContent = newValue;
-        });
-    });
-
-    wp.customize('cloudsync_form_message_label', function(value) {
-        value.bind(function(newValue) {
-            const label = document.querySelector('label[for="contact-message"]');
-            if (label) label.textContent = newValue;
-        });
-    });
-
-    wp.customize('cloudsync_form_submit_text', function(value) {
-        value.bind(function(newValue) {
-            const submitText = document.querySelector('.form-submit-btn .btn-text');
-            if (submitText) submitText.textContent = newValue;
-        });
-    });
-
 })();

@@ -79,9 +79,9 @@ function cloudsync_add_theme_panel($wp_customize) {
     ));
 }
 
-/* =============================================================================
-   2. HERO SECTION SETTINGS
-   ============================================================================= */
+//=============================================================================
+// 2. HERO SECTION SETTINGS
+//============================================================================= */
 
 /**
  * Register Hero Section settings and controls
@@ -322,9 +322,9 @@ function cloudsync_register_hero_cards_section($wp_customize) {
         'priority'    => 60,
     ));
 }
-/* =============================================================================
-   3. FEATURES SECTION SETTINGS
-   ============================================================================= */
+// =============================================================================
+// 3. FEATURES SECTION SETTINGS
+// ============================================================================= */
 
 /**
  * Register Features Section settings and controls
@@ -680,9 +680,9 @@ function cloudsync_register_features_cards_section($wp_customize) {
     ));
 }
 
-/* =============================================================================
-    4. HOW IT WORKS SECTION SETTINGS
-   ============================================================================= */
+//=============================================================================
+//  4. HOW IT WORKS SECTION SETTINGS
+//============================================================================= */
 
 /**
  * Register How It Works Section settings and controls
@@ -909,9 +909,9 @@ function cloudsync_register_how_it_works_steps_section($wp_customize) {
         'priority'    => 55,
     ));
 }
-/* =============================================================================
-   4. PRICING SECTION SETTINGS 
-   ============================================================================= */
+//=============================================================================
+//4. PRICING SECTION SETTINGS 
+//============================================================================= */
 
 /**
  * Register Pricing Section settings and controls
@@ -1219,9 +1219,9 @@ function cloudsync_register_pricing_plans_section($wp_customize) {
         'priority'    => 80,
     ));
 }
-/* =============================================================================
-   5. CTA SECTION SETTINGS
-   ============================================================================= */
+//=============================================================================
+// 5. CTA SECTION SETTINGS
+//============================================================================= */
 
 
 /**
@@ -1307,9 +1307,9 @@ function cloudsync_register_cta_section($wp_customize) {
         'priority'    => 30,
     ));
 }
-/* =============================================================================
-   6. CONTACT SECTION SETTINGS
-   ============================================================================= */
+// =============================================================================
+// 6. CONTACT SECTION SETTINGS
+//============================================================================= */
 
 /**
  * Register Contact Section settings and controls
@@ -1443,7 +1443,7 @@ function cloudsync_register_contact_section($wp_customize) {
         'description' => __('Label for address contact method', 'cloudsync'),
     ));
 
-    // Form Field Labels
+    // Form Fields
     $wp_customize->add_setting('cloudsync_form_name_label', array(
         'default'           => __('Your Name', 'cloudsync'),
         'sanitize_callback' => 'sanitize_text_field',
@@ -1455,6 +1455,18 @@ function cloudsync_register_contact_section($wp_customize) {
         'section'     => 'cloudsync_contact_section',
         'type'        => 'text',
         'description' => __('Label for the name input field', 'cloudsync'),
+    ));
+    $wp_customize->add_setting('cloudsync_form_name_placeholder', array(
+        'default'           => __(' ', 'cloudsync'),
+        'sanitize_callback' => 'sanitize_text_field',
+        'transport'         => 'postMessage',
+    ));
+
+    $wp_customize->add_control('cloudsync_form_name_placeholder', array(
+        'label'       => __('Name Field Placeholder', 'cloudsync'),
+        'section'     => 'cloudsync_contact_section',
+        'type'        => 'text',
+        'description' => __('Placeholder for the name input field', 'cloudsync'),
     ));
 
     $wp_customize->add_setting('cloudsync_form_email_label', array(
@@ -1469,6 +1481,18 @@ function cloudsync_register_contact_section($wp_customize) {
         'type'        => 'text',
         'description' => __('Label for the email input field', 'cloudsync'),
     ));
+    $wp_customize->add_setting('cloudsync_form_email_placeholder', array(
+        'default'           => __('', 'cloudsync'),
+        'sanitize_callback' => 'sanitize_text_field',
+        'transport'         => 'postMessage',
+    ));
+
+    $wp_customize->add_control('cloudsync_form_email_placeholder', array(
+        'label'       => __('Email Address Placeholder', 'cloudsync'),
+        'section'     => 'cloudsync_contact_section',
+        'type'        => 'text',
+        'description' => __('Placeholder for the email input field', 'cloudsync'),
+    ));
 
     $wp_customize->add_setting('cloudsync_form_company_label', array(
         'default'           => __('Company (Optional)', 'cloudsync'),
@@ -1482,18 +1506,43 @@ function cloudsync_register_contact_section($wp_customize) {
         'type'        => 'text',
         'description' => __('Label for the company input field', 'cloudsync'),
     ));
+    $wp_customize->add_setting('cloudsync_form_company_placeholder', array(
+        'default'           => __(' ', 'cloudsync'),
+        'sanitize_callback' => 'sanitize_text_field',
+        'transport'         => 'postMessage',
+    ));
+
+    $wp_customize->add_control('cloudsync_form_company_placeholder', array(
+        'label'       => __('Company Field Placeholder', 'cloudsync'),
+        'section'     => 'cloudsync_contact_section',
+        'type'        => 'text',
+        'description' => __('Placeholder for the company input field', 'cloudsync'),
+    ));
 
     $wp_customize->add_setting('cloudsync_form_message_label', array(
         'default'           => __('Message', 'cloudsync'),
         'sanitize_callback' => 'sanitize_text_field',
         'transport'         => 'postMessage',
     ));
-
     $wp_customize->add_control('cloudsync_form_message_label', array(
         'label'       => __('Message Field Label', 'cloudsync'),
         'section'     => 'cloudsync_contact_section',
         'type'        => 'text',
         'description' => __('Label for the message textarea field', 'cloudsync'),
+    ));
+
+
+    $wp_customize->add_setting('cloudsync_form_message_placeholder', array(
+        'default'           => __(' ', 'cloudsync'),
+        'sanitize_callback' => 'sanitize_text_field',
+        'transport'         => 'postMessage',
+    ));
+
+    $wp_customize->add_control('cloudsync_form_message_placeholder', array(
+        'label'       => __('Message Field Placeholder', 'cloudsync'),
+        'section'     => 'cloudsync_contact_section',
+        'type'        => 'text',
+        'description' => __('cloudsync_form_message_placeholder for the message textarea field', 'cloudsync'),
     ));
 
     $wp_customize->add_setting('cloudsync_form_submit_text', array(
@@ -1522,9 +1571,9 @@ function cloudsync_register_contact_section($wp_customize) {
         'description' => __('Text shown while form is being submitted', 'cloudsync'),
     ));
 }
-/* =============================================================================
-   7. FOOTER SECTION SETTINGS
-   ============================================================================= */
+//=============================================================================
+// 7. FOOTER SECTION SETTINGS
+//============================================================================= */
 
 /**
  * Register Footer Section settings and controls
