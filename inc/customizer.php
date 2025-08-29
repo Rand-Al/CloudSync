@@ -58,6 +58,7 @@ function cloudsync_customize_register($wp_customize) {
     cloudsync_register_pricing_plans_section($wp_customize);
     cloudsync_register_cta_section($wp_customize);
     cloudsync_register_contact_section($wp_customize);
+    cloudsync_register_mailchimp_section($wp_customize);
     cloudsync_register_footer_section($wp_customize);
 }
 
@@ -111,8 +112,15 @@ require_once get_template_directory() . '/inc/customizer/cta-section.php';
 //============================================================================= */
 
 require_once get_template_directory() . '/inc/customizer/contact-section.php';
+
 //=============================================================================
-// 7. FOOTER SECTION SETTINGS
+// 7. MAILCHIMP INTEGRATION SETTINGS
+//============================================================================= */
+
+require_once get_template_directory() . '/inc/customizer/mailchimp-section.php';
+
+//=============================================================================
+// 8. FOOTER SECTION SETTINGS
 //============================================================================= */
 
 require_once get_template_directory() . '/inc/customizer/footer-section.php';

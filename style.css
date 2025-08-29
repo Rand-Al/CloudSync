@@ -1092,7 +1092,10 @@ select:focus {
     font-size: 0.95rem;
     transition: all 0.3s ease;
 }
-
+.newsletter-input-group {
+    display: flex;
+    gap: 15px;
+}
 .newsletter-signup input[type="email"]::placeholder {
     color: rgba(255, 255, 255, 0.5);
 }

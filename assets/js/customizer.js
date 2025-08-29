@@ -61,9 +61,9 @@
         initializePricingPreview();
         // Initialize CTA section live preview
         initializeCTAPreview();
-        // Initialize Contact section live preview
+        // Initialize contact section live preview
         initializeContactPreview();
-        // Initialize Footer section live preview
+        // Initialize footer section live preview
         initializeFooterPreview();
     });
 
@@ -76,7 +76,6 @@
      */
     function initializeHeroSectionPreview() {
         // Hero Main Title live preview
-        // When user changes the headline, update it immediately in preview
         wp.customize("cloudsync_hero_main_title", function (value) {
             value.bind(function (newValue) {
                 updateHeroTitle(newValue);
@@ -93,7 +92,6 @@
         // Primary Button Text live preview
         wp.customize("cloudsync_hero_primary_btn_text", function (value) {
             value.bind(function (newValue) {
-                debugLog("Primary button text changed to:", newValue);
                 updatePrimaryButtonText(newValue);
             });
         });
@@ -106,63 +104,52 @@
         });
 
         // Floating Cards live preview - Card 1
+
         // These listeners handle real-time updates for the first floating card
         // when users change the icon class or title in the Customizer
         wp.customize("cloudsync_hero_card1_icon", function (value) {
-            debugLog("Setting up live preview for floating card 1 icon");
-
             value.bind(function (newValue) {
-                debugLog("Card 1 icon changed to:", newValue);
                 updateFloatingCardIcon(1, newValue);
+                debugLog("Card 1 icon changed to:", newValue);
             });
         });
 
         wp.customize("cloudsync_hero_card1_title", function (value) {
-            debugLog("Setting up live preview for floating card 1 title");
-
             value.bind(function (newValue) {
-                debugLog("Card 1 title changed to:", newValue);
                 updateFloatingCardTitle(1, newValue);
+                debugLog("Card 1 title changed to:", newValue);
             });
         });
 
         // Floating Cards live preview - Card 2
         // Similar structure for the second floating card
         wp.customize("cloudsync_hero_card2_icon", function (value) {
-            debugLog("Setting up live preview for floating card 2 icon");
-
             value.bind(function (newValue) {
-                debugLog("Card 2 icon changed to:", newValue);
                 updateFloatingCardIcon(2, newValue);
+                debugLog("Card 2 icon changed to:", newValue);
             });
         });
 
         wp.customize("cloudsync_hero_card2_title", function (value) {
-            debugLog("Setting up live preview for floating card 2 title");
-
             value.bind(function (newValue) {
-                debugLog("Card 2 title changed to:", newValue);
                 updateFloatingCardTitle(2, newValue);
+                debugLog("Card 2 title changed to:", newValue);
             });
         });
 
         // Floating Cards live preview - Card 3
         // Structure for the third floating card
         wp.customize("cloudsync_hero_card3_icon", function (value) {
-            debugLog("Setting up live preview for floating card 3 icon");
-
             value.bind(function (newValue) {
-                debugLog("Card 3 icon changed to:", newValue);
                 updateFloatingCardIcon(3, newValue);
+                debugLog("Card 3 icon changed to:", newValue);
             });
         });
 
         wp.customize("cloudsync_hero_card3_title", function (value) {
-            debugLog("Setting up live preview for floating card 3 title");
-
             value.bind(function (newValue) {
-                debugLog("Card 3 title changed to:", newValue);
                 updateFloatingCardTitle(3, newValue);
+                debugLog("Card 3 title changed to:", newValue);
             });
         });
     }
@@ -837,8 +824,6 @@
      * @param {string} newDescription The new description text from Customizer
      */
     function updateHeroDescription(newDescription) {
-        debugLog("Updating hero description with:", newDescription);
-
         const heroDescription = document.querySelector(".hero-text p");
 
         if (heroDescription) {
@@ -857,8 +842,6 @@
      * @param {string} newText The new button text from Customizer
      */
     function updatePrimaryButtonText(newText) {
-        debugLog("Updating primary button text with:", newText);
-
         const primaryButton = document.querySelector(".hero-buttons .cta-btn");
 
         if (primaryButton) {
@@ -877,8 +860,6 @@
      * @param {string} newText The new button text from Customizer
      */
     function updateSecondaryButtonText(newText) {
-        debugLog("Updating secondary button text with:", newText);
-
         const secondaryButton = document.querySelector(
             ".hero-buttons .btn-secondary"
         );
@@ -908,11 +889,6 @@
      * @param {string} newIconClass The new FontAwesome icon class
      */
     function updateFloatingCardIcon(cardNumber, newIconClass) {
-        debugLog(
-            "Updating floating card " + cardNumber + " icon with:",
-            newIconClass
-        );
-
         // Find the specific floating card using the card number
         const card = document.querySelector(
             ".floating-card.card-" + cardNumber
@@ -934,18 +910,9 @@
             return;
         }
 
-        // Store the current style attribute to preserve inline styles
-        const currentStyle = iconElement.getAttribute("style");
-
         // Replace the entire className with the new FontAwesome classes
         // This ensures that old icon classes are completely removed
         iconElement.className = newIconClass;
-
-        // Restore the inline styles that control size and color
-        if (currentStyle) {
-            iconElement.setAttribute("style", currentStyle);
-        }
-
         debugLog(
             "Successfully updated card " + cardNumber + " icon to:",
             newIconClass
@@ -963,11 +930,6 @@
      * @param {string} newTitle The new title text
      */
     function updateFloatingCardTitle(cardNumber, newTitle) {
-        debugLog(
-            "Updating floating card " + cardNumber + " title with:",
-            newTitle
-        );
-
         // Find the specific floating card using the card number
         const card = document.querySelector(
             ".floating-card.card-" + cardNumber
@@ -1183,7 +1145,7 @@
                 typeof newValue !== "string" ||
                 newValue.trim() === ""
             ) {
-                debugLog("Invalid icon class provided", { value: newValue });
+                debugLog("Invalid title value provided", { value: newValue });
                 return false;
             }
 
@@ -1216,13 +1178,13 @@
                 return false;
             }
 
-            // Find the icon element within the target card using the established HTML structure
+            // Find the title element within the target card using the established HTML structure
             const titleElement = targetCard.querySelector("h3");
 
             // Verify that the title element exists within this card
             if (!titleElement) {
                 debugLog(
-                    "Icon element not found in feature card. Check HTML structure.",
+                    "Title element not found in feature card. Check HTML structure.",
                     {
                         cardIndex: cardIndex,
                     }
@@ -1233,13 +1195,13 @@
             // Clean the new value to remove any potential whitespace issues
             const cleanTitle = newValue.trim();
 
-            // Perform the actual icon class update
+            // Perform the actual title element update
             titleElement.innerText = cleanTitle;
 
             // Log successful update for debugging purposes
             debugLog("Successfully updated feature card title", {
                 cardIndex: cardIndex,
-                newClass: cleanTitle,
+                newTitle: cleanTitle,
             });
 
             return true;
@@ -1261,7 +1223,7 @@
                 // If even the delayed attempt fails, log an error for debugging
                 debugLog("Failed to update feature card title after delay", {
                     cardIndex: cardIndex,
-                    iconClass: newValue,
+                    iconTitle: newValue,
                 });
             }
         }, 500);
@@ -1298,7 +1260,9 @@
                 typeof newValue !== "string" ||
                 newValue.trim() === ""
             ) {
-                debugLog("Invalid icon class provided", { value: newValue });
+                debugLog("Invalid description value provided", {
+                    value: newValue,
+                });
                 return false;
             }
 
@@ -1334,10 +1298,10 @@
             // Find the description element within the target card using the established HTML structure
             const descriptionElement = targetCard.querySelector("p");
 
-            // Verify that the title element exists within this card
+            // Verify that the description element exists within this card
             if (!descriptionElement) {
                 debugLog(
-                    "Icon element not found in feature card. Check HTML structure.",
+                    "Description element not found in feature card. Check HTML structure.",
                     {
                         cardIndex: cardIndex,
                     }
@@ -1348,7 +1312,7 @@
             // Clean the new value to remove any potential whitespace issues
             const cleanDescription = newValue.trim();
 
-            // Perform the actual icon class update
+            // Perform the actual description value update
             descriptionElement.innerText = cleanDescription;
 
             // Log successful update for debugging purposes
@@ -1390,7 +1354,7 @@
 
     /**
      * ==================================================
-     *    3) Helper functions to update How it works section
+     *   3) Helper functions to update How it works section
      * ==================================================
      * */
     /**
@@ -1401,11 +1365,10 @@
      * @param {string} newTitle The new title text from Customizer
      */
     function updateHowItWorksTitle(newTitle) {
-        debugLog("Updating how it works title with:", newTitle);
-        // Find the features title element
+        // Find the how it works title element
         const howItWorksTitle = document.querySelector(".how-it-works h2");
         if (howItWorksTitle) {
-            // Update the features title element
+            // Update the how it works title element
             howItWorksTitle.textContent = newTitle;
             debugLog("How it works title updated successfully");
         } else {
@@ -1424,13 +1387,12 @@
      * @param {string} newDescription The new description text from Customizer
      */
     function updateHowItWorksDescription(newDescription) {
-        debugLog("Updating how it works description with:", newDescription);
-
+        // Find the how it works description element
         const howItWorksDescription = document.querySelector(".how-it-works p");
-
         if (howItWorksDescription) {
+            // Update the how it works title element
             howItWorksDescription.textContent = newDescription;
-            debugLog("how it works description updated successfully");
+            debugLog("How it works description updated successfully");
         } else {
             debugLog(
                 'ERROR: Could not find how it works description element with selector ".hero-text p"'
@@ -1507,7 +1469,7 @@
             const identifierElement =
                 targetStep.querySelector(".step .step-number");
 
-            // Verify that the icon element exists within this card
+            // Verify that the identifier element exists within this card
             if (!identifierElement) {
                 debugLog(
                     "Identifier element not found in step element. Check HTML structure.",
@@ -1521,7 +1483,7 @@
             // Clean the new value to remove any potential whitespace issues
             const cleanIdentifierValue = newValue.trim();
 
-            // Perform the actual icon class update
+            // Perform the actual identifier element update
             identifierElement.innerText = cleanIdentifierValue;
 
             // Log successful update for debugging purposes
@@ -1549,7 +1511,7 @@
                 // If even the delayed attempt fails, log an error for debugging
                 debugLog("Failed to update step index after delay", {
                     Index: stepIndex,
-                    titleValue: newValue,
+                    identifierValue: newValue,
                 });
             }
         }, 500);
@@ -1568,13 +1530,13 @@
     function updateHowItWorksStepsTitle(stepIndex, newValue) {
         // Inner function that performs the actual DOM update
         function performTitleUpdate() {
-            // Validate cardIndex parameter before proceeding
+            // Validate stepIndex parameter before proceeding
             if (
                 typeof stepIndex !== "number" ||
                 stepIndex < 0 ||
                 stepIndex > 2
             ) {
-                debugLog("Invalid card index provided. Expected: 0-2", {
+                debugLog("Invalid step index provided. Expected: 0-2", {
                     provided: stepIndex,
                 });
                 return false;
@@ -1683,7 +1645,7 @@
     function updateHowItWorksStepsDescription(stepIndex, newValue) {
         // Inner function that performs the actual DOM update
         function performDescriptionUpdate() {
-            // Validate cardIndex parameter before proceeding
+            // Validate stepIndex parameter before proceeding
             if (
                 typeof stepIndex !== "number" ||
                 stepIndex < 0 ||
@@ -1716,7 +1678,7 @@
 
             // Check if the requested step element index exists in our NodeList
             if (stepIndex >= howItWorksSteps.length) {
-                debugLog("Card index not found", {
+                debugLog("Step index not found", {
                     requested: stepIndex,
                     available: howItWorksSteps.length,
                 });
@@ -1740,7 +1702,7 @@
             // Verify that the description element exists within this step element
             if (!descriptionElement) {
                 debugLog(
-                    "description element not found in step element. Check HTML structure.",
+                    "Description element not found in step element. Check HTML structure.",
                     {
                         stepIndex: stepIndex,
                     }
@@ -1755,9 +1717,9 @@
             descriptionElement.innerText = cleanDescription;
 
             // Log successful update for debugging purposes
-            debugLog("Successfully updated feature card title", {
+            debugLog("Successfully updated description", {
                 stepIndex: stepIndex,
-                newTitle: cleanDescription,
+                newDescription: cleanDescription,
             });
 
             return true;
@@ -1781,7 +1743,7 @@
                     "Failed to update step element description after delay",
                     {
                         stepIndex: stepIndex,
-                        newTitle: newValue,
+                        newDescription: newValue,
                     }
                 );
             }
@@ -1805,7 +1767,6 @@
      * @param {string} newTitle The new title text from Customizer
      */
     function updatePricingTitle(newTitle) {
-        debugLog("Updating pricing title with:", newTitle);
         // Find the pricing title element
         const pricingTitle = document.querySelector(".pricing h2");
         if (pricingTitle) {
@@ -1827,8 +1788,6 @@
      * @param {string} newDescription The new description text from Customizer
      */
     function updatePricingDescription(newDescription) {
-        debugLog("Updating pricing description with:", newDescription);
-
         const pricingDescription = document.querySelector(".pricing p");
 
         if (pricingDescription) {
@@ -1967,7 +1926,7 @@
     function updatePricingPlanPrice(planIndex, newValue) {
         // Inner function that performs the actual DOM update
         function performPlanPriceUpdate() {
-            // Validate cardIndex parameter before proceeding
+            // Validate planIndex parameter before proceeding
             if (
                 typeof planIndex !== "number" ||
                 planIndex < 0 ||
@@ -2006,10 +1965,10 @@
                 return false;
             }
 
-            // Get the specific step element we want to update
+            // Get the specific plan element we want to update
             const targetPlan = pricingPlans[planIndex];
 
-            // Additional safety check for the target step element
+            // Additional safety check for the target plan element
             if (!targetPlan) {
                 debugLog("Plan element is null or undefined", {
                     index: planIndex,
@@ -2017,10 +1976,10 @@
                 return false;
             }
 
-            // Find the title element within the target step element using the established HTML structure
+            // Find the price element within the target plan element using the established HTML structure
             const priceElement = targetPlan.querySelector(".price-value");
 
-            // Verify that the title element exists within this step element
+            // Verify that the price element exists within this plan element
             if (!priceElement) {
                 debugLog(
                     "Price element not found in pricing plan. Check HTML structure.",
@@ -2034,7 +1993,7 @@
             // Clean the new value to remove any potential whitespace issues
             const cleanPrice = newValue.trim();
 
-            // Perform the actual title element update
+            // Perform the actual price element update
             priceElement.innerText = cleanPrice;
 
             // Log successful update for debugging purposes
@@ -2062,7 +2021,7 @@
                 // If even the delayed attempt fails, log an error for debugging
                 debugLog("Failed to update feature card title after delay", {
                     planIndex: planIndex,
-                    newTitle: newValue,
+                    newPrice: newValue,
                 });
             }
         }, 500);
@@ -2149,13 +2108,13 @@
             // Clean the new value to remove any potential whitespace issues
             const cleanButtonText = newValue.trim();
 
-            // Perform the actual title element update
+            // Perform the actual button text element update
             buttonTextElement.innerText = cleanButtonText;
 
             // Log successful update for debugging purposes
             debugLog("Successfully updated feature card title", {
                 planIndex: planIndex,
-                newPrice: cleanButtonText,
+                newButtonText: cleanButtonText,
             });
 
             return true;
@@ -2177,7 +2136,7 @@
                 // If even the delayed attempt fails, log an error for debugging
                 debugLog("Failed to update plan button text after delay", {
                     planIndex: planIndex,
-                    newTitle: newValue,
+                    newButtonText: newValue,
                 });
             }
         }, 500);
@@ -2331,11 +2290,10 @@
      * @param {string} newTitle The new title text from Customizer
      */
     function updateCtaTitle(newTitle) {
-        debugLog("Updating CTA title with:", newTitle);
         // Find the CTA title element
         const ctaTitle = document.querySelector(".final-cta h2");
         if (ctaTitle) {
-            // Update the pricing title element
+            // Update the CTA title element
             ctaTitle.textContent = newTitle;
             debugLog("CTA title updated successfully");
         } else {
@@ -2353,11 +2311,11 @@
      * @param {string} newDescription The new description text from Customizer
      */
     function updateCtaDescription(newDescription) {
-        debugLog("Updating cta description with:", newDescription);
-
+        // Find the CTA description element
         const ctaDescription = document.querySelector(".final-cta p");
 
         if (ctaDescription) {
+            // Update the CTA description element
             ctaDescription.textContent = newDescription;
             debugLog("CTA description updated successfully");
         } else {
@@ -2374,10 +2332,11 @@
      */
     function updateCtaButtonText(newText) {
         debugLog("Updating CTA button text with:", newText);
-
+        // Find the CTA button text element
         const ctaButton = document.querySelector(".final-cta a");
 
         if (ctaButton) {
+            // Update the CTA button text element
             ctaButton.textContent = newText;
             debugLog("CTA button text updated successfully");
         } else {
@@ -2399,11 +2358,12 @@
      * @param {string} newTitle The new title text from Customizer
      */
     function updateContactTitle(newTitle) {
-        debugLog("Updating contact title with:", newTitle);
+        // Find the contact title element
         const titleElement = document.querySelector(
             ".contact .section-header h2"
         );
         if (titleElement) {
+            // Update the contact title element
             titleElement.textContent = newTitle;
             debugLog("Contact title updated successfully");
         } else {
@@ -2419,11 +2379,12 @@
      * @param {string} newDescription The new description text from Customizer
      */
     function updateContactDescription(newDescription) {
-        debugLog("Updating contact description with:", newDescription);
+        // Find the contact description element
         const descElement = document.querySelector(
             ".contact .section-header p"
         );
         if (descElement) {
+            // Update the contact description element
             descElement.textContent = newDescription;
             debugLog("Contact description updated successfully");
         } else {
@@ -2748,14 +2709,14 @@
      * @param {string} newText The new copyright text from Customizer
      */
     function updateFooterCopyright(newText) {
-        debugLog("Updating footer copyright text with:", newText);
-
+        // Find footer copyright element
         const copyrightElement = document.querySelector(
             ".footer-bottom .copyright"
         );
 
         if (copyrightElement) {
             if (newText && newText.trim() !== "") {
+                // Update footer copyright element
                 copyrightElement.textContent = newText;
             } else {
                 // Reset to default if empty

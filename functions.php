@@ -270,16 +270,18 @@ function cloudsync_scripts() {
         true                                         // Load in footer for better performance
     );
 
-    // Localize AJAX data for contact form
+    // Localize AJAX data for contact form and newsletter
     wp_localize_script(
         'cloudsync-theme-js',
         'cloudsync_ajax',
         array(
-            'ajax_url' => admin_url('admin-ajax.php'),
-            'nonce'    => wp_create_nonce('cloudsync_contact_nonce'),
-            'strings'  => array(
-                'sending'  => __('Sending...', 'cloudsync'),
-                'error'    => __('An error occurred. Please try again.', 'cloudsync')
+            'ajax_url'         => admin_url('admin-ajax.php'),
+            'nonce'           => wp_create_nonce('cloudsync_contact_nonce'),
+            'newsletter_nonce' => wp_create_nonce('cloudsync_newsletter_nonce'),
+            'strings'         => array(
+                'sending'     => __('Sending...', 'cloudsync'),
+                'error'       => __('An error occurred. Please try again.', 'cloudsync'),
+                'subscribing' => __('Subscribing...', 'cloudsync')
             )
         )
     );
@@ -332,4 +334,10 @@ require_once get_template_directory() . '/inc/customizer.php';
 require_once get_template_directory() . '/inc/seo.php';
 require_once get_template_directory() . '/inc/security.php';
 require_once get_template_directory() . '/inc/form-handler.php';
+require_once get_template_directory() . '/inc/mailchimp-integration.php';
 require_once get_template_directory() . '/inc/performance.php';
+
+// Include newsletter admin functionality (only in admin)
+if (is_admin()) {
+    require_once get_template_directory() . '/inc/newsletter-admin.php';
+}

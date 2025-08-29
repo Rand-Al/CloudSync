@@ -43,12 +43,9 @@
             this.interactiveCards();
             this.initCopyLinkButton();
             this.contactForm.init();
+            this.newsletterForm.init();
             this.adaptivePages.init();
             this.smartHeader.init();
-            
-            // Performance optimizations
-            this.lazyLoading.init();
-            this.performance.init();
         },
         /**
          * Smooth scrolling for internal anchor links
@@ -67,7 +64,7 @@
 
                     if (targetElement) {
                         // Calculate position accounting for fixed header
-                        var headerHeight = 80;
+                        var headerHeight = 20;
                         var targetPosition =
                             targetElement.offsetTop - headerHeight;
 
@@ -408,87 +405,193 @@
          */
         contactForm: {
             init: function () {
-                var form = document.getElementById('cloudsync-contact-form');
+                var form = document.getElementById("cloudsync-contact-form");
                 if (!form) return;
 
-                form.addEventListener('submit', this.handleSubmit.bind(this));
+                form.addEventListener("submit", this.handleSubmit.bind(this));
             },
 
             handleSubmit: function (e) {
                 e.preventDefault();
-                
+
                 var form = e.target;
-                var submitBtn = form.querySelector('.form-submit-btn');
-                var responseDiv = form.querySelector('.form-response') || this.createResponseDiv(form);
-                
+                var submitBtn = form.querySelector(".form-submit-btn");
+                var responseDiv =
+                    form.querySelector(".form-response") ||
+                    this.createResponseDiv(form);
+
                 // Disable submit button and show loading state
                 submitBtn.disabled = true;
-                submitBtn.classList.add('loading');
-                submitBtn.querySelector('.btn-text').textContent = cloudsync_ajax.strings.sending;
-                
+                submitBtn.classList.add("loading");
+                submitBtn.querySelector(".btn-text").textContent =
+                    cloudsync_ajax.strings.sending;
+
                 // Prepare form data
                 var formData = new FormData();
-                formData.append('action', 'cloudsync_contact_form');
-                formData.append('nonce', cloudsync_ajax.nonce);
-                formData.append('name', form.name.value);
-                formData.append('email', form.email.value);
-                formData.append('subject', form.subject.value);
-                formData.append('message', form.message.value);
-                
+                formData.append("action", "cloudsync_contact_form");
+                formData.append("nonce", cloudsync_ajax.nonce);
+                formData.append("name", form.name.value);
+                formData.append("email", form.email.value);
+                formData.append("subject", form.subject.value);
+                formData.append("message", form.message.value);
+
                 // Submit via AJAX
                 fetch(cloudsync_ajax.ajax_url, {
-                    method: 'POST',
-                    body: formData
+                    method: "POST",
+                    body: formData,
                 })
-                .then(response => response.json())
-                .then(data => {
-                    this.handleResponse(data, form, submitBtn, responseDiv);
-                })
-                .catch(error => {
-                    this.handleError(error, submitBtn, responseDiv);
-                });
+                    .then((response) => response.json())
+                    .then((data) => {
+                        this.handleResponse(data, form, submitBtn, responseDiv);
+                    })
+                    .catch((error) => {
+                        this.handleError(error, submitBtn, responseDiv);
+                    });
             },
 
             handleResponse: function (data, form, submitBtn, responseDiv) {
                 // Reset button state
                 submitBtn.disabled = false;
-                submitBtn.classList.remove('loading');
-                submitBtn.querySelector('.btn-text').textContent = 'Send Message';
-                
+                submitBtn.classList.remove("loading");
+                submitBtn.querySelector(".btn-text").textContent =
+                    "Send Message";
+
                 // Show response message
                 responseDiv.textContent = data.data.message;
-                responseDiv.className = 'form-response show ' + (data.success ? 'success' : 'error');
-                
+                responseDiv.className =
+                    "form-response show " +
+                    (data.success ? "success" : "error");
+
                 // Clear form on success
                 if (data.success) {
                     form.reset();
                 }
-                
+
                 // Hide response after 5 seconds
                 setTimeout(() => {
-                    responseDiv.classList.remove('show');
+                    responseDiv.classList.remove("show");
                 }, 5000);
             },
 
             handleError: function (error, submitBtn, responseDiv) {
                 // Reset button state
                 submitBtn.disabled = false;
-                submitBtn.classList.remove('loading');
-                submitBtn.querySelector('.btn-text').textContent = 'Send Message';
-                
+                submitBtn.classList.remove("loading");
+                submitBtn.querySelector(".btn-text").textContent =
+                    "Send Message";
+
                 // Show error message
                 responseDiv.textContent = cloudsync_ajax.strings.error;
-                responseDiv.className = 'form-response show error';
-                
-                console.error('Contact form error:', error);
+                responseDiv.className = "form-response show error";
+
+                console.error("Contact form error:", error);
             },
 
             createResponseDiv: function (form) {
-                var div = document.createElement('div');
-                div.className = 'form-response';
+                var div = document.createElement("div");
+                div.className = "form-response";
                 form.appendChild(div);
                 return div;
-            }
+            },
+        },
+
+        /**
+         * Newsletter Form AJAX Handler
+         * Handles newsletter subscription without page reload
+         */
+        newsletterForm: {
+            init: function () {
+                var forms = document.querySelectorAll(".cloudsync-newsletter-form");
+                if (forms.length === 0) return;
+                
+                var self = this;
+                forms.forEach(function(form) {
+                    form.addEventListener("submit", self.handleSubmit.bind(self));
+                });
+            },
+
+            handleSubmit: function (e) {
+                e.preventDefault();
+
+                var form = e.target;
+                var submitBtn = form.querySelector(".newsletter-submit-btn");
+                var responseDiv =
+                    form.querySelector(".newsletter-response") ||
+                    this.createResponseDiv(form);
+
+                // Disable submit button and show loading state
+                submitBtn.disabled = true;
+                submitBtn.classList.add("loading");
+                var originalText = submitBtn.querySelector(".btn-text").textContent;
+                submitBtn.querySelector(".btn-text").textContent = "Subscribing...";
+
+                // Prepare form data
+                var formData = new FormData();
+                formData.append("action", "cloudsync_newsletter_form");
+                formData.append("nonce", cloudsync_ajax.newsletter_nonce);
+                formData.append("email", form.email.value);
+                formData.append("consent", form.consent ? form.consent.checked : true);
+                
+                // Add honeypot field
+                if (form.website_url) {
+                    formData.append("website_url", form.website_url.value);
+                }
+
+                // Submit via AJAX
+                fetch(cloudsync_ajax.ajax_url, {
+                    method: "POST",
+                    body: formData,
+                })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        this.handleResponse(data, form, submitBtn, responseDiv, originalText);
+                    })
+                    .catch((error) => {
+                        this.handleError(error, submitBtn, responseDiv, originalText);
+                    });
+            },
+
+            handleResponse: function (data, form, submitBtn, responseDiv, originalText) {
+                // Reset button state
+                submitBtn.disabled = false;
+                submitBtn.classList.remove("loading");
+                submitBtn.querySelector(".btn-text").textContent = originalText;
+
+                // Show response message
+                responseDiv.textContent = data.data.message;
+                responseDiv.className =
+                    "newsletter-response show " +
+                    (data.success ? "success" : "error");
+
+                // Clear form on success
+                if (data.success) {
+                    form.reset();
+                }
+
+                // Hide response after 5 seconds
+                setTimeout(() => {
+                    responseDiv.classList.remove("show");
+                }, 5000);
+            },
+
+            handleError: function (error, submitBtn, responseDiv, originalText) {
+                // Reset button state
+                submitBtn.disabled = false;
+                submitBtn.classList.remove("loading");
+                submitBtn.querySelector(".btn-text").textContent = originalText;
+
+                // Show error message
+                responseDiv.textContent = cloudsync_ajax.strings.error || "An error occurred. Please try again.";
+                responseDiv.className = "newsletter-response show error";
+                console.error("Newsletter form error:", error);
+            },
+
+            createResponseDiv: function (form) {
+                var div = document.createElement("div");
+                div.className = "newsletter-response";
+                form.appendChild(div);
+                return div;
+            },
         },
 
         /**
@@ -740,7 +843,7 @@
      */
 
     CloudSync.adaptivePages = {
-        // Основная конфигурация остается той же
+        // Main configuration
         config: {
             tocMinHeadings: 3,
             tocDesktopBreakpoint: 768,
@@ -749,7 +852,6 @@
             resizeDebounce: 250,
             enableTOC: true,
             enableProgress: true,
-            enableLegalNav: true,
             enableLightbox: true,
             debug: true,
         },
@@ -3456,7 +3558,7 @@
              * - Touch/swipe support for mobile devices
              * - Gallery mode for multiple images
              * - Responsive image loading and sizing
-             *
+             * Тогда делаем полноценный просмотрщик: колесом увеличиваем, а мышью можно таскать увеличенную картинку.
              * @since 1.0.0
              */
             imageLightbox: {
@@ -5117,10 +5219,6 @@
                 enabledModules.push("readingProgress");
             }
 
-            if (this.config.enableLegalNav) {
-                enabledModules.push("legalNavigation");
-            }
-
             if (this.config.enableLightbox) {
                 enabledModules.push("imageLightbox");
             }
@@ -5368,74 +5466,81 @@
          * =====================================================
          */
         lazyLoading: {
-            init: function() {
+            init: function () {
                 this.setupIntersectionObserver();
                 this.loadCriticalImages();
-                utils.log('Lazy loading initialized');
+                utils.log("Lazy loading initialized");
             },
 
-            setupIntersectionObserver: function() {
+            setupIntersectionObserver: function () {
                 // Check for IntersectionObserver support
-                if (!('IntersectionObserver' in window)) {
+                if (!("IntersectionObserver" in window)) {
                     this.fallbackLoading();
                     return;
                 }
 
-                const imageObserver = new IntersectionObserver((entries, observer) => {
-                    entries.forEach(entry => {
-                        if (entry.isIntersecting) {
-                            const img = entry.target;
-                            this.loadImage(img);
-                            observer.unobserve(img);
-                        }
-                    });
-                }, {
-                    rootMargin: '50px 0px',
-                    threshold: 0.01
-                });
+                const imageObserver = new IntersectionObserver(
+                    (entries, observer) => {
+                        entries.forEach((entry) => {
+                            if (entry.isIntersecting) {
+                                const img = entry.target;
+                                this.loadImage(img);
+                                observer.unobserve(img);
+                            }
+                        });
+                    },
+                    {
+                        rootMargin: "50px 0px",
+                        threshold: 0.01,
+                    }
+                );
 
                 // Observe all lazy images
-                document.querySelectorAll('img[data-src], img[loading="lazy"]').forEach(img => {
-                    imageObserver.observe(img);
-                });
+                document
+                    .querySelectorAll('img[data-src], img[loading="lazy"]')
+                    .forEach((img) => {
+                        imageObserver.observe(img);
+                    });
             },
 
-            loadImage: function(img) {
+            loadImage: function (img) {
                 if (img.dataset.src) {
                     // Show loading placeholder
-                    img.style.filter = 'blur(5px)';
-                    img.style.transition = 'filter 0.3s ease';
-                    
+                    img.style.filter = "blur(5px)";
+                    img.style.transition = "filter 0.3s ease";
+
                     img.src = img.dataset.src;
                     img.onload = () => {
-                        img.style.filter = 'none';
-                        img.classList.add('loaded');
+                        img.style.filter = "none";
+                        img.classList.add("loaded");
                     };
                     img.onerror = () => {
-                        img.classList.add('error');
-                        utils.log('Failed to load image: ' + img.dataset.src);
+                        img.classList.add("error");
+                        utils.log("Failed to load image: " + img.dataset.src);
                     };
-                    
+
                     delete img.dataset.src;
                 }
             },
 
-            loadCriticalImages: function() {
+            loadCriticalImages: function () {
                 // Immediately load above-the-fold images
-                const heroImages = document.querySelectorAll('.hero-section img, .header img');
-                heroImages.forEach(img => {
+                const heroImages = document.querySelectorAll(
+                    ".hero-section img, .header img"
+                );
+                heroImages.forEach((img) => {
                     if (img.dataset.src) {
                         this.loadImage(img);
                     }
                 });
             },
 
-            fallbackLoading: function() {
+            fallbackLoading: function () {
                 // Fallback for browsers without IntersectionObserver
-                document.querySelectorAll('img[data-src]').forEach(img => {
+                document.querySelectorAll("img[data-src]").forEach((img) => {
                     this.loadImage(img);
                 });
-            }
+            },
         },
 
         /**
@@ -5444,19 +5549,19 @@
          * =====================================================
          */
         performance: {
-            init: function() {
+            init: function () {
                 this.optimizeScripts();
                 this.setupResourceHints();
                 this.monitorPerformance();
-                utils.log('Performance optimizations initialized');
+                utils.log("Performance optimizations initialized");
             },
 
-            optimizeScripts: function() {
+            optimizeScripts: function () {
                 // Defer non-critical scripts
-                const scripts = document.querySelectorAll('script[data-defer]');
-                scripts.forEach(script => {
+                const scripts = document.querySelectorAll("script[data-defer]");
+                scripts.forEach((script) => {
                     if (script.src) {
-                        const newScript = document.createElement('script');
+                        const newScript = document.createElement("script");
                         newScript.src = script.src;
                         newScript.defer = true;
                         document.head.appendChild(newScript);
@@ -5465,54 +5570,65 @@
                 });
             },
 
-            setupResourceHints: function() {
+            setupResourceHints: function () {
                 // Add dns-prefetch for external resources
                 const prefetchDomains = [
-                    'fonts.googleapis.com',
-                    'fonts.gstatic.com',
-                    'cdnjs.cloudflare.com'
+                    "fonts.googleapis.com",
+                    "fonts.gstatic.com",
+                    "cdnjs.cloudflare.com",
                 ];
 
-                prefetchDomains.forEach(domain => {
+                prefetchDomains.forEach((domain) => {
                     if (!document.querySelector(`link[href*="${domain}"]`)) {
-                        const link = document.createElement('link');
-                        link.rel = 'dns-prefetch';
+                        const link = document.createElement("link");
+                        link.rel = "dns-prefetch";
                         link.href = `//${domain}`;
                         document.head.appendChild(link);
                     }
                 });
             },
 
-            monitorPerformance: function() {
+            monitorPerformance: function () {
                 // Monitor Core Web Vitals
-                if ('performance' in window && 'PerformanceObserver' in window) {
+                if (
+                    "performance" in window &&
+                    "PerformanceObserver" in window
+                ) {
                     try {
                         const observer = new PerformanceObserver((list) => {
                             for (const entry of list.getEntries()) {
-                                if (entry.entryType === 'largest-contentful-paint') {
-                                    utils.log('LCP: ' + entry.startTime + 'ms');
+                                if (
+                                    entry.entryType ===
+                                    "largest-contentful-paint"
+                                ) {
+                                    utils.log("LCP: " + entry.startTime + "ms");
                                 }
-                                if (entry.entryType === 'first-input') {
-                                    utils.log('FID: ' + entry.processingStart - entry.startTime + 'ms');
+                                if (entry.entryType === "first-input") {
+                                    utils.log(
+                                        "FID: " +
+                                            entry.processingStart -
+                                            entry.startTime +
+                                            "ms"
+                                    );
                                 }
-                                if (entry.entryType === 'layout-shift') {
-                                    utils.log('CLS: ' + entry.value);
+                                if (entry.entryType === "layout-shift") {
+                                    utils.log("CLS: " + entry.value);
                                 }
                             }
                         });
 
-                        observer.observe({entryTypes: ['largest-contentful-paint', 'first-input', 'layout-shift']});
+                        observer.observe({
+                            entryTypes: [
+                                "largest-contentful-paint",
+                                "first-input",
+                                "layout-shift",
+                            ],
+                        });
                     } catch (e) {
-                        utils.log('Performance monitoring not supported');
+                        utils.log("Performance monitoring not supported");
                     }
                 }
-            }
-        }
+            },
+        },
     };
-
-    // Временно делаем CloudSync глобальным для отладки
-    // Удалить в продакшене
-    if (typeof window !== "undefined") {
-        window.CloudSync = CloudSync;
-    }
 })();

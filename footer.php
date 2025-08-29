@@ -97,9 +97,23 @@
                         <div class="footer-newsletter">
                             <h4><?php esc_html_e('Stay Updated', 'cloudsync'); ?></h4>
                             <p><?php echo esc_html($newsletter_text); ?></p>
-                            <form class="newsletter-signup">
-                                <input type="email" placeholder="<?php esc_attr_e('Enter your email', 'cloudsync'); ?>" aria-label="<?php esc_attr_e('Email address for newsletter', 'cloudsync'); ?>">
-                                <button type="submit"><?php esc_html_e('Subscribe', 'cloudsync'); ?></button>
+                            <form class="newsletter-signup cloudsync-newsletter-form">
+                                <!-- Honeypot field for spam protection -->
+                                <input type="text" name="website_url" style="display: none;" tabindex="-1" autocomplete="off">
+                                
+                                <div class="newsletter-input-group">
+                                    <input type="email" name="email" placeholder="<?php esc_attr_e('Enter your email', 'cloudsync'); ?>" aria-label="<?php esc_attr_e('Email address for newsletter', 'cloudsync'); ?>" required>
+                                    <button type="submit" class="newsletter-submit-btn">
+                                        <span class="btn-text"><?php esc_html_e('Subscribe', 'cloudsync'); ?></span>
+                                    </button>
+                                </div>
+                                
+                                <!-- Consent checkbox -->
+                                <label class="newsletter-consent">
+                                    <input type="checkbox" name="consent" required>
+                                    <span class="checkmark"></span>
+                                    <?php esc_html_e('I agree to receive newsletter updates', 'cloudsync'); ?>
+                                </label>
                             </form>
                         </div>
                     <?php endif; ?>
